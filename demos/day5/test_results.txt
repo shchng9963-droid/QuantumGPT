@@ -1,0 +1,53 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0 -- /home/wangshuchang/quantumgpt/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/wangshuchang/quantumgpt
+collecting ... collected 37 items
+
+tests/unit/test_backends.py::TestFakeBackendAdapter::test_instantiation PASSED [  2%]
+tests/unit/test_backends.py::TestFakeBackendAdapter::test_invalid_name PASSED [  5%]
+tests/unit/test_backends.py::TestFakeBackendAdapter::test_get_health PASSED [  8%]
+tests/unit/test_backends.py::TestFakeBackendAdapter::test_get_qubit_properties PASSED [ 10%]
+tests/unit/test_backends.py::TestFakeBackendAdapter::test_get_coupling_map PASSED [ 13%]
+tests/unit/test_backends.py::TestFakeBackendAdapter::test_run_ghz PASSED [ 16%]
+tests/unit/test_backends.py::TestFakeBackendAdapter::test_run_bell PASSED [ 18%]
+tests/unit/test_backends.py::TestFakeBackendAdapter::test_properties_snapshot PASSED [ 21%]
+tests/unit/test_backends.py::TestReplayBackend::test_creation PASSED     [ 24%]
+tests/unit/test_backends.py::TestReplayBackend::test_time_progression PASSED [ 27%]
+tests/unit/test_backends.py::TestReplayBackend::test_drift_increases PASSED [ 29%]
+tests/unit/test_backends.py::TestReplayBackend::test_run_at_different_times PASSED [ 32%]
+tests/unit/test_backends.py::TestReplayBackend::test_qubit_properties PASSED [ 35%]
+tests/unit/test_backends.py::TestSyntheticDriftBackend::test_stable_profile PASSED [ 37%]
+tests/unit/test_backends.py::TestSyntheticDriftBackend::test_linear_decay PASSED [ 40%]
+tests/unit/test_backends.py::TestSyntheticDriftBackend::test_sudden_degradation PASSED [ 43%]
+tests/unit/test_backends.py::TestSyntheticDriftBackend::test_custom_profile PASSED [ 45%]
+tests/unit/test_backends.py::TestSyntheticDriftBackend::test_per_qubit_override PASSED [ 48%]
+tests/unit/test_backends.py::TestSyntheticDriftBackend::test_profile_hot_swap PASSED [ 51%]
+tests/unit/test_backends.py::TestPropertiesStream::test_replay_all PASSED [ 54%]
+tests/unit/test_backends.py::TestPropertiesStream::test_replay_all_synthetic PASSED [ 56%]
+tests/unit/test_backends.py::TestPropertiesStream::test_realtime_stream PASSED [ 59%]
+tests/unit/test_backends.py::TestInterfaceCompliance::test_all_methods[<lambda>0] PASSED [ 62%]
+tests/unit/test_backends.py::TestInterfaceCompliance::test_all_methods[<lambda>1] PASSED [ 64%]
+tests/unit/test_backends.py::TestInterfaceCompliance::test_all_methods[<lambda>2] PASSED [ 67%]
+tests/unit/test_mqtbench.py::test_list_available PASSED                  [ 70%]
+tests/unit/test_mqtbench.py::test_default_selection PASSED               [ 72%]
+tests/unit/test_mqtbench.py::test_circuit_properties PASSED              [ 75%]
+tests/unit/test_mqtbench.py::test_native_gate_set PASSED                 [ 78%]
+tests/unit/test_mqtbench.py::test_ecr_count PASSED                       [ 81%]
+tests/unit/test_mqtbench.py::test_custom_selection PASSED                [ 83%]
+tests/unit/test_mqtbench.py::test_runnable_on_aer PASSED                 [ 86%]
+tests/unit/test_replay_backend.py::test_snapshot_extraction PASSED       [ 89%]
+tests/unit/test_replay_backend.py::test_drift_series PASSED              [ 91%]
+tests/unit/test_replay_backend.py::test_replay_backend_health PASSED     [ 94%]
+tests/unit/test_replay_backend.py::test_replay_backend_run PASSED        [ 97%]
+tests/unit/test_replay_backend.py::test_replay_seek PASSED               [100%]
+
+=============================== warnings summary ===============================
+tests/unit/test_backends.py: 22 warnings
+tests/unit/test_mqtbench.py: 62 warnings
+tests/unit/test_replay_backend.py: 2 warnings
+  /home/wangshuchang/quantumgpt/.venv/lib/python3.11/site-packages/stevedore/extension.py:340: DeprecationWarning: Since backends now support running jobs that contain both fractional gates and dynamic circuit, IBMFractionalTranslationPlugin is deprecated as of qiskit-ibm-runtime 0.42.0 and will be removed no sooner than 3 months after the release date. Use IBMDynamicFractionalTranslationPlugin instead.
+    obj = plugin(*invoke_args, **invoke_kwds)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 37 passed, 86 warnings in 46.11s =======================

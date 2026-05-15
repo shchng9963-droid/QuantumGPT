@@ -1,0 +1,230 @@
+{
+  "circuits": {
+    "GHZ-5": {
+      "mqt_name": "ghz",
+      "qubits": 5,
+      "depth": 12,
+      "ecr_count": 4,
+      "total_gates": 25,
+      "description": "Entanglement benchmark",
+      "ops": {
+        "rz": 12,
+        "sx": 5,
+        "measure": 5,
+        "ecr": 4,
+        "x": 4
+      }
+    },
+    "DJ-5": {
+      "mqt_name": "dj",
+      "qubits": 5,
+      "depth": 22,
+      "ecr_count": 4,
+      "total_gates": 38,
+      "description": "Deutsch-Jozsa oracle",
+      "ops": {
+        "rz": 21,
+        "sx": 13,
+        "ecr": 4,
+        "measure": 4
+      }
+    },
+    "GraphState-5": {
+      "mqt_name": "graphstate",
+      "qubits": 5,
+      "depth": 27,
+      "ecr_count": 5,
+      "total_gates": 48,
+      "description": "Graph state preparation",
+      "ops": {
+        "rz": 26,
+        "sx": 15,
+        "ecr": 5,
+        "measure": 5,
+        "x": 2
+      }
+    },
+    "QFTent-5": {
+      "mqt_name": "qftentangled",
+      "qubits": 5,
+      "depth": 61,
+      "ecr_count": 24,
+      "total_gates": 146,
+      "description": "QFT + entanglement",
+      "ops": {
+        "rz": 72,
+        "sx": 30,
+        "ecr": 24,
+        "x": 20,
+        "measure": 5
+      }
+    },
+    "VQE_SU2-4": {
+      "mqt_name": "vqe_su2",
+      "qubits": 4,
+      "depth": 38,
+      "ecr_count": 9,
+      "total_gates": 92,
+      "description": "Variational SU(2) ansatz",
+      "ops": {
+        "rz": 43,
+        "sx": 40,
+        "ecr": 9,
+        "measure": 4
+      }
+    }
+  },
+  "results": {
+    "GHZ-5|FakeAdapter": {
+      "fidelity": 0.9283241008912607,
+      "transpiled_depth": 14,
+      "elapsed": 1.4352574348449707,
+      "counts_top3": {
+        "11111": 3814,
+        "00000": 3791,
+        "11110": 76
+      }
+    },
+    "GHZ-5|Replay(t=0)": {
+      "fidelity": 0.8401573106848966,
+      "transpiled_depth": 12,
+      "elapsed": 0.09394955635070801,
+      "counts_top3": {
+        "00000": 3466,
+        "11111": 3417,
+        "10000": 155
+      }
+    },
+    "GHZ-5|SynthDrift(stable)": {
+      "fidelity": 0.8500619415167837,
+      "transpiled_depth": 12,
+      "elapsed": 0.3811047077178955,
+      "counts_top3": {
+        "00000": 3483,
+        "11111": 3482,
+        "10000": 148
+      }
+    },
+    "DJ-5|FakeAdapter": {
+      "fidelity": 0.9204101562500001,
+      "transpiled_depth": 30,
+      "elapsed": 1.4388082027435303,
+      "counts_top3": {
+        "1111": 7540,
+        "1011": 156,
+        "1110": 142
+      }
+    },
+    "DJ-5|Replay(t=0)": {
+      "fidelity": 0.9000244140625,
+      "transpiled_depth": 22,
+      "elapsed": 0.09136724472045898,
+      "counts_top3": {
+        "1111": 7373,
+        "1101": 251,
+        "1110": 232
+      }
+    },
+    "DJ-5|SynthDrift(stable)": {
+      "fidelity": 0.902099609375,
+      "transpiled_depth": 22,
+      "elapsed": 0.5846114158630371,
+      "counts_top3": {
+        "1111": 7390,
+        "1101": 240,
+        "0111": 229
+      }
+    },
+    "GraphState-5|FakeAdapter": {
+      "fidelity": 0.9989370341258603,
+      "transpiled_depth": 47,
+      "elapsed": 1.2836802005767822,
+      "counts_top3": {
+        "01011": 280,
+        "10001": 275,
+        "00010": 275
+      }
+    },
+    "GraphState-5|Replay(t=0)": {
+      "fidelity": 0.9981137882609372,
+      "transpiled_depth": 27,
+      "elapsed": 0.09667706489562988,
+      "counts_top3": {
+        "01010": 296,
+        "00101": 279,
+        "00000": 278
+      }
+    },
+    "GraphState-5|SynthDrift(stable)": {
+      "fidelity": 0.9979234432841114,
+      "transpiled_depth": 27,
+      "elapsed": 0.3940858840942383,
+      "counts_top3": {
+        "00101": 284,
+        "00010": 284,
+        "00111": 281
+      }
+    },
+    "QFTent-5|FakeAdapter": {
+      "fidelity": 0.9555559593341632,
+      "transpiled_depth": 148,
+      "elapsed": 1.4942936897277832,
+      "counts_top3": {
+        "11111": 449,
+        "00000": 430,
+        "00010": 417
+      }
+    },
+    "QFTent-5|Replay(t=0)": {
+      "fidelity": 0.9518871398854002,
+      "transpiled_depth": 61,
+      "elapsed": 0.10451054573059082,
+      "counts_top3": {
+        "00010": 446,
+        "11111": 443,
+        "00001": 431
+      }
+    },
+    "QFTent-5|SynthDrift(stable)": {
+      "fidelity": 0.9712242537510815,
+      "transpiled_depth": 61,
+      "elapsed": 0.6071488857269287,
+      "counts_top3": {
+        "00000": 448,
+        "11110": 446,
+        "00010": 440
+      }
+    },
+    "VQE_SU2-4|FakeAdapter": {
+      "fidelity": 0.9903232631027434,
+      "transpiled_depth": 40,
+      "elapsed": 1.5383985042572021,
+      "counts_top3": {
+        "0000": 2045,
+        "0100": 1143,
+        "1010": 1132
+      }
+    },
+    "VQE_SU2-4|Replay(t=0)": {
+      "fidelity": 0.9860952754197536,
+      "transpiled_depth": 38,
+      "elapsed": 0.09929275512695312,
+      "counts_top3": {
+        "0000": 2039,
+        "1010": 1124,
+        "0100": 1049
+      }
+    },
+    "VQE_SU2-4|SynthDrift(stable)": {
+      "fidelity": 0.9897729734469071,
+      "transpiled_depth": 38,
+      "elapsed": 0.7155647277832031,
+      "counts_top3": {
+        "0000": 2067,
+        "0100": 1114,
+        "1010": 1106
+      }
+    }
+  },
+  "shots": 8192
+}
