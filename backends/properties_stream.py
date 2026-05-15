@@ -8,22 +8,20 @@ The stream supports:
   - Configurable emit interval
   - Background thread (non-blocking)
   - History buffer for replay/analysis
+  - Static replay_all() for batch time stepping
 
 Usage:
     from backends import FakeBackendAdapter
     from backends.properties_stream import PropertiesStream
 
-    backend = FakeBackendAdapter("FakeBrisbane")
-    stream = PropertiesStream(backend, interval=4.0)
+    # Batch mode: step through time and collect snapshots
+    snapshots = PropertiesStream.replay_all(backend, hours=48, step_hours=12)
 
-    # Register a callback
-    stream.on_snapshot(lambda snap: print(f"T1={snap['avg_t1_us']:.1f}"))
-
+    # Streaming mode: background telemetry
+    stream = PropertiesStream(backend, interval_seconds=0.1, time_acceleration=3600)
     stream.start()
     # ... do work ...
     stream.stop()
-
-    # Get history
     history = stream.get_history(last_n=10)
 """
 
@@ -47,20 +45,28 @@ class PropertiesStream:
         backend: ShadowBackend,
         interval: float = 4.0,
         history_size: int = 1000,
+        *,
+        interval_seconds: Optional[float] = None,
+        time_acceleration: float = 1.0,
     ):
         """
         Args:
             backend: The shadow backend to poll
-            interval: Seconds between emissions
+            interval: Seconds between emissions (legacy, use interval_seconds)
             history_size: Max snapshots to keep in memory
+            interval_seconds: Seconds between emissions (preferred param name)
+            time_acceleration: How fast simulated time advances relative to real time.
+                              E.g., 3600 means 1 real second = 1 simulated hour.
         """
         self._backend = backend
-        self._interval = interval
+        self._interval = interval_seconds if interval_seconds is not None else interval
+        self._time_acceleration = time_acceleration
         self._listeners: list[Callable[[dict[str, Any]], None]] = []
         self._history: deque[dict[str, Any]] = deque(maxlen=history_size)
         self._thread: Optional[threading.Thread] = None
         self._stop_event = threading.Event()
         self._emit_count = 0
+        self._wall_start: float = 0.0
 
     @property
     def is_running(self) -> bool:
@@ -69,6 +75,11 @@ class PropertiesStream:
     @property
     def emit_count(self) -> int:
         return self._emit_count
+
+    @property
+    def buffer_size(self) -> int:
+        """Number of snapshots currently in the history buffer."""
+        return len(self._history)
 
     def on_snapshot(self, callback: Callable[[dict[str, Any]], None]):
         """Register a listener that receives each snapshot dict.
@@ -87,6 +98,7 @@ class PropertiesStream:
         if self.is_running:
             return
         self._stop_event.clear()
+        self._wall_start = time.time()
         self._thread = threading.Thread(target=self._run, daemon=True)
         self._thread.start()
 
@@ -97,13 +109,19 @@ class PropertiesStream:
             self._thread.join(timeout=timeout)
             self._thread = None
 
-    def emit_once(self) -> dict[str, Any]:
-        """Manually emit a single snapshot (synchronous). 
-        
-        Useful for testing or on-demand polling.
+    def emit_once(self, sim_time_hours: Optional[float] = None) -> dict[str, Any]:
+        """Manually emit a single snapshot (synchronous).
+
+        If sim_time_hours is provided, sets backend time first (for backends
+        with set_time method).
         """
+        if sim_time_hours is not None and hasattr(self._backend, "set_time"):
+            self._backend.set_time(sim_time_hours)
+
         snapshot = self._backend.get_properties_snapshot()
         snapshot["stream_seq"] = self._emit_count
+        if sim_time_hours is not None:
+            snapshot["stream_sim_time_hours"] = sim_time_hours
         self._emit_count += 1
         self._history.append(snapshot)
 
@@ -132,7 +150,52 @@ class PropertiesStream:
         return None
 
     def _run(self):
-        """Background loop: emit snapshots at fixed intervals."""
+        """Background loop: emit snapshots at fixed intervals.
+
+        Advances simulated time on backends that support set_time()
+        proportional to wall-clock time * time_acceleration.
+        """
         while not self._stop_event.is_set():
-            self.emit_once()
+            # Compute simulated time if backend supports it
+            elapsed_wall = time.time() - self._wall_start
+            sim_hours = (elapsed_wall * self._time_acceleration) / 3600.0
+            self.emit_once(sim_time_hours=sim_hours)
             self._stop_event.wait(timeout=self._interval)
+
+    # ===== Static batch replay =====
+
+    @staticmethod
+    def replay_all(
+        backend: ShadowBackend,
+        hours: float,
+        step_hours: float,
+    ) -> list[dict[str, Any]]:
+        """Step through simulated time and collect all snapshots.
+
+        Requires the backend to have a set_time(hours) method
+        (ReplayBackend, SyntheticDriftBackend).
+
+        Args:
+            backend: Backend with set_time() method
+            hours: Total simulated duration in hours
+            step_hours: Step size in hours
+
+        Returns:
+            List of snapshot dicts, one per time step (inclusive of endpoints)
+        """
+        if not hasattr(backend, "set_time"):
+            raise TypeError(
+                f"Backend {type(backend).__name__} does not support set_time(); "
+                "replay_all requires a time-stepping backend."
+            )
+
+        snapshots = []
+        t = 0.0
+        while t <= hours + 1e-9:  # inclusive endpoint
+            backend.set_time(t)
+            snap = backend.get_properties_snapshot()
+            snap["stream_sim_time_hours"] = round(t, 6)
+            snapshots.append(snap)
+            t += step_hours
+
+        return snapshots

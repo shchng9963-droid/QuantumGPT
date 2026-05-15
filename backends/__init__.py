@@ -10,7 +10,14 @@ Three concrete implementations:
 from backends.base import ShadowBackend, BackendHealth, QubitProperties, SimulationResult
 from backends.fake_adapter import FakeBackendAdapter
 from backends.replay import ReplayBackend
-from backends.synthetic_drift import SyntheticDriftBackend, DriftConfig
+from backends.synthetic_drift import (
+    SyntheticDriftBackend,
+    DriftProfile,
+    STABLE,
+    LINEAR_DECAY,
+    SUDDEN_DEGRADATION,
+    DIURNAL_CYCLE,
+)
 from backends.calibration_data import (
     CalibrationSnapshot,
     extract_snapshot_from_fake_backend,
@@ -25,7 +32,11 @@ __all__ = [
     "FakeBackendAdapter",
     "ReplayBackend",
     "SyntheticDriftBackend",
-    "DriftConfig",
+    "DriftProfile",
+    "STABLE",
+    "LINEAR_DECAY",
+    "SUDDEN_DEGRADATION",
+    "DIURNAL_CYCLE",
     "CalibrationSnapshot",
     "extract_snapshot_from_fake_backend",
     "generate_drift_series",
