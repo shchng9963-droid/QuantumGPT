@@ -1,165 +1,138 @@
-"""Properties Stream — mock telemetry that emits calibration snapshots.
+"""Properties Stream — mock real-time telemetry from shadow backends.
 
-Simulates the real-time data feed from a quantum device's calibration
-system. The agent's drift detector and perception tools consume this stream.
+Periodically emits calibration snapshots from a ShadowBackend,
+simulating the real-time telemetry feed that a physical QPU provides.
 
-Two modes:
-  - Realtime: emits at wall-clock intervals (for live demo / dashboards)
-  - Accelerated: emits a full history instantly (for evaluation / testing)
+The stream supports:
+  - Multiple listeners (observer pattern)
+  - Configurable emit interval
+  - Background thread (non-blocking)
+  - History buffer for replay/analysis
 
 Usage:
+    from backends import FakeBackendAdapter
     from backends.properties_stream import PropertiesStream
 
-    stream = PropertiesStream(backend, interval_seconds=4.0)
-    stream.start()
+    backend = FakeBackendAdapter("FakeBrisbane")
+    stream = PropertiesStream(backend, interval=4.0)
 
-    # Consume snapshots
-    for snapshot in stream.iter_snapshots():
-        print(snapshot["drift_score"])
-        if should_stop:
-            break
+    # Register a callback
+    stream.on_snapshot(lambda snap: print(f"T1={snap['avg_t1_us']:.1f}"))
+
+    stream.start()
+    # ... do work ...
     stream.stop()
 
-    # Or: get all snapshots from a replay at once
-    snapshots = PropertiesStream.replay_all(backend, hours=168, step_hours=1.0)
+    # Get history
+    history = stream.get_history(last_n=10)
 """
 
 import threading
 import time
 from collections import deque
-from typing import Any, Generator
+from typing import Any, Callable, Optional
 
 from backends.base import ShadowBackend
 
 
 class PropertiesStream:
-    """Emits calibration snapshots from a ShadowBackend at regular intervals.
+    """Streams calibration snapshots from a ShadowBackend at fixed intervals.
 
-    For ReplayBackend/SyntheticDriftBackend, it advances the backend's
-    internal time with each tick, simulating real-time hardware telemetry.
-
-    Thread-safe: can be consumed from a different thread than the emitter.
+    Runs in a background daemon thread. Listeners receive snapshots
+    as plain dicts (serializable, suitable for logging/storage).
     """
 
     def __init__(
         self,
         backend: ShadowBackend,
-        interval_seconds: float = 4.0,
-        time_acceleration: float = 1.0,
-        max_buffer_size: int = 10000,
+        interval: float = 4.0,
+        history_size: int = 1000,
     ):
         """
         Args:
-            backend: The shadow backend to stream from.
-            interval_seconds: Wall-clock seconds between emissions.
-            time_acceleration: How many simulated hours pass per wall-clock second.
-                E.g., 3600 means 1 wall-second = 1 sim-hour.
-            max_buffer_size: Max snapshots to buffer before dropping oldest.
+            backend: The shadow backend to poll
+            interval: Seconds between emissions
+            history_size: Max snapshots to keep in memory
         """
         self._backend = backend
-        self._interval = interval_seconds
-        self._acceleration = time_acceleration
-        self._buffer: deque[dict[str, Any]] = deque(maxlen=max_buffer_size)
-        self._running = False
-        self._thread: threading.Thread | None = None
-        self._lock = threading.Lock()
-        self._sim_time = 0.0  # simulated hours elapsed
+        self._interval = interval
+        self._listeners: list[Callable[[dict[str, Any]], None]] = []
+        self._history: deque[dict[str, Any]] = deque(maxlen=history_size)
+        self._thread: Optional[threading.Thread] = None
+        self._stop_event = threading.Event()
+        self._emit_count = 0
 
     @property
-    def backend(self) -> ShadowBackend:
-        return self._backend
+    def is_running(self) -> bool:
+        return self._thread is not None and self._thread.is_alive()
 
     @property
-    def buffer_size(self) -> int:
-        return len(self._buffer)
+    def emit_count(self) -> int:
+        return self._emit_count
 
-    @property
-    def sim_time(self) -> float:
-        """Current simulated time in hours."""
-        return self._sim_time
+    def on_snapshot(self, callback: Callable[[dict[str, Any]], None]):
+        """Register a listener that receives each snapshot dict.
 
-    def start(self) -> None:
-        """Start emitting snapshots in a background thread."""
-        if self._running:
+        Callbacks are invoked in the emitter thread — keep them fast
+        or offload heavy work to a queue.
+        """
+        self._listeners.append(callback)
+
+    def remove_listener(self, callback: Callable):
+        """Remove a previously registered listener."""
+        self._listeners = [l for l in self._listeners if l is not callback]
+
+    def start(self):
+        """Start emitting in a background daemon thread."""
+        if self.is_running:
             return
-        self._running = True
-        self._thread = threading.Thread(target=self._emit_loop, daemon=True)
+        self._stop_event.clear()
+        self._thread = threading.Thread(target=self._run, daemon=True)
         self._thread.start()
 
-    def stop(self) -> None:
-        """Stop the emission thread."""
-        self._running = False
-        if self._thread:
-            self._thread.join(timeout=5.0)
+    def stop(self, timeout: float = 5.0):
+        """Stop the stream and wait for the thread to finish."""
+        self._stop_event.set()
+        if self._thread is not None:
+            self._thread.join(timeout=timeout)
             self._thread = None
 
-    def _emit_loop(self) -> None:
-        """Background loop: advance time and emit snapshots."""
-        while self._running:
-            # Advance simulated time
-            self._sim_time += self._interval * self._acceleration / 3600.0
-
-            # Set backend time if it supports it
-            if hasattr(self._backend, "set_time"):
-                self._backend.set_time(self._sim_time)
-
-            # Get snapshot
-            snapshot = self._backend.get_properties_snapshot()
-            snapshot["stream_sim_time_hours"] = self._sim_time
-
-            with self._lock:
-                self._buffer.append(snapshot)
-
-            time.sleep(self._interval)
-
-    def get_latest(self) -> dict[str, Any] | None:
-        """Get the most recent snapshot (non-blocking)."""
-        with self._lock:
-            return self._buffer[-1] if self._buffer else None
-
-    def get_all(self) -> list[dict[str, Any]]:
-        """Get all buffered snapshots and clear the buffer."""
-        with self._lock:
-            snapshots = list(self._buffer)
-            self._buffer.clear()
-            return snapshots
-
-    def get_recent(self, n: int = 10) -> list[dict[str, Any]]:
-        """Get the N most recent snapshots (does not clear buffer)."""
-        with self._lock:
-            return list(self._buffer)[-n:]
-
-    def iter_snapshots(self) -> Generator[dict[str, Any], None, None]:
-        """Blocking iterator that yields new snapshots as they arrive."""
-        last_size = 0
-        while self._running:
-            current_size = len(self._buffer)
-            if current_size > last_size:
-                with self._lock:
-                    new_items = list(self._buffer)[last_size:]
-                last_size = current_size
-                for item in new_items:
-                    yield item
-            else:
-                time.sleep(self._interval / 2)
-
-    @staticmethod
-    def replay_all(
-        backend: ShadowBackend,
-        hours: float,
-        step_hours: float = 1.0,
-    ) -> list[dict[str, Any]]:
-        """Generate all snapshots from a replay/drift backend at once.
-
-        Non-blocking, returns immediately. Useful for evaluation and testing.
+    def emit_once(self) -> dict[str, Any]:
+        """Manually emit a single snapshot (synchronous). 
+        
+        Useful for testing or on-demand polling.
         """
-        snapshots = []
-        t = 0.0
-        while t <= hours:
-            if hasattr(backend, "set_time"):
-                backend.set_time(t)
-            snap = backend.get_properties_snapshot()
-            snap["stream_sim_time_hours"] = t
-            snapshots.append(snap)
-            t += step_hours
-        return snapshots
+        snapshot = self._backend.get_properties_snapshot()
+        snapshot["stream_seq"] = self._emit_count
+        self._emit_count += 1
+        self._history.append(snapshot)
+
+        for listener in self._listeners:
+            try:
+                listener(snapshot)
+            except Exception:
+                pass  # don't let one bad listener kill the stream
+
+        return snapshot
+
+    def get_history(self, last_n: Optional[int] = None) -> list[dict[str, Any]]:
+        """Return recent snapshots from the history buffer.
+
+        Args:
+            last_n: Number of most recent snapshots to return (None = all)
+        """
+        if last_n is None:
+            return list(self._history)
+        return list(self._history)[-last_n:]
+
+    def get_latest(self) -> Optional[dict[str, Any]]:
+        """Return the most recent snapshot, or None if empty."""
+        if self._history:
+            return self._history[-1]
+        return None
+
+    def _run(self):
+        """Background loop: emit snapshots at fixed intervals."""
+        while not self._stop_event.is_set():
+            self.emit_once()
+            self._stop_event.wait(timeout=self._interval)
