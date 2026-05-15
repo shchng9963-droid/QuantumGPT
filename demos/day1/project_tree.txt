@@ -1,0 +1,40 @@
+quantumgpt/
+├── agent/
+│   └── __init__.py
+├── backends/
+│   ├── __init__.py
+│   ├── base.py
+│   ├── calibration_data.py
+│   ├── fake_adapter.py
+│   ├── properties_stream.py
+│   ├── replay.py
+│   ├── replay_backend.py
+│   └── synthetic_drift.py
+├── bench/
+│   ├── __init__.py
+│   └── circuits.py
+├── configs/
+├── data/
+│   ├── calibration/
+│   ├── circuits/
+│   └── results/
+├── docs/
+│   └── related_work_survey.md
+├── eval/
+│   └── __init__.py
+├── notebooks/
+├── scripts/
+│   └── validate_backends.py
+├── tests/
+│   ├── integration/
+│   └── unit/
+│       ├── test_backends.py
+│       └── test_replay_backend.py
+├── tools/
+│   └── __init__.py
+├── .gitignore
+├── QuantumGPT_Plan.md
+├── QuantumGPT_Plan_merged.md
+├── QuantumGPT_Plan_v2.md
+├── README.md
+└── requirements.txt
