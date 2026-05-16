@@ -6,6 +6,8 @@ sys.path.insert(0, "/home/wangshuchang/quantumgpt")
 import pytest
 from qiskit.circuit import QuantumCircuit
 
+mqt = pytest.importorskip("mqt.bench", reason="mqt-bench not installed")
+
 from bench.mqtbench import (
     get_mqtbench_circuits,
     list_mqtbench_available,

@@ -1,0 +1,666 @@
+{
+  "stable": {
+    "severity": "nominal",
+    "trend": "stable",
+    "t1_slope": -2.2299819728947752e-15,
+    "drift_slope": 0.0,
+    "changepoints": [],
+    "num_actions": 1,
+    "actions": [
+      {
+        "type": "OK",
+        "priority": 5,
+        "reason": "Device healthy. Drift=0.000, T1 trend=-0.00us/h, fidelity stable."
+      }
+    ],
+    "health_timeline": [
+      {
+        "time_hours": 0,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011676695958380897,
+        "avg_2q_error": 0.016144464261679505,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 233.71281734636727,
+        "avg_t2_us": 159.06159026104567,
+        "drift_score": 0.0,
+        "calibration_age_minutes": 0.0
+      },
+      {
+        "time_hours": 4,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011676695958380897,
+        "avg_2q_error": 0.016144464261679505,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 233.71281734636727,
+        "avg_t2_us": 159.06159026104567,
+        "drift_score": 0.0,
+        "calibration_age_minutes": 240.0
+      },
+      {
+        "time_hours": 8,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011676695958380897,
+        "avg_2q_error": 0.016144464261679505,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 233.71281734636727,
+        "avg_t2_us": 159.06159026104567,
+        "drift_score": 0.0,
+        "calibration_age_minutes": 480.0
+      },
+      {
+        "time_hours": 12,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011676695958380897,
+        "avg_2q_error": 0.016144464261679505,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 233.71281734636727,
+        "avg_t2_us": 159.06159026104567,
+        "drift_score": 0.0,
+        "calibration_age_minutes": 720.0
+      }
+    ],
+    "probes": [
+      {
+        "time": 0,
+        "circuit": "ghz_5",
+        "fidelity": 0.8882
+      },
+      {
+        "time": 0,
+        "circuit": "qft_4",
+        "fidelity": 0.9985
+      },
+      {
+        "time": 4,
+        "circuit": "ghz_5",
+        "fidelity": 0.8857
+      },
+      {
+        "time": 4,
+        "circuit": "qft_4",
+        "fidelity": 0.9982
+      },
+      {
+        "time": 8,
+        "circuit": "ghz_5",
+        "fidelity": 0.8734
+      },
+      {
+        "time": 8,
+        "circuit": "qft_4",
+        "fidelity": 0.9986
+      },
+      {
+        "time": 12,
+        "circuit": "ghz_5",
+        "fidelity": 0.8811
+      },
+      {
+        "time": 12,
+        "circuit": "qft_4",
+        "fidelity": 0.998
+      }
+    ],
+    "worst_qubits": [
+      0,
+      1,
+      4,
+      14,
+      7
+    ],
+    "best_qubits": [
+      11,
+      12,
+      9,
+      10,
+      3
+    ]
+  },
+  "linear": {
+    "severity": "critical",
+    "trend": "sudden_change",
+    "t1_slope": -7.011384520391012,
+    "drift_slope": 0.030000000000000002,
+    "changepoints": [
+      4.0,
+      8.0,
+      12.0,
+      16.0,
+      20.0,
+      24.0
+    ],
+    "num_actions": 4,
+    "actions": [
+      {
+        "type": "RECALIBRATE",
+        "priority": 1,
+        "reason": "Abrupt calibration change detected at t=4.0h, 8.0h, 12.0h, 16.0h, 20.0h, 24.0h. Drift trend slope: +0.0300/h."
+      },
+      {
+        "type": "RECALIBRATE",
+        "priority": 1,
+        "reason": "Drift score 0.720 exceeds critical threshold (0.5)."
+      },
+      {
+        "type": "REMAP_LAYOUT",
+        "priority": 2,
+        "reason": "Minimum probe fidelity 0.837 is moderate. Consider remapping to qubits [11, 12, 9, 10, 3]."
+      },
+      {
+        "type": "RECALIBRATE",
+        "priority": 2,
+        "reason": "T1 degrading at -7.01 us/h. At this rate, device will become unusable in 9h."
+      }
+    ],
+    "health_timeline": [
+      {
+        "time_hours": 0,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011676695958380897,
+        "avg_2q_error": 0.016144464261679505,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 233.71281734636727,
+        "avg_t2_us": 159.06159026104567,
+        "drift_score": 0.0,
+        "calibration_age_minutes": 0.0
+      },
+      {
+        "time_hours": 4,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0012437232000450773,
+        "avg_2q_error": 0.018678912669570964,
+        "avg_readout_error": 0.033629582923228346,
+        "avg_t1_us": 205.66727926480317,
+        "avg_t2_us": 139.9741994297202,
+        "drift_score": 0.12,
+        "calibration_age_minutes": 240.0
+      },
+      {
+        "time_hours": 8,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0013197768042520653,
+        "avg_2q_error": 0.02121336107746242,
+        "avg_readout_error": 0.03612066313976378,
+        "avg_t1_us": 177.6217411832391,
+        "avg_t2_us": 120.88680859839474,
+        "drift_score": 0.24,
+        "calibration_age_minutes": 480.0
+      },
+      {
+        "time_hours": 12,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0013958304084590533,
+        "avg_2q_error": 0.023747809485353884,
+        "avg_readout_error": 0.038611743356299216,
+        "avg_t1_us": 149.57620310167502,
+        "avg_t2_us": 101.79941776706924,
+        "drift_score": 0.36,
+        "calibration_age_minutes": 720.0
+      },
+      {
+        "time_hours": 16,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0014718840126660413,
+        "avg_2q_error": 0.026282257893245335,
+        "avg_readout_error": 0.04110282357283465,
+        "avg_t1_us": 121.53066502011097,
+        "avg_t2_us": 82.71202693574374,
+        "drift_score": 0.48,
+        "calibration_age_minutes": 960.0
+      },
+      {
+        "time_hours": 20,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0015479376168730293,
+        "avg_2q_error": 0.02881670630113679,
+        "avg_readout_error": 0.043593903789370066,
+        "avg_t1_us": 93.4851269385469,
+        "avg_t2_us": 63.62463610441827,
+        "drift_score": 0.6,
+        "calibration_age_minutes": 1200.0
+      },
+      {
+        "time_hours": 24,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0016239912210800176,
+        "avg_2q_error": 0.03135115470902825,
+        "avg_readout_error": 0.04608498400590552,
+        "avg_t1_us": 65.43958885698285,
+        "avg_t2_us": 44.53724527309279,
+        "drift_score": 0.72,
+        "calibration_age_minutes": 1440.0
+      }
+    ],
+    "probes": [
+      {
+        "time": 0,
+        "circuit": "ghz_5",
+        "fidelity": 0.8732
+      },
+      {
+        "time": 4,
+        "circuit": "ghz_5",
+        "fidelity": 0.8804
+      },
+      {
+        "time": 8,
+        "circuit": "ghz_5",
+        "fidelity": 0.8754
+      },
+      {
+        "time": 12,
+        "circuit": "ghz_5",
+        "fidelity": 0.8548
+      },
+      {
+        "time": 16,
+        "circuit": "ghz_5",
+        "fidelity": 0.856
+      },
+      {
+        "time": 20,
+        "circuit": "ghz_5",
+        "fidelity": 0.8401
+      },
+      {
+        "time": 24,
+        "circuit": "ghz_5",
+        "fidelity": 0.8369
+      }
+    ],
+    "worst_qubits": [
+      0,
+      1,
+      4,
+      14,
+      7
+    ],
+    "best_qubits": [
+      11,
+      12,
+      9,
+      10,
+      3
+    ]
+  },
+  "sudden": {
+    "severity": "critical",
+    "trend": "sudden_change",
+    "t1_slope": -27.312475956329262,
+    "drift_slope": 0.16694772344013487,
+    "changepoints": [
+      5.0
+    ],
+    "num_actions": 5,
+    "actions": [
+      {
+        "type": "RECALIBRATE",
+        "priority": 1,
+        "reason": "Abrupt calibration change detected at t=5.0h. Drift trend slope: +0.1669/h."
+      },
+      {
+        "type": "RECALIBRATE",
+        "priority": 1,
+        "reason": "Drift score 1.000 exceeds critical threshold (0.5)."
+      },
+      {
+        "type": "APPLY_MITIGATION",
+        "priority": 2,
+        "reason": "Fidelity is degrading at -0.0322/h. Latest probe fidelities: ghz_5=0.703"
+      },
+      {
+        "type": "REMAP_LAYOUT",
+        "priority": 2,
+        "reason": "Minimum probe fidelity 0.703 is moderate. Consider remapping to qubits [11, 12, 9, 10, 3]."
+      },
+      {
+        "type": "RECALIBRATE",
+        "priority": 2,
+        "reason": "T1 degrading at -27.31 us/h. At this rate, device will become unusable in 3h."
+      }
+    ],
+    "health_timeline": [
+      {
+        "time_hours": 0,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011676695958380897,
+        "avg_2q_error": 0.016144464261679505,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 233.71281734636727,
+        "avg_t2_us": 159.06159026104567,
+        "drift_score": 0.0,
+        "calibration_age_minutes": 0.0
+      },
+      {
+        "time_hours": 2,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011676695958380897,
+        "avg_2q_error": 0.016144464261679505,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 233.71281734636727,
+        "avg_t2_us": 159.06159026104567,
+        "drift_score": 0.0,
+        "calibration_age_minutes": 120.0
+      },
+      {
+        "time_hours": 4,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011676695958380897,
+        "avg_2q_error": 0.016144464261679505,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 233.71281734636727,
+        "avg_t2_us": 159.06159026104567,
+        "drift_score": 0.0,
+        "calibration_age_minutes": 240.0
+      },
+      {
+        "time_hours": 5,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0026887416799778493,
+        "avg_2q_error": 0.06683343241950863,
+        "avg_readout_error": 0.09124900036909449,
+        "avg_t1_us": 70.11384520391017,
+        "avg_t2_us": 47.7184770783137,
+        "drift_score": 1.0,
+        "calibration_age_minutes": 300.0
+      },
+      {
+        "time_hours": 5.5,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0026887416799778493,
+        "avg_2q_error": 0.06683343241950863,
+        "avg_readout_error": 0.09124900036909449,
+        "avg_t1_us": 70.11384520391017,
+        "avg_t2_us": 47.7184770783137,
+        "drift_score": 1.0,
+        "calibration_age_minutes": 330.0
+      },
+      {
+        "time_hours": 6,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0026887416799778493,
+        "avg_2q_error": 0.06683343241950863,
+        "avg_readout_error": 0.09124900036909449,
+        "avg_t1_us": 70.11384520391017,
+        "avg_t2_us": 47.7184770783137,
+        "drift_score": 1.0,
+        "calibration_age_minutes": 360.0
+      },
+      {
+        "time_hours": 8,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0026887416799778493,
+        "avg_2q_error": 0.06683343241950863,
+        "avg_readout_error": 0.09124900036909449,
+        "avg_t1_us": 70.11384520391017,
+        "avg_t2_us": 47.7184770783137,
+        "drift_score": 1.0,
+        "calibration_age_minutes": 480.0
+      }
+    ],
+    "probes": [
+      {
+        "time": 0,
+        "circuit": "ghz_5",
+        "fidelity": 0.8881
+      },
+      {
+        "time": 2,
+        "circuit": "ghz_5",
+        "fidelity": 0.8843
+      },
+      {
+        "time": 4,
+        "circuit": "ghz_5",
+        "fidelity": 0.8801
+      },
+      {
+        "time": 5,
+        "circuit": "ghz_5",
+        "fidelity": 0.6713
+      },
+      {
+        "time": 5.5,
+        "circuit": "ghz_5",
+        "fidelity": 0.6825
+      },
+      {
+        "time": 6,
+        "circuit": "ghz_5",
+        "fidelity": 0.6874
+      },
+      {
+        "time": 8,
+        "circuit": "ghz_5",
+        "fidelity": 0.7034
+      }
+    ],
+    "worst_qubits": [
+      0,
+      1,
+      4,
+      14,
+      7
+    ],
+    "best_qubits": [
+      11,
+      12,
+      9,
+      10,
+      3
+    ]
+  },
+  "diurnal": {
+    "severity": "critical",
+    "trend": "sudden_change",
+    "t1_slope": 1.8807755111267486,
+    "drift_slope": 3.056493084935143e-18,
+    "changepoints": [
+      3.0,
+      6.0,
+      9.0,
+      12.0,
+      15.0,
+      18.0,
+      21.0,
+      24.0
+    ],
+    "num_actions": 1,
+    "actions": [
+      {
+        "type": "RECALIBRATE",
+        "priority": 1,
+        "reason": "Abrupt calibration change detected at t=3.0h, 6.0h, 9.0h, 12.0h, 15.0h, 18.0h, 21.0h, 24.0h. Drift trend slope: +0.0000/h."
+      }
+    ],
+    "health_timeline": [
+      {
+        "time_hours": 0,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011676695958380897,
+        "avg_2q_error": 0.016144464261679505,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 233.71281734636727,
+        "avg_t2_us": 159.06159026104567,
+        "drift_score": 0.0,
+        "calibration_age_minutes": 0.0
+      },
+      {
+        "time_hours": 3,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011945586054723089,
+        "avg_2q_error": 0.017040527089573255,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 208.92382964699289,
+        "avg_t2_us": 142.19056089606045,
+        "drift_score": 0.21213203435596423,
+        "calibration_age_minutes": 180.0
+      },
+      {
+        "time_hours": 6,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0012056963979415838,
+        "avg_2q_error": 0.017411688465625234,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 198.65589474441214,
+        "avg_t2_us": 135.2023517218888,
+        "drift_score": 0.3,
+        "calibration_age_minutes": 360.0
+      },
+      {
+        "time_hours": 9,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011945586054723089,
+        "avg_2q_error": 0.017040527089573255,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 208.92382964699289,
+        "avg_t2_us": 142.19056089606045,
+        "drift_score": 0.21213203435596426,
+        "calibration_age_minutes": 540.0
+      },
+      {
+        "time_hours": 12,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011676695958380897,
+        "avg_2q_error": 0.016144464261679505,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 233.71281734636727,
+        "avg_t2_us": 159.06159026104567,
+        "drift_score": 3.6739403974420595e-17,
+        "calibration_age_minutes": 720.0
+      },
+      {
+        "time_hours": 15,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011407805862038698,
+        "avg_2q_error": 0.015248401433785759,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 258.5018050457417,
+        "avg_t2_us": 175.9326196260309,
+        "drift_score": 0.21213203435596414,
+        "calibration_age_minutes": 900.0
+      },
+      {
+        "time_hours": 18,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011296427937345958,
+        "avg_2q_error": 0.01487724005773378,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 268.7697399483223,
+        "avg_t2_us": 182.92082880020251,
+        "drift_score": 0.3,
+        "calibration_age_minutes": 1080.0
+      },
+      {
+        "time_hours": 21,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011407805862038698,
+        "avg_2q_error": 0.015248401433785759,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 258.5018050457417,
+        "avg_t2_us": 175.9326196260309,
+        "drift_score": 0.2121320343559643,
+        "calibration_age_minutes": 1260.0
+      },
+      {
+        "time_hours": 24,
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "num_qubits": 127,
+        "avg_1q_error": 0.0011676695958380897,
+        "avg_2q_error": 0.016144464261679505,
+        "avg_readout_error": 0.031138502706692914,
+        "avg_t1_us": 233.71281734636727,
+        "avg_t2_us": 159.06159026104567,
+        "drift_score": 7.347880794884119e-17,
+        "calibration_age_minutes": 1440.0
+      }
+    ],
+    "probes": [
+      {
+        "time": 0,
+        "circuit": "ghz_5",
+        "fidelity": 0.89
+      },
+      {
+        "time": 3,
+        "circuit": "ghz_5",
+        "fidelity": 0.8796
+      },
+      {
+        "time": 6,
+        "circuit": "ghz_5",
+        "fidelity": 0.8828
+      },
+      {
+        "time": 9,
+        "circuit": "ghz_5",
+        "fidelity": 0.8807
+      },
+      {
+        "time": 12,
+        "circuit": "ghz_5",
+        "fidelity": 0.882
+      },
+      {
+        "time": 15,
+        "circuit": "ghz_5",
+        "fidelity": 0.8913
+      },
+      {
+        "time": 18,
+        "circuit": "ghz_5",
+        "fidelity": 0.8823
+      },
+      {
+        "time": 21,
+        "circuit": "ghz_5",
+        "fidelity": 0.883
+      },
+      {
+        "time": 24,
+        "circuit": "ghz_5",
+        "fidelity": 0.8762
+      }
+    ],
+    "worst_qubits": [
+      0,
+      1,
+      4,
+      14,
+      7
+    ],
+    "best_qubits": [
+      11,
+      12,
+      9,
+      10,
+      3
+    ]
+  }
+}

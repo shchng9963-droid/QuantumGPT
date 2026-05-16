@@ -1,0 +1,3354 @@
+{
+  "pelt": {
+    "best_params": {
+      "pelt_penalty": 3.0,
+      "pelt_model": "rbf"
+    },
+    "metrics": {
+      "precision": 0.9068,
+      "recall": 0.9304,
+      "f1": 0.9185,
+      "tp": 107,
+      "fp": 11,
+      "fn": 8
+    },
+    "per_scenario": [
+      {
+        "name": "stable_0",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_1",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_2",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_3",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_4",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_5",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_6",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_7",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_8",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_9",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "gradual_0",
+        "truth": [],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 0,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "gradual_1",
+        "truth": [],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 0,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "gradual_2",
+        "truth": [],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 0,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "gradual_3",
+        "truth": [],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 0,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "gradual_4",
+        "truth": [],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 0,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "sudden_0_at_3.0h",
+        "truth": [
+          6
+        ],
+        "detected": [
+          4
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_1_at_4.0h",
+        "truth": [
+          8
+        ],
+        "detected": [
+          9
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_2_at_4.5h",
+        "truth": [
+          9
+        ],
+        "detected": [
+          9
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_3_at_5.0h",
+        "truth": [
+          10
+        ],
+        "detected": [
+          9
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_4_at_6.0h",
+        "truth": [
+          12
+        ],
+        "detected": [
+          9
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_5_at_7.0h",
+        "truth": [
+          14
+        ],
+        "detected": [
+          14
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_6_at_7.5h",
+        "truth": [
+          15
+        ],
+        "detected": [
+          14
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_7_at_8.0h",
+        "truth": [
+          16
+        ],
+        "detected": [
+          14
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_8_at_9.0h",
+        "truth": [
+          18
+        ],
+        "detected": [
+          19
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_9_at_10.0h",
+        "truth": [
+          20
+        ],
+        "detected": [
+          19
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_10_at_10.5h",
+        "truth": [
+          21
+        ],
+        "detected": [
+          19
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_11_at_11.0h",
+        "truth": [
+          22
+        ],
+        "detected": [
+          19
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_12_at_12.0h",
+        "truth": [
+          24
+        ],
+        "detected": [
+          24
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_13_at_13.0h",
+        "truth": [
+          26
+        ],
+        "detected": [
+          24
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_14_at_13.5h",
+        "truth": [
+          27
+        ],
+        "detected": [
+          24
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_15_at_14.0h",
+        "truth": [
+          28
+        ],
+        "detected": [
+          29
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_16_at_15.0h",
+        "truth": [
+          30
+        ],
+        "detected": [
+          29
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_17_at_16.0h",
+        "truth": [
+          32
+        ],
+        "detected": [
+          29
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_18_at_16.5h",
+        "truth": [
+          33
+        ],
+        "detected": [
+          34
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_19_at_17.0h",
+        "truth": [
+          34
+        ],
+        "detected": [
+          34
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_20_at_18.0h",
+        "truth": [
+          36
+        ],
+        "detected": [
+          34
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_21_at_19.0h",
+        "truth": [
+          38
+        ],
+        "detected": [
+          39
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_22_at_19.5h",
+        "truth": [
+          39
+        ],
+        "detected": [
+          39
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_23_at_20.0h",
+        "truth": [
+          40
+        ],
+        "detected": [
+          39
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_24_at_21.0h",
+        "truth": [
+          42
+        ],
+        "detected": [
+          39
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_0",
+        "truth": [
+          16,
+          28
+        ],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_1",
+        "truth": [
+          11,
+          20
+        ],
+        "detected": [
+          9,
+          19
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_2",
+        "truth": [
+          17,
+          28
+        ],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_3",
+        "truth": [
+          12,
+          31
+        ],
+        "detected": [
+          9,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_4",
+        "truth": [
+          15,
+          41
+        ],
+        "detected": [
+          14,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_5",
+        "truth": [
+          17,
+          25
+        ],
+        "detected": [
+          14,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_6",
+        "truth": [
+          10,
+          26
+        ],
+        "detected": [
+          9,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_7",
+        "truth": [
+          10,
+          23
+        ],
+        "detected": [
+          9,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_8",
+        "truth": [
+          16,
+          23
+        ],
+        "detected": [
+          14,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_9",
+        "truth": [
+          8,
+          14
+        ],
+        "detected": [
+          9,
+          14
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_10",
+        "truth": [
+          15,
+          37
+        ],
+        "detected": [
+          14,
+          34
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_11",
+        "truth": [
+          7,
+          38
+        ],
+        "detected": [
+          4,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_12",
+        "truth": [
+          7,
+          22
+        ],
+        "detected": [
+          4,
+          19
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_13",
+        "truth": [
+          14,
+          40
+        ],
+        "detected": [
+          14,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_14",
+        "truth": [
+          15,
+          37
+        ],
+        "detected": [
+          14,
+          34
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_15",
+        "truth": [
+          12,
+          31
+        ],
+        "detected": [
+          9,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_16",
+        "truth": [
+          7,
+          14
+        ],
+        "detected": [
+          4,
+          14
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_17",
+        "truth": [
+          12,
+          40
+        ],
+        "detected": [
+          9,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_18",
+        "truth": [
+          15,
+          26
+        ],
+        "detected": [
+          14,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_19",
+        "truth": [
+          8,
+          40
+        ],
+        "detected": [
+          9,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "staircase_0",
+        "truth": [
+          11,
+          25,
+          31
+        ],
+        "detected": [
+          24,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "name": "staircase_1",
+        "truth": [
+          11,
+          22,
+          39
+        ],
+        "detected": [
+          9,
+          19,
+          39
+        ],
+        "tp": 3,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "staircase_2",
+        "truth": [
+          11,
+          19,
+          25
+        ],
+        "detected": [
+          9,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "name": "staircase_3",
+        "truth": [
+          6,
+          18,
+          38
+        ],
+        "detected": [
+          19,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "name": "staircase_4",
+        "truth": [
+          11,
+          15,
+          31
+        ],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "name": "staircase_5",
+        "truth": [
+          7,
+          15,
+          22
+        ],
+        "detected": [
+          14,
+          19
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "name": "staircase_6",
+        "truth": [
+          7,
+          27,
+          35
+        ],
+        "detected": [
+          4,
+          24,
+          34
+        ],
+        "tp": 3,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "staircase_7",
+        "truth": [
+          8,
+          23,
+          32
+        ],
+        "detected": [
+          19,
+          29
+        ],
+        "tp": 1,
+        "fp": 1,
+        "fn": 2
+      },
+      {
+        "name": "staircase_8",
+        "truth": [
+          12,
+          28,
+          35
+        ],
+        "detected": [
+          9,
+          29,
+          34
+        ],
+        "tp": 3,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "staircase_9",
+        "truth": [
+          8,
+          17,
+          27
+        ],
+        "detected": [
+          14,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "name": "recovery_0",
+        "truth": [
+          8,
+          30
+        ],
+        "detected": [
+          9,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_1",
+        "truth": [
+          14,
+          21
+        ],
+        "detected": [
+          14,
+          19
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_2",
+        "truth": [
+          11,
+          38
+        ],
+        "detected": [
+          9,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_3",
+        "truth": [
+          11,
+          20
+        ],
+        "detected": [
+          9,
+          19
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_4",
+        "truth": [
+          14,
+          40
+        ],
+        "detected": [
+          14,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_5",
+        "truth": [
+          11,
+          32
+        ],
+        "detected": [
+          9,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_6",
+        "truth": [
+          17,
+          27
+        ],
+        "detected": [
+          14,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_7",
+        "truth": [
+          17,
+          29
+        ],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_8",
+        "truth": [
+          16,
+          33
+        ],
+        "detected": [
+          14,
+          34
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_9",
+        "truth": [
+          14,
+          22
+        ],
+        "detected": [
+          14,
+          19
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      }
+    ]
+  },
+  "bocpd": {
+    "best_params": {
+      "bocpd_hazard": 0.1,
+      "bocpd_threshold": 0.1
+    },
+    "metrics": {
+      "precision": 0.2016,
+      "recall": 0.6783,
+      "f1": 0.3108,
+      "tp": 78,
+      "fp": 309,
+      "fn": 37
+    },
+    "per_scenario": [
+      {
+        "name": "stable_0",
+        "truth": [],
+        "detected": [
+          4,
+          17,
+          23,
+          28,
+          36,
+          44
+        ],
+        "tp": 0,
+        "fp": 6,
+        "fn": 0
+      },
+      {
+        "name": "stable_1",
+        "truth": [],
+        "detected": [
+          4,
+          17,
+          23,
+          28,
+          36,
+          44
+        ],
+        "tp": 0,
+        "fp": 6,
+        "fn": 0
+      },
+      {
+        "name": "stable_2",
+        "truth": [],
+        "detected": [
+          4,
+          17,
+          23,
+          28,
+          36,
+          44
+        ],
+        "tp": 0,
+        "fp": 6,
+        "fn": 0
+      },
+      {
+        "name": "stable_3",
+        "truth": [],
+        "detected": [
+          4,
+          17,
+          23,
+          28,
+          36,
+          44
+        ],
+        "tp": 0,
+        "fp": 6,
+        "fn": 0
+      },
+      {
+        "name": "stable_4",
+        "truth": [],
+        "detected": [
+          4,
+          17,
+          23,
+          28,
+          36,
+          44
+        ],
+        "tp": 0,
+        "fp": 6,
+        "fn": 0
+      },
+      {
+        "name": "stable_5",
+        "truth": [],
+        "detected": [
+          4,
+          17,
+          23,
+          28,
+          36,
+          44
+        ],
+        "tp": 0,
+        "fp": 6,
+        "fn": 0
+      },
+      {
+        "name": "stable_6",
+        "truth": [],
+        "detected": [
+          4,
+          17,
+          23,
+          28,
+          36,
+          44
+        ],
+        "tp": 0,
+        "fp": 6,
+        "fn": 0
+      },
+      {
+        "name": "stable_7",
+        "truth": [],
+        "detected": [
+          4,
+          17,
+          23,
+          28,
+          36,
+          44
+        ],
+        "tp": 0,
+        "fp": 6,
+        "fn": 0
+      },
+      {
+        "name": "stable_8",
+        "truth": [],
+        "detected": [
+          4,
+          17,
+          23,
+          28,
+          36,
+          44
+        ],
+        "tp": 0,
+        "fp": 6,
+        "fn": 0
+      },
+      {
+        "name": "stable_9",
+        "truth": [],
+        "detected": [
+          4,
+          17,
+          23,
+          28,
+          36,
+          44
+        ],
+        "tp": 0,
+        "fp": 6,
+        "fn": 0
+      },
+      {
+        "name": "gradual_0",
+        "truth": [],
+        "detected": [
+          2,
+          16,
+          25,
+          35,
+          41,
+          45
+        ],
+        "tp": 0,
+        "fp": 6,
+        "fn": 0
+      },
+      {
+        "name": "gradual_1",
+        "truth": [],
+        "detected": [
+          2,
+          19,
+          25,
+          35,
+          45
+        ],
+        "tp": 0,
+        "fp": 5,
+        "fn": 0
+      },
+      {
+        "name": "gradual_2",
+        "truth": [],
+        "detected": [
+          2,
+          13,
+          17,
+          44
+        ],
+        "tp": 0,
+        "fp": 4,
+        "fn": 0
+      },
+      {
+        "name": "gradual_3",
+        "truth": [],
+        "detected": [
+          2,
+          16,
+          20,
+          24,
+          37,
+          43
+        ],
+        "tp": 0,
+        "fp": 6,
+        "fn": 0
+      },
+      {
+        "name": "gradual_4",
+        "truth": [],
+        "detected": [
+          6,
+          16,
+          22,
+          35,
+          44
+        ],
+        "tp": 0,
+        "fp": 5,
+        "fn": 0
+      },
+      {
+        "name": "sudden_0_at_3.0h",
+        "truth": [
+          6
+        ],
+        "detected": [
+          5,
+          16,
+          24,
+          38,
+          45
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0
+      },
+      {
+        "name": "sudden_1_at_4.0h",
+        "truth": [
+          8
+        ],
+        "detected": [
+          6,
+          14,
+          23,
+          42,
+          47
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0
+      },
+      {
+        "name": "sudden_2_at_4.5h",
+        "truth": [
+          9
+        ],
+        "detected": [
+          13,
+          26,
+          48
+        ],
+        "tp": 0,
+        "fp": 3,
+        "fn": 1
+      },
+      {
+        "name": "sudden_3_at_5.0h",
+        "truth": [
+          10
+        ],
+        "detected": [
+          9,
+          17,
+          22,
+          34,
+          47
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0
+      },
+      {
+        "name": "sudden_4_at_6.0h",
+        "truth": [
+          12
+        ],
+        "detected": [
+          21,
+          30,
+          40,
+          47
+        ],
+        "tp": 0,
+        "fp": 4,
+        "fn": 1
+      },
+      {
+        "name": "sudden_5_at_7.0h",
+        "truth": [
+          14
+        ],
+        "detected": [
+          15,
+          20,
+          26,
+          34,
+          41,
+          48
+        ],
+        "tp": 1,
+        "fp": 5,
+        "fn": 0
+      },
+      {
+        "name": "sudden_6_at_7.5h",
+        "truth": [
+          15
+        ],
+        "detected": [
+          9,
+          24,
+          48
+        ],
+        "tp": 0,
+        "fp": 3,
+        "fn": 1
+      },
+      {
+        "name": "sudden_7_at_8.0h",
+        "truth": [
+          16
+        ],
+        "detected": [
+          4,
+          14,
+          21,
+          32,
+          44,
+          48
+        ],
+        "tp": 1,
+        "fp": 5,
+        "fn": 0
+      },
+      {
+        "name": "sudden_8_at_9.0h",
+        "truth": [
+          18
+        ],
+        "detected": [
+          5,
+          11,
+          16,
+          30,
+          35,
+          40,
+          45
+        ],
+        "tp": 1,
+        "fp": 6,
+        "fn": 0
+      },
+      {
+        "name": "sudden_9_at_10.0h",
+        "truth": [
+          20
+        ],
+        "detected": [
+          7,
+          14,
+          29,
+          41
+        ],
+        "tp": 0,
+        "fp": 4,
+        "fn": 1
+      },
+      {
+        "name": "sudden_10_at_10.5h",
+        "truth": [
+          21
+        ],
+        "detected": [
+          15,
+          23,
+          32,
+          36,
+          40,
+          48
+        ],
+        "tp": 1,
+        "fp": 5,
+        "fn": 0
+      },
+      {
+        "name": "sudden_11_at_11.0h",
+        "truth": [
+          22
+        ],
+        "detected": [
+          20,
+          31,
+          35,
+          42
+        ],
+        "tp": 1,
+        "fp": 3,
+        "fn": 0
+      },
+      {
+        "name": "sudden_12_at_12.0h",
+        "truth": [
+          24
+        ],
+        "detected": [
+          13,
+          27,
+          35,
+          48
+        ],
+        "tp": 1,
+        "fp": 3,
+        "fn": 0
+      },
+      {
+        "name": "sudden_13_at_13.0h",
+        "truth": [
+          26
+        ],
+        "detected": [
+          9,
+          16,
+          29,
+          39
+        ],
+        "tp": 1,
+        "fp": 3,
+        "fn": 0
+      },
+      {
+        "name": "sudden_14_at_13.5h",
+        "truth": [
+          27
+        ],
+        "detected": [
+          3,
+          7,
+          18,
+          34,
+          47
+        ],
+        "tp": 0,
+        "fp": 5,
+        "fn": 1
+      },
+      {
+        "name": "sudden_15_at_14.0h",
+        "truth": [
+          28
+        ],
+        "detected": [
+          31,
+          40,
+          46
+        ],
+        "tp": 1,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "sudden_16_at_15.0h",
+        "truth": [
+          30
+        ],
+        "detected": [
+          24,
+          33,
+          41
+        ],
+        "tp": 1,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "sudden_17_at_16.0h",
+        "truth": [
+          32
+        ],
+        "detected": [
+          11,
+          15,
+          29,
+          38,
+          44
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0
+      },
+      {
+        "name": "sudden_18_at_16.5h",
+        "truth": [
+          33
+        ],
+        "detected": [
+          8,
+          20,
+          38
+        ],
+        "tp": 0,
+        "fp": 3,
+        "fn": 1
+      },
+      {
+        "name": "sudden_19_at_17.0h",
+        "truth": [
+          34
+        ],
+        "detected": [
+          16,
+          21,
+          27,
+          35
+        ],
+        "tp": 1,
+        "fp": 3,
+        "fn": 0
+      },
+      {
+        "name": "sudden_20_at_18.0h",
+        "truth": [
+          36
+        ],
+        "detected": [
+          37,
+          47
+        ],
+        "tp": 1,
+        "fp": 1,
+        "fn": 0
+      },
+      {
+        "name": "sudden_21_at_19.0h",
+        "truth": [
+          38
+        ],
+        "detected": [
+          5,
+          19,
+          31,
+          44
+        ],
+        "tp": 0,
+        "fp": 4,
+        "fn": 1
+      },
+      {
+        "name": "sudden_22_at_19.5h",
+        "truth": [
+          39
+        ],
+        "detected": [
+          13,
+          23,
+          30,
+          42,
+          48
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0
+      },
+      {
+        "name": "sudden_23_at_20.0h",
+        "truth": [
+          40
+        ],
+        "detected": [
+          9,
+          15,
+          43
+        ],
+        "tp": 1,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "sudden_24_at_21.0h",
+        "truth": [
+          42
+        ],
+        "detected": [
+          4,
+          20,
+          33,
+          43,
+          47
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0
+      },
+      {
+        "name": "double_0",
+        "truth": [
+          16,
+          28
+        ],
+        "detected": [
+          4,
+          9,
+          17,
+          25,
+          38,
+          43,
+          47
+        ],
+        "tp": 2,
+        "fp": 5,
+        "fn": 0
+      },
+      {
+        "name": "double_1",
+        "truth": [
+          11,
+          20
+        ],
+        "detected": [
+          16,
+          26,
+          38
+        ],
+        "tp": 0,
+        "fp": 3,
+        "fn": 2
+      },
+      {
+        "name": "double_2",
+        "truth": [
+          17,
+          28
+        ],
+        "detected": [
+          4,
+          23,
+          28,
+          35,
+          41,
+          46
+        ],
+        "tp": 1,
+        "fp": 5,
+        "fn": 1
+      },
+      {
+        "name": "double_3",
+        "truth": [
+          12,
+          31
+        ],
+        "detected": [
+          12,
+          16,
+          23,
+          47
+        ],
+        "tp": 1,
+        "fp": 3,
+        "fn": 1
+      },
+      {
+        "name": "double_4",
+        "truth": [
+          15,
+          41
+        ],
+        "detected": [
+          9,
+          16,
+          28,
+          42,
+          48
+        ],
+        "tp": 2,
+        "fp": 3,
+        "fn": 0
+      },
+      {
+        "name": "double_5",
+        "truth": [
+          17,
+          25
+        ],
+        "detected": [
+          2,
+          24,
+          30,
+          41,
+          45
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 1
+      },
+      {
+        "name": "double_6",
+        "truth": [
+          10,
+          26
+        ],
+        "detected": [
+          3,
+          11,
+          19,
+          26,
+          42
+        ],
+        "tp": 2,
+        "fp": 3,
+        "fn": 0
+      },
+      {
+        "name": "double_7",
+        "truth": [
+          10,
+          23
+        ],
+        "detected": [
+          13,
+          17,
+          47
+        ],
+        "tp": 1,
+        "fp": 2,
+        "fn": 1
+      },
+      {
+        "name": "double_8",
+        "truth": [
+          16,
+          23
+        ],
+        "detected": [
+          10,
+          14,
+          25,
+          35,
+          40,
+          46
+        ],
+        "tp": 2,
+        "fp": 4,
+        "fn": 0
+      },
+      {
+        "name": "double_9",
+        "truth": [
+          8,
+          14
+        ],
+        "detected": [
+          11,
+          23,
+          27,
+          42,
+          46
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 1
+      },
+      {
+        "name": "double_10",
+        "truth": [
+          15,
+          37
+        ],
+        "detected": [
+          13,
+          21,
+          27
+        ],
+        "tp": 1,
+        "fp": 2,
+        "fn": 1
+      },
+      {
+        "name": "double_11",
+        "truth": [
+          7,
+          38
+        ],
+        "detected": [
+          9,
+          13,
+          28,
+          38
+        ],
+        "tp": 2,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "double_12",
+        "truth": [
+          7,
+          22
+        ],
+        "detected": [
+          2,
+          10,
+          17,
+          43
+        ],
+        "tp": 1,
+        "fp": 3,
+        "fn": 1
+      },
+      {
+        "name": "double_13",
+        "truth": [
+          14,
+          40
+        ],
+        "detected": [
+          7,
+          17,
+          22,
+          28,
+          41,
+          46
+        ],
+        "tp": 2,
+        "fp": 4,
+        "fn": 0
+      },
+      {
+        "name": "double_14",
+        "truth": [
+          15,
+          37
+        ],
+        "detected": [
+          12,
+          18,
+          24,
+          35,
+          39,
+          46
+        ],
+        "tp": 2,
+        "fp": 4,
+        "fn": 0
+      },
+      {
+        "name": "double_15",
+        "truth": [
+          12,
+          31
+        ],
+        "detected": [
+          7,
+          21,
+          31,
+          39,
+          45
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 1
+      },
+      {
+        "name": "double_16",
+        "truth": [
+          7,
+          14
+        ],
+        "detected": [
+          9,
+          13,
+          20,
+          24,
+          46
+        ],
+        "tp": 2,
+        "fp": 3,
+        "fn": 0
+      },
+      {
+        "name": "double_17",
+        "truth": [
+          12,
+          40
+        ],
+        "detected": [
+          10,
+          20,
+          24,
+          33,
+          47
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 1
+      },
+      {
+        "name": "double_18",
+        "truth": [
+          15,
+          26
+        ],
+        "detected": [
+          3,
+          17,
+          25,
+          37
+        ],
+        "tp": 2,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "double_19",
+        "truth": [
+          8,
+          40
+        ],
+        "detected": [
+          3,
+          13,
+          19,
+          25,
+          32,
+          36,
+          42
+        ],
+        "tp": 1,
+        "fp": 6,
+        "fn": 1
+      },
+      {
+        "name": "staircase_0",
+        "truth": [
+          11,
+          25,
+          31
+        ],
+        "detected": [
+          8,
+          22,
+          31,
+          40,
+          46
+        ],
+        "tp": 3,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "staircase_1",
+        "truth": [
+          11,
+          22,
+          39
+        ],
+        "detected": [
+          2,
+          10,
+          19,
+          25,
+          33,
+          37,
+          48
+        ],
+        "tp": 3,
+        "fp": 4,
+        "fn": 0
+      },
+      {
+        "name": "staircase_2",
+        "truth": [
+          11,
+          19,
+          25
+        ],
+        "detected": [
+          4,
+          15,
+          19,
+          23,
+          35,
+          43
+        ],
+        "tp": 2,
+        "fp": 4,
+        "fn": 1
+      },
+      {
+        "name": "staircase_3",
+        "truth": [
+          6,
+          18,
+          38
+        ],
+        "detected": [
+          11,
+          22,
+          29,
+          40,
+          46
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 2
+      },
+      {
+        "name": "staircase_4",
+        "truth": [
+          11,
+          15,
+          31
+        ],
+        "detected": [
+          12,
+          20,
+          41,
+          46
+        ],
+        "tp": 1,
+        "fp": 3,
+        "fn": 2
+      },
+      {
+        "name": "staircase_5",
+        "truth": [
+          7,
+          15,
+          22
+        ],
+        "detected": [
+          4,
+          22,
+          35,
+          41
+        ],
+        "tp": 2,
+        "fp": 2,
+        "fn": 1
+      },
+      {
+        "name": "staircase_6",
+        "truth": [
+          7,
+          27,
+          35
+        ],
+        "detected": [
+          14,
+          35,
+          43,
+          48
+        ],
+        "tp": 1,
+        "fp": 3,
+        "fn": 2
+      },
+      {
+        "name": "staircase_7",
+        "truth": [
+          8,
+          23,
+          32
+        ],
+        "detected": [
+          14,
+          29,
+          39,
+          47
+        ],
+        "tp": 1,
+        "fp": 3,
+        "fn": 2
+      },
+      {
+        "name": "staircase_8",
+        "truth": [
+          12,
+          28,
+          35
+        ],
+        "detected": [
+          8,
+          20,
+          27,
+          41,
+          48
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 2
+      },
+      {
+        "name": "staircase_9",
+        "truth": [
+          8,
+          17,
+          27
+        ],
+        "detected": [
+          11,
+          15,
+          22,
+          30,
+          39,
+          44
+        ],
+        "tp": 3,
+        "fp": 3,
+        "fn": 0
+      },
+      {
+        "name": "recovery_0",
+        "truth": [
+          8,
+          30
+        ],
+        "detected": [
+          18,
+          24,
+          33,
+          40,
+          48
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 1
+      },
+      {
+        "name": "recovery_1",
+        "truth": [
+          14,
+          21
+        ],
+        "detected": [
+          12,
+          20,
+          27,
+          42
+        ],
+        "tp": 2,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "recovery_2",
+        "truth": [
+          11,
+          38
+        ],
+        "detected": [
+          5,
+          14,
+          21,
+          26,
+          35
+        ],
+        "tp": 2,
+        "fp": 3,
+        "fn": 0
+      },
+      {
+        "name": "recovery_3",
+        "truth": [
+          11,
+          20
+        ],
+        "detected": [
+          12,
+          28,
+          36,
+          40,
+          45
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 1
+      },
+      {
+        "name": "recovery_4",
+        "truth": [
+          14,
+          40
+        ],
+        "detected": [
+          8,
+          16,
+          21,
+          38,
+          46
+        ],
+        "tp": 2,
+        "fp": 3,
+        "fn": 0
+      },
+      {
+        "name": "recovery_5",
+        "truth": [
+          11,
+          32
+        ],
+        "detected": [
+          12,
+          28,
+          37,
+          44,
+          48
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 1
+      },
+      {
+        "name": "recovery_6",
+        "truth": [
+          17,
+          27
+        ],
+        "detected": [
+          15,
+          22,
+          35
+        ],
+        "tp": 1,
+        "fp": 2,
+        "fn": 1
+      },
+      {
+        "name": "recovery_7",
+        "truth": [
+          17,
+          29
+        ],
+        "detected": [
+          5,
+          16,
+          20,
+          29,
+          40,
+          47
+        ],
+        "tp": 2,
+        "fp": 4,
+        "fn": 0
+      },
+      {
+        "name": "recovery_8",
+        "truth": [
+          16,
+          33
+        ],
+        "detected": [
+          33,
+          42,
+          47
+        ],
+        "tp": 1,
+        "fp": 2,
+        "fn": 1
+      },
+      {
+        "name": "recovery_9",
+        "truth": [
+          14,
+          22
+        ],
+        "detected": [
+          20,
+          26,
+          34,
+          47
+        ],
+        "tp": 1,
+        "fp": 3,
+        "fn": 1
+      }
+    ]
+  },
+  "ensemble": {
+    "best_params": {
+      "pelt_penalty": 3.0,
+      "bocpd_hazard": 0.05,
+      "bocpd_threshold": 0.1
+    },
+    "metrics": {
+      "precision": 0.9068,
+      "recall": 0.9304,
+      "f1": 0.9185,
+      "tp": 107,
+      "fp": 11,
+      "fn": 8
+    },
+    "per_scenario": [
+      {
+        "name": "stable_0",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_1",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_2",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_3",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_4",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_5",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_6",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_7",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_8",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "stable_9",
+        "truth": [],
+        "detected": [],
+        "tp": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "gradual_0",
+        "truth": [],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 0,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "gradual_1",
+        "truth": [],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 0,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "gradual_2",
+        "truth": [],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 0,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "gradual_3",
+        "truth": [],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 0,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "gradual_4",
+        "truth": [],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 0,
+        "fp": 2,
+        "fn": 0
+      },
+      {
+        "name": "sudden_0_at_3.0h",
+        "truth": [
+          6
+        ],
+        "detected": [
+          4
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_1_at_4.0h",
+        "truth": [
+          8
+        ],
+        "detected": [
+          9
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_2_at_4.5h",
+        "truth": [
+          9
+        ],
+        "detected": [
+          9
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_3_at_5.0h",
+        "truth": [
+          10
+        ],
+        "detected": [
+          9
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_4_at_6.0h",
+        "truth": [
+          12
+        ],
+        "detected": [
+          9
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_5_at_7.0h",
+        "truth": [
+          14
+        ],
+        "detected": [
+          14
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_6_at_7.5h",
+        "truth": [
+          15
+        ],
+        "detected": [
+          14
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_7_at_8.0h",
+        "truth": [
+          16
+        ],
+        "detected": [
+          14
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_8_at_9.0h",
+        "truth": [
+          18
+        ],
+        "detected": [
+          19
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_9_at_10.0h",
+        "truth": [
+          20
+        ],
+        "detected": [
+          19
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_10_at_10.5h",
+        "truth": [
+          21
+        ],
+        "detected": [
+          19
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_11_at_11.0h",
+        "truth": [
+          22
+        ],
+        "detected": [
+          19
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_12_at_12.0h",
+        "truth": [
+          24
+        ],
+        "detected": [
+          24
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_13_at_13.0h",
+        "truth": [
+          26
+        ],
+        "detected": [
+          24
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_14_at_13.5h",
+        "truth": [
+          27
+        ],
+        "detected": [
+          24
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_15_at_14.0h",
+        "truth": [
+          28
+        ],
+        "detected": [
+          29
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_16_at_15.0h",
+        "truth": [
+          30
+        ],
+        "detected": [
+          29
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_17_at_16.0h",
+        "truth": [
+          32
+        ],
+        "detected": [
+          29
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_18_at_16.5h",
+        "truth": [
+          33
+        ],
+        "detected": [
+          34
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_19_at_17.0h",
+        "truth": [
+          34
+        ],
+        "detected": [
+          34
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_20_at_18.0h",
+        "truth": [
+          36
+        ],
+        "detected": [
+          34
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_21_at_19.0h",
+        "truth": [
+          38
+        ],
+        "detected": [
+          39
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_22_at_19.5h",
+        "truth": [
+          39
+        ],
+        "detected": [
+          39
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_23_at_20.0h",
+        "truth": [
+          40
+        ],
+        "detected": [
+          39
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "sudden_24_at_21.0h",
+        "truth": [
+          42
+        ],
+        "detected": [
+          39
+        ],
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_0",
+        "truth": [
+          16,
+          28
+        ],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_1",
+        "truth": [
+          11,
+          20
+        ],
+        "detected": [
+          9,
+          19
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_2",
+        "truth": [
+          17,
+          28
+        ],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_3",
+        "truth": [
+          12,
+          31
+        ],
+        "detected": [
+          9,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_4",
+        "truth": [
+          15,
+          41
+        ],
+        "detected": [
+          14,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_5",
+        "truth": [
+          17,
+          25
+        ],
+        "detected": [
+          14,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_6",
+        "truth": [
+          10,
+          26
+        ],
+        "detected": [
+          9,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_7",
+        "truth": [
+          10,
+          23
+        ],
+        "detected": [
+          9,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_8",
+        "truth": [
+          16,
+          23
+        ],
+        "detected": [
+          14,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_9",
+        "truth": [
+          8,
+          14
+        ],
+        "detected": [
+          9,
+          14
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_10",
+        "truth": [
+          15,
+          37
+        ],
+        "detected": [
+          14,
+          34
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_11",
+        "truth": [
+          7,
+          38
+        ],
+        "detected": [
+          4,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_12",
+        "truth": [
+          7,
+          22
+        ],
+        "detected": [
+          4,
+          19
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_13",
+        "truth": [
+          14,
+          40
+        ],
+        "detected": [
+          14,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_14",
+        "truth": [
+          15,
+          37
+        ],
+        "detected": [
+          14,
+          34
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_15",
+        "truth": [
+          12,
+          31
+        ],
+        "detected": [
+          9,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_16",
+        "truth": [
+          7,
+          14
+        ],
+        "detected": [
+          4,
+          14
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_17",
+        "truth": [
+          12,
+          40
+        ],
+        "detected": [
+          9,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_18",
+        "truth": [
+          15,
+          26
+        ],
+        "detected": [
+          14,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "double_19",
+        "truth": [
+          8,
+          40
+        ],
+        "detected": [
+          9,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "staircase_0",
+        "truth": [
+          11,
+          25,
+          31
+        ],
+        "detected": [
+          24,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "name": "staircase_1",
+        "truth": [
+          11,
+          22,
+          39
+        ],
+        "detected": [
+          9,
+          19,
+          39
+        ],
+        "tp": 3,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "staircase_2",
+        "truth": [
+          11,
+          19,
+          25
+        ],
+        "detected": [
+          9,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "name": "staircase_3",
+        "truth": [
+          6,
+          18,
+          38
+        ],
+        "detected": [
+          19,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "name": "staircase_4",
+        "truth": [
+          11,
+          15,
+          31
+        ],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "name": "staircase_5",
+        "truth": [
+          7,
+          15,
+          22
+        ],
+        "detected": [
+          14,
+          19
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "name": "staircase_6",
+        "truth": [
+          7,
+          27,
+          35
+        ],
+        "detected": [
+          4,
+          24,
+          34
+        ],
+        "tp": 3,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "staircase_7",
+        "truth": [
+          8,
+          23,
+          32
+        ],
+        "detected": [
+          19,
+          29
+        ],
+        "tp": 1,
+        "fp": 1,
+        "fn": 2
+      },
+      {
+        "name": "staircase_8",
+        "truth": [
+          12,
+          28,
+          35
+        ],
+        "detected": [
+          9,
+          29,
+          34
+        ],
+        "tp": 3,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "staircase_9",
+        "truth": [
+          8,
+          17,
+          27
+        ],
+        "detected": [
+          14,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "name": "recovery_0",
+        "truth": [
+          8,
+          30
+        ],
+        "detected": [
+          9,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_1",
+        "truth": [
+          14,
+          21
+        ],
+        "detected": [
+          14,
+          19
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_2",
+        "truth": [
+          11,
+          38
+        ],
+        "detected": [
+          9,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_3",
+        "truth": [
+          11,
+          20
+        ],
+        "detected": [
+          9,
+          19
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_4",
+        "truth": [
+          14,
+          40
+        ],
+        "detected": [
+          14,
+          39
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_5",
+        "truth": [
+          11,
+          32
+        ],
+        "detected": [
+          9,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_6",
+        "truth": [
+          17,
+          27
+        ],
+        "detected": [
+          14,
+          24
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_7",
+        "truth": [
+          17,
+          29
+        ],
+        "detected": [
+          14,
+          29
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_8",
+        "truth": [
+          16,
+          33
+        ],
+        "detected": [
+          14,
+          34
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "name": "recovery_9",
+        "truth": [
+          14,
+          22
+        ],
+        "detected": [
+          14,
+          19
+        ],
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      }
+    ]
+  }
+}

@@ -436,7 +436,7 @@ class ReplayBackend(ShadowBackend):
         if self._sim is None:
             raise RuntimeError("Call set_time() first")
 
-        transpiled = transpile(circuit, backend=self._sim)
+        transpiled = transpile(circuit, backend=self._sim, optimization_level=0)
         job = self._sim.run(transpiled, shots=shots)
         result = job.result()
         counts = result.get_counts()

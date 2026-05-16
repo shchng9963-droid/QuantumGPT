@@ -1,0 +1,584 @@
+{
+  "sudden_batch": {
+    "snapshots": 21,
+    "alerts": [
+      {
+        "time": 5.0,
+        "level": "critical",
+        "type": "drift_spike",
+        "message": "Drift spiked by +1.000 (from 0.000 to 1.000)"
+      },
+      {
+        "time": 5.0,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 5.0,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 5.0,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -65.44 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 5.0,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 5.5,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 5.5,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 5.5,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -98.16 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 5.5,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 6.0,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 6.0,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 6.0,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -98.16 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 6.0,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 6.5,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 6.5,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 6.5,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -65.44 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 6.5,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 7.0,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 7.0,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 7.0,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 7.5,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 7.5,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 7.5,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 8.0,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 8.0,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 8.0,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 8.5,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 8.5,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 8.5,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 9.0,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 9.0,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 9.0,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 9.5,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 9.5,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 9.5,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 10.0,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 10.0,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 10.0,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      }
+    ],
+    "summary": {
+      "backend": "SyntheticDrift(FakeBrisbane)",
+      "total_snapshots": 21,
+      "total_alerts": 38,
+      "alerts_by_level": {
+        "info": 0,
+        "warning": 15,
+        "critical": 23
+      },
+      "alerts_by_type": {
+        "drift_high": 11,
+        "drift_spike": 1,
+        "t1_degrading": 4,
+        "t1_low": 11,
+        "error_high": 11
+      },
+      "latest_health": {
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "timestamp": 1778912480.0276089,
+        "sim_time_hours": 10.0,
+        "num_qubits": 127,
+        "avg_1q_error": 0.0026887416799778493,
+        "avg_2q_error": 0.06683343241950863,
+        "avg_readout_error": 0.09124900036909449,
+        "avg_t1_us": 70.11384520391017,
+        "avg_t2_us": 47.7184770783137,
+        "drift_score": 1.0,
+        "stream_sim_time_hours": 10.0
+      },
+      "t1_slope": 2.0661401433894762e-15,
+      "drift_slope": -4.259371684470656e-18
+    }
+  },
+  "linear_stream": {
+    "snapshots": 26,
+    "alerts": [
+      {
+        "time": 1.8256969451904297,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -7.01 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 4.687765121459961,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -7.01 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 5.672235488891602,
+        "level": "warning",
+        "type": "drift_high",
+        "message": "Drift score 0.170 exceeds warning threshold (0.15)"
+      },
+      {
+        "time": 7.503458023071289,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -7.01 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 8.407976150512695,
+        "level": "warning",
+        "type": "drift_high",
+        "message": "Drift score 0.252 exceeds warning threshold (0.15)"
+      },
+      {
+        "time": 10.344484329223633,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -7.01 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 11.337692260742188,
+        "level": "warning",
+        "type": "drift_high",
+        "message": "Drift score 0.340 exceeds warning threshold (0.15)"
+      },
+      {
+        "time": 13.240726470947266,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -7.01 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 14.233911514282227,
+        "level": "warning",
+        "type": "drift_high",
+        "message": "Drift score 0.427 exceeds warning threshold (0.15)"
+      },
+      {
+        "time": 16.108386993408203,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -7.01 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 17.06965446472168,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 0.512 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 18.95026397705078,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -7.01 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 19.85418701171875,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 0.596 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 19.85418701171875,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 94.5 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 21.768798828125,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -7.01 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 22.672740936279297,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 0.680 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 22.672740936279297,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 74.7 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 22.672740936279297,
+        "level": "warning",
+        "type": "error_high",
+        "message": "2Q error 0.03051 exceeds warning threshold (0.03)"
+      }
+    ],
+    "summary": {
+      "backend": "SyntheticDrift(FakeBrisbane)",
+      "total_snapshots": 26,
+      "total_alerts": 18,
+      "alerts_by_level": {
+        "info": 0,
+        "warning": 15,
+        "critical": 3
+      },
+      "alerts_by_type": {
+        "drift_high": 7,
+        "t1_degrading": 8,
+        "t1_low": 2,
+        "error_high": 1
+      },
+      "latest_health": {
+        "backend": "SyntheticDrift(FakeBrisbane)",
+        "timestamp": 1778912483.0989363,
+        "sim_time_hours": 23.641435623168945,
+        "num_qubits": 127,
+        "avg_1q_error": 0.001617173692780459,
+        "avg_2q_error": 0.031123963980531737,
+        "avg_readout_error": 0.045861680849535964,
+        "avg_t1_us": 67.95362157825973,
+        "avg_t2_us": 46.24825987278405,
+        "drift_score": 0.7092430686950684,
+        "stream_seq": 25,
+        "stream_sim_time_hours": 23.641435623168945
+      },
+      "t1_slope": -7.011384520390998,
+      "drift_slope": 0.02999999999999995
+    }
+  },
+  "recovery": {
+    "snapshots": 21,
+    "alerts": [
+      {
+        "time": 3.0,
+        "level": "critical",
+        "type": "drift_spike",
+        "message": "Drift spiked by +1.000 (from 0.000 to 1.000)"
+      },
+      {
+        "time": 3.0,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 3.0,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 3.0,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -65.44 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 3.0,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 3.5,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 3.5,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 3.5,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -98.16 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 3.5,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 4.0,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 4.0,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 4.0,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -98.16 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 4.0,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 4.5,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 4.5,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 4.5,
+        "level": "warning",
+        "type": "t1_degrading",
+        "message": "T1 degrading at -65.44 \u03bcs/h (threshold: -5.0)"
+      },
+      {
+        "time": 4.5,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 5.0,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 5.0,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 5.0,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 5.5,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 5.5,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 5.5,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 6.0,
+        "level": "critical",
+        "type": "drift_high",
+        "message": "Drift score 1.000 exceeds critical threshold (0.5)"
+      },
+      {
+        "time": 6.0,
+        "level": "warning",
+        "type": "t1_low",
+        "message": "Avg T1 = 70.1 \u03bcs is below warning threshold (100.0 \u03bcs)"
+      },
+      {
+        "time": 6.0,
+        "level": "critical",
+        "type": "error_high",
+        "message": "2Q error 0.06683 exceeds critical threshold (0.06)"
+      },
+      {
+        "time": 6.5,
+        "level": "info",
+        "type": "recovery",
+        "message": "Device recovered: drift=0.000, T1=233.7\u03bcs, 2Q_err=0.01614"
+      }
+    ]
+  },
+  "integration": {
+    "streaming_alerts": 17,
+    "advisor_severity": "critical",
+    "advisor_actions": 4
+  }
+}

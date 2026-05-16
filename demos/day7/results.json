@@ -1,0 +1,56 @@
+{
+  "tasks": [
+    {
+      "task": "Healthy health check",
+      "model": "deepseek-chat",
+      "provider": "openai",
+      "tool_calls": 1,
+      "tokens": 2487,
+      "elapsed": 7.402773141860962,
+      "answer_preview": "Here's a summary of the backend health:\n\n---\n\n## \ud83d\udda5\ufe0f Backend Health Report \u2014 **FakeBrisbane**\n\n| Metric | Value |\n|---|---|\n| **Qubits** | 127 |\n| **Avg. 1-Qubit Gate Error** | **0.0071** (\u2248 0.71%) |\n| **Avg. 2-Qubit Gate Error** | **0.0196** (\u2248 1.96%) |\n| **Avg. Readout Error** | **0.0311** (\u2248 3.11%"
+    },
+    {
+      "task": "Run GHZ-5 on healthy backend",
+      "model": "deepseek-chat",
+      "provider": "openai",
+      "tool_calls": 4,
+      "tokens": 7302,
+      "elapsed": 12.776459217071533,
+      "answer_preview": "Here's the full report:\n\n---\n\n## \u2705 GHZ-5 Circuit \u2014 Results Summary\n\n**Backend:** FakeBrisbane (127-qubit simulated backend)\n\n### Qubit Properties (0\u20134)\n\n| Qubit | T\u2081 (\u03bcs) | T\u2082 (\u03bcs) | Readout Error | 1Q Gate Error |\n|-------|---------|---------|---------------|---------------|\n| **0** | 237.4 | **49."
+    },
+    {
+      "task": "Run DJ-5 + QFT-4 on healthy",
+      "model": "deepseek-chat",
+      "provider": "openai",
+      "tool_calls": 4,
+      "tokens": 4797,
+      "elapsed": 10.947677850723267,
+      "answer_preview": "Excellent! Here's the full report:\n\n---\n\n## \ud83d\udcca Circuit Execution Results\n\n| Circuit | Fidelity | Transpiled Depth | Gate Count | Shots |\n|---------|----------|-----------------|------------|-------|\n| **DJ-5** (Deutsch-Jozsa) | **0.9111** (91.1%) | 30 | 53 | 4096 |\n| **qft_4** (4-Qubit QFT) | **0.998"
+    },
+    {
+      "task": "Degraded backend (t=8h)",
+      "model": "deepseek-chat",
+      "provider": "openai",
+      "tool_calls": 5,
+      "tokens": 16050,
+      "elapsed": 18.579426050186157,
+      "answer_preview": "---\n\n## \ud83d\udea8 Quantum Backend Diagnostic Report \ud83d\udea8\n\n### 1. Backend Health Check \u2014 Severity: CRITICAL\n\n| Metric | Value | Status |\n|--------|-------|--------|\n| **Drift Score** | **1.0** \ud83d\udd34 (max) | Device is severely drifted |\n| **Calibration Age** | **8 hours** | Overdue for recalibration |\n| **Avg T1** |"
+    },
+    {
+      "task": "Slow drift (t=12h)",
+      "model": "deepseek-chat",
+      "provider": "openai",
+      "tool_calls": 6,
+      "tokens": 11882,
+      "elapsed": 15.834193468093872,
+      "answer_preview": "Here's the full report:\n\n---\n\n## \u2705 Device Status Report\n\n### Overall Verdict: **Usable \u2014 with caution**\n\n| Benchmark | Fidelity | Depth | Quality |\n|-----------|----------|-------|---------|\n| **GHZ-5** (shallow, 8 layers) | **86.3%** | 8 | Good |\n| **QFTent-5** (deep, 61 layers) | **94.9%** | 61 | "
+    }
+  ],
+  "db_counts": {
+    "health_snapshots": 5,
+    "qubit_properties": 46,
+    "circuit_runs": 6,
+    "agent_sessions": 5,
+    "drift_events": 3
+  }
+}
