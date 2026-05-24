@@ -39,4 +39,45 @@ Thumbs.db
 
 # Secrets
 .env
+.env.*
+!.env.example
 *.key
+
+# Node / Web (legacy presentation tooling, archived)
+node_modules/
+package.json
+package-lock.json
+
+# archive/ and stretch/ ARE tracked (legacy code preserved with history).
+# Only their large/binary contents are excluded via specific patterns above.
+
+# Ad-hoc eval / scratch outputs (use reports/ for tracked outputs)
+eval/*.log
+eval/*.json
+eval/.collect_done
+eval/fidelity_*.pdf
+eval/fidelity_*.png
+*_results.json
+arxiv_results.json
+parse_arxiv.py
+query*.xml
+run_web.sh
+EXPERIMENT_REPORT.txt
+
+# Tool internal state
+.claude/
+.hermes/
+
+# Runtime demo outputs (canonical version is showcase/physics_demo_output/)
+demos/output/
+
+# Office / presentation binaries
+*.pptx
+*.docx
+*.xlsx
+
+# Benchmark scratch outputs (only commit curated reports/baseline_week1/*)
+benchmark/*.json
+benchmark/*.md
+benchmark/*.txt
+

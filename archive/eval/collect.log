@@ -1,0 +1,29 @@
+Extracting circuit features...
+  ghz_3: depth=4, 1q=1, 2q=2
+  ghz_5: depth=6, 1q=1, 2q=4
+  qft_4: depth=9, 1q=4, 2q=2
+  bv_5: depth=7, 1q=12, 2q=3
+  vqe_4: depth=8, 1q=0, 2q=6
+  qaoa_4: depth=15, 1q=8, 2q=8
+
+Collecting 192 samples (est. 86s)...
+  [12/192] 7s elapsed, ETA 101s | last fidelity=0.9544
+  [24/192] 13s elapsed, ETA 94s | last fidelity=0.9477
+  [36/192] 20s elapsed, ETA 87s | last fidelity=0.9441
+  [48/192] 27s elapsed, ETA 80s | last fidelity=0.9580
+  [60/192] 33s elapsed, ETA 73s | last fidelity=0.8488
+  [72/192] 40s elapsed, ETA 66s | last fidelity=0.9518
+  [84/192] 46s elapsed, ETA 59s | last fidelity=0.9501
+  [96/192] 52s elapsed, ETA 52s | last fidelity=0.9410
+  [108/192] 59s elapsed, ETA 46s | last fidelity=0.9720
+  [120/192] 66s elapsed, ETA 39s | last fidelity=0.9600
+  [132/192] 72s elapsed, ETA 33s | last fidelity=0.9572
+  [144/192] 78s elapsed, ETA 26s | last fidelity=0.9647
+  [156/192] 85s elapsed, ETA 20s | last fidelity=0.8866
+  [168/192] 91s elapsed, ETA 13s | last fidelity=0.9599
+  [180/192] 98s elapsed, ETA 7s | last fidelity=0.9514
+  [192/192] 105s elapsed, ETA 0s | last fidelity=0.9702
+
+Done: 192 samples in 104.6s
+Saved to eval/fidelity_data.json
+Fidelity stats: min=0.7334, max=0.9992, mean=0.9364, std=0.0559

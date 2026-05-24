@@ -1,0 +1,119 @@
+============================================================
+QuantumGPT Full Comparison: 6 Systems × 7 Tasks
+============================================================
+
+[1/2] Standard evaluation (stable backend)...
+  [6/126] 59s elapsed, ETA 1174s
+  [12/126] 245s elapsed, ETA 2325s
+  [18/126] 457s elapsed, ETA 2741s
+  [24/126] 514s elapsed, ETA 2184s
+  [30/126] 568s elapsed, ETA 1818s
+  [36/126] 610s elapsed, ETA 1524s
+  [42/126] 823s elapsed, ETA 1646s
+  [48/126] 883s elapsed, ETA 1436s
+  [54/126] 1074s elapsed, ETA 1433s
+  [60/126] 1299s elapsed, ETA 1429s
+  [66/126] 1354s elapsed, ETA 1231s
+  [72/126] 1409s elapsed, ETA 1056s
+  [78/126] 1457s elapsed, ETA 897s
+  [84/126] 1684s elapsed, ETA 842s
+  [90/126] 1745s elapsed, ETA 698s
+  [96/126] 1938s elapsed, ETA 606s
+  [102/126] 2165s elapsed, ETA 509s
+  [108/126] 2220s elapsed, ETA 370s
+  [114/126] 2275s elapsed, ETA 240s
+  [120/126] 2325s elapsed, ETA 116s
+  [126/126] 2551s elapsed, ETA 0s
+
+==================================================================================================
+ TABLE 1: Standard Evaluation (Stable Backend)
+==================================================================================================
+
+  Success Rate (%)
+  Task                 |     Static |  LLM-1Shot |      ReAct |  ReAct+Bgt |  ReAct+Mem | Full(Ours)
+  --------------------------------------------------------------------------------------------------
+  Health + GHZ-5       |        100 |        100 |        100 |        100 |        100 |        100
+  Multi-Circuit        |        100 |        100 |        100 |        100 |        100 |        100
+  Diagnose+Mitigate    |          0 |        100 |        100 |        100 |        100 |        100
+  Fidelity Predict     |        100 |        100 |        100 |        100 |        100 |        100
+  Transpile+Run        |        100 |        100 |        100 |        100 |        100 |        100
+  Rabi Experiment      |        100 |        100 |        100 |        100 |        100 |        100
+  Full Pipeline        |        100 |        100 |        100 |        100 |        100 |        100
+
+  Avg Fidelity
+  Task                 |     Static |  LLM-1Shot |      ReAct |  ReAct+Bgt |  ReAct+Mem | Full(Ours)
+  --------------------------------------------------------------------------------------------------
+  Health + GHZ-5       |     0.9296 |     0.9286 |     0.9310 |     0.9285 |     0.9268 |     0.9300
+  Multi-Circuit        |     0.9979 |     0.9980 |     0.9983 |     0.9988 |     0.9979 |     0.9978
+  Diagnose+Mitigate    |     0.9311 |     0.9332 |     0.9291 |     0.9300 |     0.9336 |     0.9323
+  Fidelity Predict     |     0.9257 |     0.9259 |     0.9303 |     0.9297 |     0.9280 |     0.9254
+  Transpile+Run        |     0.9980 |     0.9970 |     0.9983 |     0.9977 |     0.9980 |     0.9980
+  Rabi Experiment      |    30.3400 |    52.4100 |    52.4100 |    52.4100 |    52.4100 |    52.4100
+  Full Pipeline        |     0.9281 |     0.9324 |     0.9303 |     0.9337 |     0.9389 |     0.9450
+
+  Avg Tool Calls
+  Task                 |     Static |  LLM-1Shot |      ReAct |  ReAct+Bgt |  ReAct+Mem | Full(Ours)
+  --------------------------------------------------------------------------------------------------
+  Health + GHZ-5       |        2.0 |        2.0 |        2.0 |        2.0 |        2.0 |        2.0
+  Multi-Circuit        |        4.0 |        4.0 |        4.0 |        4.0 |        4.0 |        4.0
+  Diagnose+Mitigate    |        2.0 |        4.0 |        4.0 |        4.0 |        4.0 |        4.0
+  Fidelity Predict     |        2.0 |        2.0 |        3.0 |        3.0 |        3.0 |        3.0
+  Transpile+Run        |        2.0 |        2.0 |        3.0 |        3.0 |        3.0 |        3.0
+  Rabi Experiment      |        3.0 |        3.0 |        4.0 |        4.0 |        4.0 |        4.0
+  Full Pipeline        |        2.0 |        4.0 |        4.0 |        4.0 |        4.0 |        4.0
+
+  OVERALL
+  Task                 |     Static |  LLM-1Shot |      ReAct |  ReAct+Bgt |  ReAct+Mem | Full(Ours)
+  --------------------------------------------------------------------------------------------------
+  Avg Success Rate     |         86 |        100 |        100 |        100 |        100 |        100
+  Avg Fidelity         |     5.1500 |     8.3036 |     8.3039 |     8.3041 |     8.3047 |     8.3055
+  Avg Tool Calls       |        2.4 |        3.0 |        3.4 |        3.4 |        3.4 |        3.4
+
+[2/2] Drift evaluation (stable vs degraded)...
+  [Drift eval] Running stable baseline...
+  [Drift eval] Running under sudden degradation (t=6h)...
+
+==================================================================================================
+ TABLE 2: Drift Evaluation (Stable vs Degraded)
+==================================================================================================
+
+  Success Rate (%)
+  Task                 |     Static |  LLM-1Shot |      ReAct |  ReAct+Bgt |  ReAct+Mem | Full(Ours)
+  --------------------------------------------------------------------------------------------------
+  Health + GHZ-5 (stable) |        100 |        100 |        100 |        100 |        100 |        100
+  Diagnose+Mitigate (stable) |          0 |        100 |        100 |        100 |        100 |        100
+  Full Pipeline (stable) |        100 |        100 |        100 |        100 |        100 |        100
+  Health + GHZ-5 (drift) |        100 |        100 |        100 |        100 |        100 |        100
+  Diagnose+Mitigate (drift) |          0 |        100 |        100 |        100 |        100 |        100
+  Full Pipeline (drift) |        100 |        100 |        100 |        100 |        100 |        100
+
+  Avg Fidelity
+  Task                 |     Static |  LLM-1Shot |      ReAct |  ReAct+Bgt |  ReAct+Mem | Full(Ours)
+  --------------------------------------------------------------------------------------------------
+  Health + GHZ-5 (stable) |     0.9090 |     0.9106 |     0.9066 |     0.9171 |     0.9111 |     0.9046
+  Diagnose+Mitigate (stable) |     0.9078 |     0.9183 |     0.9076 |     0.9057 |     0.9133 |     0.9120
+  Full Pipeline (stable) |     0.9061 |     0.9139 |     0.9120 |     0.9221 |     0.9172 |     0.9190
+  Health + GHZ-5 (drift) |     0.7462 |     0.7530 |     0.7521 |     0.7606 |     0.7580 |     0.7602
+  Diagnose+Mitigate (drift) |     0.7594 |     0.7533 |     0.7560 |     0.7444 |     0.7462 |     0.7517
+  Full Pipeline (drift) |     0.7466 |     0.7512 |     0.7808 |     0.7604 |     0.7455 |     0.7612
+
+  Avg Tool Calls
+  Task                 |     Static |  LLM-1Shot |      ReAct |  ReAct+Bgt |  ReAct+Mem | Full(Ours)
+  --------------------------------------------------------------------------------------------------
+  Health + GHZ-5 (stable) |        2.0 |        2.0 |        2.0 |        2.0 |        2.0 |        2.0
+  Diagnose+Mitigate (stable) |        2.0 |        4.0 |        4.0 |        4.0 |        4.0 |        4.0
+  Full Pipeline (stable) |        2.0 |        4.0 |        4.0 |        4.0 |        4.0 |        4.0
+  Health + GHZ-5 (drift) |        2.0 |        2.0 |        2.0 |        3.0 |        3.0 |        3.0
+  Diagnose+Mitigate (drift) |        2.0 |        4.0 |        4.0 |        4.0 |        4.0 |        4.0
+  Full Pipeline (drift) |        2.0 |        4.0 |        4.0 |        4.0 |        4.0 |        4.0
+
+  OVERALL
+  Task                 |     Static |  LLM-1Shot |      ReAct |  ReAct+Bgt |  ReAct+Mem | Full(Ours)
+  --------------------------------------------------------------------------------------------------
+  Avg Success Rate     |         67 |        100 |        100 |        100 |        100 |        100
+  Avg Fidelity         |     0.8292 |     0.8334 |     0.8359 |     0.8350 |     0.8319 |     0.8348
+  Avg Tool Calls       |        2.0 |        3.3 |        3.3 |        3.5 |        3.5 |        3.5
+
+Results saved to /home/wangshuchang/quantumgpt/eval/comparison_results.json
+
+Total time: 2613.8s
