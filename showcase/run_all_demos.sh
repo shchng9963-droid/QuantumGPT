@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# QuantumGPT Phase 1-2 展示脚本
-# 运行所有可展示的 demo 并收集输出
+# QuantumGPT v2.1 Showcase Runner
+# Runs all demos and collects outputs into showcase/
 set -e
 
 cd "$(dirname "$0")/.."
 export PYTHONPATH=.
 
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║         QuantumGPT Phase 1-2 Showcase Runner                ║"
+echo "║         QuantumGPT v2.1 Showcase Runner                     ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 
-# 1. 单工具演示
+# ── 1. Backend health check (single tool) ──────────────────────────
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Demo 1: 后端健康检查 (单工具)"
+echo "Demo 1: Backend Health Check"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 python3 -c "
 from tools.quantum_tools import ToolExecutor
@@ -28,9 +28,9 @@ print(f'  Readout err={r[\"avg_readout_error\"]}')
 "
 echo ""
 
-# 2. ReAct Agent 演示
+# ── 2. ReAct Agent (GHZ-5 + mitigation) ───────────────────────────
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Demo 2: ReAct Agent (GHZ-5 + 缓解)"
+echo "Demo 2: ReAct Agent (GHZ-5 + Error Mitigation)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 python3 -c "
 from agent.react import ReActAgent
@@ -41,9 +41,9 @@ trace = agent.run('Run GHZ-5 circuit. If fidelity is below 0.95, apply error mit
 "
 echo ""
 
-# 3. Rabi Demo
+# ── 3. Rabi tune-up demo ──────────────────────────────────────────
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Demo 3: Rabi 端到端 (prompt → sim → fit → report)"
+echo "Demo 3: Rabi Oscillation (prompt → sim → fit → report)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 python3 - <<'PY'
 from demos.rabi_demo import run_rabi_demo
@@ -51,9 +51,29 @@ run_rabi_demo(save_dir='showcase/physics_demo_output')
 PY
 echo ""
 
-# 4. 评测
+# ── 4. Drift-aware demo ──────────────────────────────────────────
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Demo 4: 7×4 系统评测 (简化版, 1 seed)"
+echo "Demo 4: Drift-Aware Agent (detect drift → recheck → rerun)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+python3 - <<'PY'
+from demos.drift_demo import run_drift_demo
+run_drift_demo(save_dir='showcase/drift_demo_output')
+PY
+echo ""
+
+# ── 5. Memory-aware demo ─────────────────────────────────────────
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Demo 5: Memory-Aware Agent (recall → diagnose → override)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+python3 - <<'PY'
+from demos.memory_demo import run_memory_demo
+run_memory_demo(save_dir='showcase/memory_demo_output')
+PY
+echo ""
+
+# ── 6. Eval (optional, quick) ────────────────────────────────────
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Demo 6: System Evaluation (1-seed quick run)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 python3 -c "
 from eval.run_eval import run_evaluation, print_table
@@ -63,5 +83,9 @@ print_table(results)
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  All demos completed! Check showcase/ for outputs.          ║"
+echo "║  All demos completed! Outputs in showcase/                  ║"
+echo "║                                                             ║"
+echo "║  showcase/physics_demo_output/  ← Rabi                     ║"
+echo "║  showcase/drift_demo_output/    ← Drift-aware              ║"
+echo "║  showcase/memory_demo_output/   ← Memory-aware             ║"
 echo "╚══════════════════════════════════════════════════════════════╝"

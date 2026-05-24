@@ -168,6 +168,10 @@ class AgentTrace:
     state: AgentState | None = None
 
     @property
+    def best_fidelity(self) -> float:
+        return self.budget_summary.get("best_fidelity", 0.0)
+
+    @property
     def num_tool_calls(self) -> int:
         return sum(1 for s in self.steps if s.action is not None)
 
@@ -343,19 +347,24 @@ class ReActRulePlanner:
                             pass
 
         # ─── Phase: memory-informed preflight ─────────────────────
-        low_fidelity_circuit = self._low_fidelity_circuit_from_memory(
+        memory_hit = self._low_fidelity_circuit_from_memory(
             memory_context, prompt_lower, budget.target_fidelity
         )
         if (
-            low_fidelity_circuit
+            memory_hit
             and "get_backend_health" in past_tools
             and "diagnose_and_suggest" not in past_tools
         ):
+            low_fidelity_circuit, remembered_fidelity = memory_hit
             thought = (
                 f"Memory shows prior low fidelity for {low_fidelity_circuit}; "
                 "diagnosing likely causes before repeating the run."
             )
-            return thought, [{"name": "diagnose_and_suggest", "input": {"circuit_name": low_fidelity_circuit}}], None
+            diag_input: dict[str, Any] = {
+                "circuit_name": low_fidelity_circuit,
+                "fidelity": remembered_fidelity,
+            }
+            return thought, [{"name": "diagnose_and_suggest", "input": diag_input}], None
 
         # ─── Phase: transpile ─────────────────────────────────────
         if intents.get("transpile"):
@@ -402,6 +411,10 @@ class ReActRulePlanner:
             return thought, [{"name": "list_benchmarks", "input": {}}], None
 
         # ─── Phase: run circuit(s) ────────────────────────────────
+        # If a prior diagnose_and_suggest produced recommended_overrides,
+        # apply them to the next run_circuit (shots, optimization_level, etc.).
+        diag_overrides = self._get_diagnose_overrides(history)
+
         all_circuits = self._get_circuits_to_run(prompt_lower, history)
         for circ_name in all_circuits:
             failed_attempts = self._failed_tool_count(history, "run_circuit", circuit_name=circ_name)
@@ -418,8 +431,12 @@ class ReActRulePlanner:
                         return thought, [{"name": "diagnose_and_suggest", "input": {"circuit_name": circ_name}}], None
                     continue
                 retry_note = "Retrying" if failed_attempts else "Running"
+                run_input: dict[str, Any] = {"circuit_name": circ_name, "shots": 4096}
+                if diag_overrides:
+                    run_input.update(diag_overrides)
+                    retry_note += f" (with overrides from diagnosis: {diag_overrides})"
                 thought = f"{retry_note} {circ_name} circuit to measure fidelity."
-                return thought, [{"name": "run_circuit", "input": {"circuit_name": circ_name, "shots": 4096}}], None
+                return thought, [{"name": "run_circuit", "input": run_input}], None
 
         # ─── Phase: mitigation ────────────────────────────────────
         if intents.get("mitigate") and not budget.mitigation_attempted:
@@ -546,24 +563,59 @@ class ReActRulePlanner:
         memory_context: str,
         prompt_lower: str,
         target_fidelity: float,
-    ) -> str | None:
+    ) -> tuple[str, float] | None:
+        """Scan an injected memory context for a prior low-fidelity run of the
+        circuit the user is currently asking about.
+
+        Returns (circuit_name, remembered_fidelity) or None.
+
+        Accepts two formats so the planner stays useful regardless of how
+        memory is rendered:
+
+          1. ``circuit=ghz_5 ... fidelity=0.62`` (key=value, legacy/test)
+          2. ``[MEMORY] ...`` bullets produced by
+             ``AgentMemory.get_context_summary``, which look like:
+                 ``1. Prior ghz_5 run had low fidelity (fidelity=0.62, ...)``
+        """
         if not memory_context:
             return None
         requested = self._extract_circuit_name(prompt_lower)
+        known = [name for _, name in self._circuit_patterns()]
+
         for line in memory_context.splitlines():
-            circuit_match = re.search(r"circuit=([a-z0-9_\-]+)", line, flags=re.IGNORECASE)
-            fidelity_match = re.search(r"fidelity=([0-9]*\.?[0-9]+)", line, flags=re.IGNORECASE)
-            if not circuit_match or not fidelity_match:
-                continue
-            circuit = circuit_match.group(1).lower().replace("-", "_")
-            if requested and circuit != requested:
+            fidelity_match = re.search(
+                r"fidelity[=:]\s*([0-9]*\.?[0-9]+)", line, flags=re.IGNORECASE
+            )
+            if not fidelity_match:
                 continue
             try:
                 fidelity = float(fidelity_match.group(1))
             except ValueError:
                 continue
-            if fidelity < target_fidelity:
-                return circuit
+            if fidelity >= target_fidelity:
+                continue
+
+            # Format 1 — explicit circuit=<name>
+            circuit_match = re.search(
+                r"circuit[=:]\s*([a-z0-9_\-]+)", line, flags=re.IGNORECASE
+            )
+            if circuit_match:
+                circuit = circuit_match.group(1).lower().replace("-", "_")
+            else:
+                # Format 2 — fall back to scanning the line for any known
+                # circuit name (handles "Prior ghz_5 run had ...").
+                circuit = None
+                lowered = line.lower()
+                for name in known:
+                    if re.search(rf"\b{re.escape(name)}\b", lowered):
+                        circuit = name
+                        break
+                if circuit is None:
+                    continue
+
+            if requested and circuit != requested:
+                continue
+            return (circuit, fidelity)
         return None
 
     def _result_has_error(self, result: str | None) -> bool:
@@ -574,6 +626,21 @@ class ReActRulePlanner:
         except Exception:
             return False
         return isinstance(parsed, dict) and bool(parsed.get("error"))
+
+    @staticmethod
+    def _get_diagnose_overrides(history: list[dict]) -> dict:
+        """Extract recommended_overrides from the most recent diagnose_and_suggest result."""
+        for h in reversed(history):
+            if h.get("tool") == "diagnose_and_suggest" and h.get("result"):
+                try:
+                    parsed = json.loads(h["result"])
+                    overrides = parsed.get("recommended_overrides", {})
+                    if isinstance(overrides, dict) and overrides:
+                        return overrides
+                except Exception:
+                    pass
+                break
+        return {}
 
     def _failed_tool_count(
         self,
@@ -788,6 +855,25 @@ class ReActRulePlanner:
         sections.append(f"---\n**Budget:** {bs['tool_calls_used']} calls, {bs['elapsed_seconds']}s elapsed")
         sections.append(f"**Best fidelity:** {bs['best_fidelity']}")
         sections.append(f"**Target:** {bs['target_fidelity']}  **Status:** {bs['decision']}")
+
+        # Execution mode banner — tells the reader this was simulation.
+        # If any safety block or dry-run was encountered, note it explicitly.
+        mode_tags = ["simulation"]
+        safety_blocks = sum(
+            1 for h in history
+            if h.get("result")
+            and '"blocked_by_safety_policy"' in str(h.get("result", ""))
+        )
+        safety_dry_runs = sum(
+            1 for h in history
+            if h.get("result")
+            and '"dry_run"' in str(h.get("result", ""))
+        )
+        if safety_blocks:
+            mode_tags.append(f"{safety_blocks} safety block(s)")
+        if safety_dry_runs:
+            mode_tags.append(f"{safety_dry_runs} dry-run step(s)")
+        sections.append(f"\n**Mode:** {' | '.join(mode_tags)} — no physical hardware was modified.")
 
         return "\n".join(sections)
 
@@ -1047,6 +1133,27 @@ class ReActAgent:
                 "status": safety_status,
             }
             trace.state.observations.append(f"{tool_name} -> safety_{safety_status}")
+
+            # Register a SAFETY_VIOLATION artifact so it shows up in
+            # trace exports (visible to physics teachers reviewing the run).
+            if safety_status == "blocked":
+                try:
+                    parsed = json.loads(result_str)
+                    reason = parsed.get("reason", "unknown")
+                except Exception:
+                    reason = "unknown"
+                trace.state.artifacts.add_artifact(
+                    artifact_type=ArtifactType.SAFETY_VIOLATION,
+                    created_at_step=step.step_num,
+                    metadata={
+                        "tool": tool_name,
+                        "input": tool_input,
+                        "reason": reason,
+                        "status": safety_status,
+                    },
+                    artifact_id=f"safety-block-{step.step_num}",
+                )
+
             step.state_summary = trace.state.summary_for_prompt()
             return
 
@@ -1167,13 +1274,19 @@ class ReActAgent:
             pass
         return None
 
-    def run(self, user_prompt: str) -> AgentTrace:
-        """Run the ReAct agent loop."""
+    def run(self, user_prompt: str, memory_context: str = "") -> AgentTrace:
+        """Run the ReAct agent loop.
+
+        Args:
+            user_prompt: The user's request.
+            memory_context: Optional externally-injected memory context.
+                If provided, it overrides the auto-retrieved context from
+                self.memory. Useful for demos and testing.
+        """
         self.budget.start()
 
-        # Inject memory context if available
-        memory_context = ""
-        if self.memory is not None:
+        # Inject memory context — prefer explicit parameter, fallback to self.memory
+        if not memory_context and self.memory is not None:
             memory_context = self.memory.get_context_summary(
                 user_prompt, self.backend.name
             )

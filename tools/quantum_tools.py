@@ -455,6 +455,8 @@ class ToolExecutor:
     def _run_circuit(self, inp: dict) -> dict:
         name = inp["circuit_name"]
         shots = inp.get("shots", 4096)
+        optimization_level = inp.get("optimization_level")
+        initial_layout = inp.get("initial_layout")
 
         # Try hand-written circuits first
         hand_written = _list_bench()
@@ -471,7 +473,13 @@ class ToolExecutor:
                     f"{list(hand_written.keys()) + list(mqt.keys())}"
                 )
 
-        result = self.backend.run(circ, shots=shots)
+        run_kwargs: dict[str, Any] = {}
+        if optimization_level is not None:
+            run_kwargs["optimization_level"] = optimization_level
+        if initial_layout is not None:
+            run_kwargs["initial_layout"] = initial_layout
+
+        result = self.backend.run(circ, shots=shots, **run_kwargs)
         # Top 5 counts
         top_counts = dict(sorted(result.counts.items(), key=lambda x: -x[1])[:5])
 
@@ -711,12 +719,31 @@ class ToolExecutor:
         if not suggestions:
             suggestions.append("Device looks healthy. No action needed.")
 
+        # ── Actionable overrides ──────────────────────────────────
+        # These are concrete parameter changes the planner can pass
+        # to the next run_circuit call to improve the outcome.
+        overrides: dict[str, Any] = {}
+
+        if fidelity is not None and fidelity < 0.85:
+            # Boost shots for better statistics
+            overrides["shots"] = 8192
+            # Higher optimization tries harder at routing/gate cancellation
+            overrides["optimization_level"] = 3
+        elif fidelity is not None and fidelity < 0.95:
+            overrides["shots"] = 8192
+            overrides["optimization_level"] = 2
+
+        if h.avg_2q_error > 0.03:
+            # When 2Q errors are high, aggressive optimization helps
+            overrides["optimization_level"] = 3
+
         return {
             "severity": severity,
             "drift_score": round(drift, 4) if drift is not None else None,
             "avg_1q_error": round(h.avg_1q_error, 6),
             "avg_2q_error": round(h.avg_2q_error, 6),
             "suggestions": suggestions,
+            "recommended_overrides": overrides,
         }
 
     # ═══════════════════════════════════════════════════════

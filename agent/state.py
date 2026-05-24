@@ -27,6 +27,7 @@ class ArtifactType(str, Enum):
     LAB_EXPERIMENT_RESULT = "lab_experiment_result"
     FIT_RESULT = "fit_result"
     CALIBRATION_UPDATE = "calibration_update"
+    SAFETY_VIOLATION = "safety_violation"
 
 
 class ArtifactStatus(str, Enum):

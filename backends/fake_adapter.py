@@ -169,7 +169,14 @@ class FakeBackendAdapter(ShadowBackend):
         **kwargs,
     ) -> SimulationResult:
         # Transpile for this backend's topology
-        transpiled = transpile(circuit, backend=self._sim)
+        opt_level = kwargs.get("optimization_level", 1)
+        initial_layout = kwargs.get("initial_layout", None)
+        transpiled = transpile(
+            circuit,
+            backend=self._sim,
+            optimization_level=opt_level,
+            initial_layout=initial_layout,
+        )
 
         # Run on noisy simulator
         job = self._sim.run(transpiled, shots=shots)

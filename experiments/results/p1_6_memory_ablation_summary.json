@@ -1,0 +1,239 @@
+{
+  "config": {
+    "circuits": [
+      "ghz_5",
+      "qaoa_4",
+      "vqe_4"
+    ],
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "n_trials": 3,
+    "target_fidelity": 0.95,
+    "max_tool_calls": 12,
+    "n_runs_total": 180
+  },
+  "by_system": {
+    "memory_off": {
+      "n": 90,
+      "fidelity_mean": 0.9577,
+      "fidelity_std": 0.0216,
+      "success_rate": 0.6111,
+      "tool_calls_mean": 2.522,
+      "diagnose_rate": 0.0
+    },
+    "memory_on": {
+      "n": 90,
+      "fidelity_mean": 0.9587,
+      "fidelity_std": 0.0217,
+      "success_rate": 0.6,
+      "tool_calls_mean": 3.256,
+      "diagnose_rate": 0.6667
+    }
+  },
+  "by_system_trial": {
+    "memory_off/trial1": {
+      "n": 30,
+      "fidelity_mean": 0.9573,
+      "fidelity_std": 0.0218,
+      "success_rate": 0.6667,
+      "tool_calls_mean": 2.467,
+      "diagnose_rate": 0.0
+    },
+    "memory_off/trial2": {
+      "n": 30,
+      "fidelity_mean": 0.9579,
+      "fidelity_std": 0.0229,
+      "success_rate": 0.6,
+      "tool_calls_mean": 2.533,
+      "diagnose_rate": 0.0
+    },
+    "memory_off/trial3": {
+      "n": 30,
+      "fidelity_mean": 0.9579,
+      "fidelity_std": 0.0202,
+      "success_rate": 0.5667,
+      "tool_calls_mean": 2.567,
+      "diagnose_rate": 0.0
+    },
+    "memory_on/trial1": {
+      "n": 30,
+      "fidelity_mean": 0.9587,
+      "fidelity_std": 0.0221,
+      "success_rate": 0.6,
+      "tool_calls_mean": 2.6,
+      "diagnose_rate": 0.0
+    },
+    "memory_on/trial2": {
+      "n": 30,
+      "fidelity_mean": 0.9584,
+      "fidelity_std": 0.0219,
+      "success_rate": 0.5667,
+      "tool_calls_mean": 3.6,
+      "diagnose_rate": 1.0
+    },
+    "memory_on/trial3": {
+      "n": 30,
+      "fidelity_mean": 0.9589,
+      "fidelity_std": 0.0211,
+      "success_rate": 0.6333,
+      "tool_calls_mean": 3.567,
+      "diagnose_rate": 1.0
+    }
+  },
+  "by_system_circuit_trial": {
+    "memory_off/ghz_5/trial1": {
+      "n": 10,
+      "fidelity_mean": 0.9321,
+      "fidelity_std": 0.0063,
+      "success_rate": 0.0,
+      "tool_calls_mean": 3,
+      "diagnose_rate": 0.0
+    },
+    "memory_off/qaoa_4/trial1": {
+      "n": 10,
+      "fidelity_mean": 0.9569,
+      "fidelity_std": 0.0096,
+      "success_rate": 1.0,
+      "tool_calls_mean": 2.4,
+      "diagnose_rate": 0.0
+    },
+    "memory_off/vqe_4/trial1": {
+      "n": 10,
+      "fidelity_mean": 0.9828,
+      "fidelity_std": 0.0026,
+      "success_rate": 1.0,
+      "tool_calls_mean": 2,
+      "diagnose_rate": 0.0
+    },
+    "memory_off/ghz_5/trial2": {
+      "n": 10,
+      "fidelity_mean": 0.9308,
+      "fidelity_std": 0.0053,
+      "success_rate": 0.0,
+      "tool_calls_mean": 3,
+      "diagnose_rate": 0.0
+    },
+    "memory_off/qaoa_4/trial2": {
+      "n": 10,
+      "fidelity_mean": 0.9596,
+      "fidelity_std": 0.0123,
+      "success_rate": 0.8,
+      "tool_calls_mean": 2.6,
+      "diagnose_rate": 0.0
+    },
+    "memory_off/vqe_4/trial2": {
+      "n": 10,
+      "fidelity_mean": 0.9833,
+      "fidelity_std": 0.0019,
+      "success_rate": 1.0,
+      "tool_calls_mean": 2,
+      "diagnose_rate": 0.0
+    },
+    "memory_off/ghz_5/trial3": {
+      "n": 10,
+      "fidelity_mean": 0.9358,
+      "fidelity_std": 0.0073,
+      "success_rate": 0.0,
+      "tool_calls_mean": 3,
+      "diagnose_rate": 0.0
+    },
+    "memory_off/qaoa_4/trial3": {
+      "n": 10,
+      "fidelity_mean": 0.9554,
+      "fidelity_std": 0.0082,
+      "success_rate": 0.7,
+      "tool_calls_mean": 2.7,
+      "diagnose_rate": 0.0
+    },
+    "memory_off/vqe_4/trial3": {
+      "n": 10,
+      "fidelity_mean": 0.9824,
+      "fidelity_std": 0.0019,
+      "success_rate": 1.0,
+      "tool_calls_mean": 2,
+      "diagnose_rate": 0.0
+    },
+    "memory_on/ghz_5/trial1": {
+      "n": 10,
+      "fidelity_mean": 0.9335,
+      "fidelity_std": 0.005,
+      "success_rate": 0.0,
+      "tool_calls_mean": 3,
+      "diagnose_rate": 0.0
+    },
+    "memory_on/qaoa_4/trial1": {
+      "n": 10,
+      "fidelity_mean": 0.9591,
+      "fidelity_std": 0.014,
+      "success_rate": 0.8,
+      "tool_calls_mean": 2.8,
+      "diagnose_rate": 0.0
+    },
+    "memory_on/vqe_4/trial1": {
+      "n": 10,
+      "fidelity_mean": 0.9834,
+      "fidelity_std": 0.0018,
+      "success_rate": 1.0,
+      "tool_calls_mean": 2,
+      "diagnose_rate": 0.0
+    },
+    "memory_on/ghz_5/trial2": {
+      "n": 10,
+      "fidelity_mean": 0.9331,
+      "fidelity_std": 0.0041,
+      "success_rate": 0.0,
+      "tool_calls_mean": 4,
+      "diagnose_rate": 1.0
+    },
+    "memory_on/qaoa_4/trial2": {
+      "n": 10,
+      "fidelity_mean": 0.9594,
+      "fidelity_std": 0.0137,
+      "success_rate": 0.7,
+      "tool_calls_mean": 3.8,
+      "diagnose_rate": 1.0
+    },
+    "memory_on/vqe_4/trial2": {
+      "n": 10,
+      "fidelity_mean": 0.9827,
+      "fidelity_std": 0.0018,
+      "success_rate": 1.0,
+      "tool_calls_mean": 3,
+      "diagnose_rate": 1.0
+    },
+    "memory_on/ghz_5/trial3": {
+      "n": 10,
+      "fidelity_mean": 0.9341,
+      "fidelity_std": 0.0061,
+      "success_rate": 0.0,
+      "tool_calls_mean": 4,
+      "diagnose_rate": 1.0
+    },
+    "memory_on/qaoa_4/trial3": {
+      "n": 10,
+      "fidelity_mean": 0.9601,
+      "fidelity_std": 0.0106,
+      "success_rate": 0.9,
+      "tool_calls_mean": 3.7,
+      "diagnose_rate": 1.0
+    },
+    "memory_on/vqe_4/trial3": {
+      "n": 10,
+      "fidelity_mean": 0.9826,
+      "fidelity_std": 0.0023,
+      "success_rate": 1.0,
+      "tool_calls_mean": 3,
+      "diagnose_rate": 1.0
+    }
+  }
+}

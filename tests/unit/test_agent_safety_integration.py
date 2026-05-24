@@ -69,3 +69,29 @@ def test_react_agent_dry_run_does_not_record_successful_lab_result_artifact():
     ]
     assert lab_artifacts == []
     assert policy.audit_log[-1]["decision"] == "dry_run"
+
+
+def test_safety_block_registers_artifact_in_trace():
+    """When the agent is blocked by safety, a SAFETY_VIOLATION artifact must
+    appear in the trace so it is visible in exported reports."""
+    backend = FakeBackendAdapter("FakeBrisbane")
+    policy = SafetyPolicy(max_rabi_amp_ghz=0.01)
+    agent = ReActAgent(
+        backend,
+        provider="mock",
+        use_memory=False,
+        verbose=False,
+        safety_policy=policy,
+        max_turns=4,
+    )
+
+    trace = agent.run(_rabi_prompt())
+
+    # Check artifact in trace state
+    artifacts = trace.to_dict(include_observations=True).get("artifacts", {})
+    safety_artifacts = [
+        a for a in artifacts.values()
+        if a.get("artifact_type") == "safety_violation"
+    ]
+    assert safety_artifacts, "Expected at least one safety_violation artifact"
+    assert "amp_max" in safety_artifacts[0]["metadata"]["reason"]
