@@ -28,6 +28,7 @@ import numpy as np
 
 from backends.base import ShadowBackend
 from detection.drift_detector import DriftDetector, DriftReport, extract_features
+from agent.planner import AgentPlanner
 
 
 # ═══════════════════════════════════════════════════════
@@ -305,7 +306,7 @@ class ReplanningPolicy:
 # Drift-Aware ReAct Rule Planner Extension
 # ═══════════════════════════════════════════════════════
 
-class DriftAwareRulePlanner:
+class DriftAwareRulePlanner(AgentPlanner):
     """Extends the ReAct rule planner with drift-aware replanning.
 
     When drift is detected:
