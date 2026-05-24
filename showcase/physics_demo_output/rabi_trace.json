@@ -1,0 +1,376 @@
+{
+  "user_prompt": "Run a Rabi oscillation experiment on a qubit at 5.0 GHz using a gaussian pulse of 100ns duration. Fit the oscillation data to extract the \u03c0-pulse amplitude. Report the \u03c0 and \u03c0/2 pulse amplitudes.",
+  "model": "react-rule-planner-v1",
+  "provider": "mock",
+  "backend": "FakeBrisbane",
+  "final_answer": "## QuantumGPT ReAct Analysis Report\n\n**Backend: FakeBrisbane** (127 qubits)\n  T1=224.5\u03bcs  T2=144.9\u03bcs\n  1Q err=0.006101  2Q err=0.009141  readout=0.029398\n  drift=None\n\n**Rabi Experiment** (gaussian pulse, 100.0ns)\n  Qubit freq: 5.0 GHz\n  \u03c0-pulse amplitude: 52.41 MHz\n  Max P(|1\u27e9): 1.0\n\n**Rabi Fit Result**\n  \u03c0-amplitude: 52.52 MHz \u00b1 0.0 GHz\n  \u03c0/2-amplitude: 0.026261 GHz\n  R\u00b2: 1.0\n\n---\n**Budget:** 3 calls, 1.4s elapsed\n**Best fidelity:** None\n**Target:** 0.0  **Status:** PROCEED",
+  "total_tokens": 0,
+  "elapsed_seconds": 1.368,
+  "budget_summary": {
+    "target_fidelity": 0.0,
+    "best_fidelity": null,
+    "tool_calls_used": 3,
+    "remaining_calls": 7,
+    "elapsed_seconds": 1.4,
+    "remaining_seconds": 118.6,
+    "mitigation_attempted": false,
+    "decision": "PROCEED"
+  },
+  "diagnostics": {
+    "requested_provider": "mock",
+    "resolved_provider": "mock",
+    "model": "react-rule-planner-v1",
+    "final_answer_length": 480,
+    "no_final_answer": false,
+    "invalid_tool_call_count": 0,
+    "malformed_json_count": 0,
+    "repeated_tool_count": 0,
+    "max_turns_exceeded": false,
+    "hallucinated_tool_names": [],
+    "safety_block_count": 0,
+    "safety_dry_run_count": 0
+  },
+  "steps": [
+    {
+      "step": 0,
+      "thought": "First, I need to check the backend health to understand current device state.",
+      "action": "get_backend_health",
+      "action_input": {},
+      "observation_length": 242,
+      "budget_decision": "PROCEED",
+      "state_summary": {
+        "task_id": null,
+        "backend_name": "FakeBrisbane",
+        "backend_snapshot_id": "artifact-aaae644b4a37",
+        "current_step": 0,
+        "artifact_counts": {
+          "backend_snapshot": 1
+        },
+        "artifact_status_counts": {
+          "valid": 1
+        },
+        "recent_observations": [
+          "get_backend_health -> backend_snapshot"
+        ],
+        "budget_state": {},
+        "drift_state": {},
+        "safety_status": {}
+      },
+      "timestamp": 1779551384.003,
+      "observation": "{\n  \"backend\": \"FakeBrisbane\",\n  \"num_qubits\": 127,\n  \"avg_1q_error\": 0.006101,\n  \"avg_2q_error\": 0.009141,\n  \"avg_readout_error\": 0.029398,\n  \"avg_t1_us\": 224.5,\n  \"avg_t2_us\": 144.9,\n  \"calibration_age_minutes\": 0.0,\n  \"drift_score\": null\n}"
+    },
+    {
+      "step": 1,
+      "thought": "Running a Rabi oscillation experiment for qubit characterization.",
+      "action": "rabi_experiment",
+      "action_input": {
+        "qubit_freq_ghz": 5.0,
+        "pulse_duration_ns": 100.0,
+        "pulse_shape": "gaussian"
+      },
+      "observation_length": 989,
+      "budget_decision": "PROCEED",
+      "state_summary": {
+        "task_id": null,
+        "backend_name": "FakeBrisbane",
+        "backend_snapshot_id": "artifact-aaae644b4a37",
+        "current_step": 1,
+        "artifact_counts": {
+          "backend_snapshot": 1,
+          "lab_experiment_result": 1
+        },
+        "artifact_status_counts": {
+          "valid": 2
+        },
+        "recent_observations": [
+          "get_backend_health -> backend_snapshot",
+          "rabi_experiment -> lab_experiment_result"
+        ],
+        "budget_state": {},
+        "drift_state": {},
+        "safety_status": {}
+      },
+      "timestamp": 1779551384.004,
+      "observation": "{\n  \"qubit_freq_ghz\": 5.0,\n  \"pulse_shape\": \"gaussian\",\n  \"pulse_duration_ns\": 100.0,\n  \"n_points\": 30,\n  \"amplitudes\": [\n    0.0,\n    0.002759,\n    0.005517,\n    0.008276,\n    0.011034,\n    0.013793,\n    0.016552,\n    0.01931,\n    0.022069,\n    0.024828,\n    0.027586,\n    0.030345,\n    0.033103,\n    0.035862,\n    0.038621,\n    0.041379,\n    0.044138,\n    0.046897,\n    0.049655,\n    0.052414,\n    0.055172,\n    0.057931,\n    0.06069,\n    0.063448,\n    0.066207,\n    0.068966,\n    0.071724,\n    0.074483,\n    0.077241,\n    0.08\n  ],\n  \"populations\": [\n    0.0,\n    0.0068,\n    0.027,\n    0.06,\n    0.105,\n    0.1607,\n    0.2257,\n    0.2981,\n    0.3759,\n    0.4572,\n    0.5396,\n    0.6209,\n    0.699,\n    0.7716,\n    0.8369,\n    0.893,\n    0.9384,\n    0.972,\n    0.9927,\n    1.0,\n    0.9937,\n    0.9741,\n    0.9415,\n    0.897,\n    0.8416,\n    0.777,\n    0.7049,\n    0.6272,\n    0.5461,\n    0.4637\n  ],\n  \"pi_amplitude_ghz\": 0.052414,\n  \"pi_amplitude_mhz\": 52.41,\n  \"max_population\": 1.0\n}"
+    },
+    {
+      "step": 2,
+      "thought": "Fitting the Rabi data to extract \u03c0-pulse amplitude.",
+      "action": "fit_rabi",
+      "action_input": {
+        "amplitudes": [
+          0.0,
+          0.002759,
+          0.005517,
+          0.008276,
+          0.011034,
+          0.013793,
+          0.016552,
+          0.01931,
+          0.022069,
+          0.024828,
+          0.027586,
+          0.030345,
+          0.033103,
+          0.035862,
+          0.038621,
+          0.041379,
+          0.044138,
+          0.046897,
+          0.049655,
+          0.052414,
+          0.055172,
+          0.057931,
+          0.06069,
+          0.063448,
+          0.066207,
+          0.068966,
+          0.071724,
+          0.074483,
+          0.077241,
+          0.08
+        ],
+        "populations": [
+          0.0,
+          0.0068,
+          0.027,
+          0.06,
+          0.105,
+          0.1607,
+          0.2257,
+          0.2981,
+          0.3759,
+          0.4572,
+          0.5396,
+          0.6209,
+          0.699,
+          0.7716,
+          0.8369,
+          0.893,
+          0.9384,
+          0.972,
+          0.9927,
+          1.0,
+          0.9937,
+          0.9741,
+          0.9415,
+          0.897,
+          0.8416,
+          0.777,
+          0.7049,
+          0.6272,
+          0.5461,
+          0.4637
+        ]
+      },
+      "observation_length": 212,
+      "budget_decision": "PROCEED",
+      "state_summary": {
+        "task_id": null,
+        "backend_name": "FakeBrisbane",
+        "backend_snapshot_id": "artifact-aaae644b4a37",
+        "current_step": 2,
+        "artifact_counts": {
+          "backend_snapshot": 1,
+          "lab_experiment_result": 1,
+          "fit_result": 1
+        },
+        "artifact_status_counts": {
+          "valid": 3
+        },
+        "recent_observations": [
+          "get_backend_health -> backend_snapshot",
+          "rabi_experiment -> lab_experiment_result",
+          "fit_rabi -> fit_result"
+        ],
+        "budget_state": {},
+        "drift_state": {},
+        "safety_status": {}
+      },
+      "timestamp": 1779551385.368,
+      "observation": "{\n  \"pi_amplitude_ghz\": 0.052522,\n  \"pi_amplitude_mhz\": 52.52,\n  \"half_pi_amplitude_ghz\": 0.026261,\n  \"amplitude\": 1.0,\n  \"offset\": 0.0,\n  \"r_squared\": 1.0,\n  \"pi_uncertainty_ghz\": 0.0,\n  \"fit_successful\": true\n}"
+    },
+    {
+      "step": 3,
+      "thought": "I have gathered enough information. Preparing the final report.",
+      "observation_length": 0,
+      "budget_decision": "PROCEED",
+      "timestamp": 1779551385.371
+    }
+  ],
+  "state_summary": {
+    "task_id": null,
+    "backend_name": "FakeBrisbane",
+    "backend_snapshot_id": "artifact-aaae644b4a37",
+    "current_step": 2,
+    "artifact_counts": {
+      "backend_snapshot": 1,
+      "lab_experiment_result": 1,
+      "fit_result": 1
+    },
+    "artifact_status_counts": {
+      "valid": 3
+    },
+    "recent_observations": [
+      "get_backend_health -> backend_snapshot",
+      "rabi_experiment -> lab_experiment_result",
+      "fit_rabi -> fit_result"
+    ],
+    "budget_state": {},
+    "drift_state": {},
+    "safety_status": {}
+  },
+  "artifacts": {
+    "artifact-aaae644b4a37": {
+      "artifact_id": "artifact-aaae644b4a37",
+      "artifact_type": "backend_snapshot",
+      "created_at_step": 0,
+      "depends_on": [],
+      "backend_snapshot_hash": "87c5357dcb18eae2",
+      "status": "valid",
+      "invalidation_reason": null,
+      "invalidation_detail": null,
+      "payload_ref": "tool:get_backend_health:step:0",
+      "metadata": {
+        "tool_name": "get_backend_health",
+        "tool_input": {},
+        "result_keys": [
+          "avg_1q_error",
+          "avg_2q_error",
+          "avg_readout_error",
+          "avg_t1_us",
+          "avg_t2_us",
+          "backend",
+          "calibration_age_minutes",
+          "drift_score",
+          "num_qubits"
+        ],
+        "snapshot_hash": "87c5357dcb18eae2"
+      }
+    },
+    "artifact-8d3482375084": {
+      "artifact_id": "artifact-8d3482375084",
+      "artifact_type": "lab_experiment_result",
+      "created_at_step": 1,
+      "depends_on": [
+        "artifact-aaae644b4a37"
+      ],
+      "backend_snapshot_hash": "87c5357dcb18eae2",
+      "status": "valid",
+      "invalidation_reason": null,
+      "invalidation_detail": null,
+      "payload_ref": "tool:rabi_experiment:step:1",
+      "metadata": {
+        "tool_name": "rabi_experiment",
+        "tool_input": {
+          "qubit_freq_ghz": 5.0,
+          "pulse_duration_ns": 100.0,
+          "pulse_shape": "gaussian"
+        },
+        "result_keys": [
+          "amplitudes",
+          "max_population",
+          "n_points",
+          "pi_amplitude_ghz",
+          "pi_amplitude_mhz",
+          "populations",
+          "pulse_duration_ns",
+          "pulse_shape",
+          "qubit_freq_ghz"
+        ]
+      }
+    },
+    "artifact-fea185ebbd21": {
+      "artifact_id": "artifact-fea185ebbd21",
+      "artifact_type": "fit_result",
+      "created_at_step": 2,
+      "depends_on": [
+        "artifact-aaae644b4a37"
+      ],
+      "backend_snapshot_hash": "87c5357dcb18eae2",
+      "status": "valid",
+      "invalidation_reason": null,
+      "invalidation_detail": null,
+      "payload_ref": "tool:fit_rabi:step:2",
+      "metadata": {
+        "tool_name": "fit_rabi",
+        "tool_input": {
+          "amplitudes": [
+            0.0,
+            0.002759,
+            0.005517,
+            0.008276,
+            0.011034,
+            0.013793,
+            0.016552,
+            0.01931,
+            0.022069,
+            0.024828,
+            0.027586,
+            0.030345,
+            0.033103,
+            0.035862,
+            0.038621,
+            0.041379,
+            0.044138,
+            0.046897,
+            0.049655,
+            0.052414,
+            0.055172,
+            0.057931,
+            0.06069,
+            0.063448,
+            0.066207,
+            0.068966,
+            0.071724,
+            0.074483,
+            0.077241,
+            0.08
+          ],
+          "populations": [
+            0.0,
+            0.0068,
+            0.027,
+            0.06,
+            0.105,
+            0.1607,
+            0.2257,
+            0.2981,
+            0.3759,
+            0.4572,
+            0.5396,
+            0.6209,
+            0.699,
+            0.7716,
+            0.8369,
+            0.893,
+            0.9384,
+            0.972,
+            0.9927,
+            1.0,
+            0.9937,
+            0.9741,
+            0.9415,
+            0.897,
+            0.8416,
+            0.777,
+            0.7049,
+            0.6272,
+            0.5461,
+            0.4637
+          ]
+        },
+        "result_keys": [
+          "amplitude",
+          "fit_successful",
+          "half_pi_amplitude_ghz",
+          "offset",
+          "pi_amplitude_ghz",
+          "pi_amplitude_mhz",
+          "pi_uncertainty_ghz",
+          "r_squared"
+        ]
+      }
+    }
+  }
+}

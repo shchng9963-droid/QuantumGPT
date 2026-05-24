@@ -19,14 +19,25 @@ def drift_executor():
 
 
 class TestToolDefinitions:
-    def test_nine_tools_defined(self):
+    def test_current_tool_surface_is_defined_without_duplicates(self):
         names = [t["name"] for t in TOOL_DEFINITIONS]
-        assert len(names) == 9
         expected = {
-            "get_backend_health", "get_qubit_properties", "get_coupling_map",
-            "detect_drift", "get_calibration_age", "compare_backends",
-            "run_circuit", "list_benchmarks", "diagnose_and_suggest",
+            "get_backend_health",
+            "get_qubit_properties",
+            "get_coupling_map",
+            "detect_drift",
+            "get_calibration_age",
+            "compare_backends",
+            "run_circuit",
+            "list_benchmarks",
+            "transpile_circuit",
+            "apply_mitigation",
+            "predict_fidelity",
+            "rabi_experiment",
+            "fit_rabi",
+            "diagnose_and_suggest",
         }
+        assert len(names) == len(set(names))
         assert set(names) == expected
 
     def test_all_have_schemas(self):

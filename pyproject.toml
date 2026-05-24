@@ -18,6 +18,8 @@ dependencies = [
     "matplotlib>=3.8",
     "click>=8.0",
     "rich>=13.0",
+    "openai>=1.0",
+    "anthropic>=0.40",
 ]
 
 [project.scripts]

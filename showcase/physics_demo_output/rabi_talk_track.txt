@@ -1,0 +1,4 @@
+I asked QuantumGPT to run a physics-facing Rabi calibration workflow on FakeBrisbane.
+The agent produced a traceable sequence of tool calls: get_backend_health, rabi_experiment, fit_rabi.
+It first generated Rabi sweep data, then fit the oscillation. It extracted a pi-pulse amplitude of 52.52 MHz. The fit quality was R²=1.0.
+The important point is that the final recommendation is backed by a readable trace, raw JSON, and explicit diagnostics rather than an opaque chat answer.

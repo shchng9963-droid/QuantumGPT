@@ -1,0 +1,302 @@
+[
+  {
+    "task_id": "T1-01",
+    "system": "react_drift",
+    "success": true,
+    "fidelity": null,
+    "tool_calls": 2,
+    "wall_time_s": 0.189,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties"
+    ],
+    "error": null,
+    "requested_provider": "mock",
+    "resolved_provider": "mock",
+    "model": "react-rule-planner-v1",
+    "final_answer_length": 538,
+    "no_final_answer": false,
+    "invalid_tool_call_count": 0,
+    "malformed_json_count": 0,
+    "repeated_tool_count": 0,
+    "max_turns_exceeded": false,
+    "hallucinated_tool_names": [],
+    "trace": {
+      "user_prompt": "Check the backend health and report the average gate errors and T1/T2 times.",
+      "model": "react-rule-planner-v1",
+      "provider": "mock",
+      "backend": "SyntheticDrift(FakeBrisbane)",
+      "final_answer": "## QuantumGPT ReAct Analysis Report\n\n**Backend: SyntheticDrift(FakeBrisbane)** (127 qubits)\n  T1=224.5\u03bcs  T2=144.5\u03bcs\n  1Q err=0.000369  2Q err=0.009141  readout=0.029398\n  drift=0.0\n\n**Qubit Properties:**\n  Q0: T1=344.2\u03bcs T2=75.6\u03bcs readout_err=0.0252\n  Q1: T1=358.4\u03bcs T2=251.4\u03bcs readout_err=0.0214\n  Q2: T1=284.8\u03bcs T2=129.9\u03bcs readout_err=0.0075\n  Q3: T1=283.4\u03bcs T2=381.0\u03bcs readout_err=0.025\n  Q4: T1=312.2\u03bcs T2=252.9\u03bcs readout_err=0.0138\n\n---\n**Budget:** 2 calls, 0.2s elapsed\n**Best fidelity:** None\n**Target:** 0.85  **Status:** PROCEED",
+      "total_tokens": 0,
+      "elapsed_seconds": 0.004,
+      "budget_summary": {
+        "target_fidelity": 0.85,
+        "best_fidelity": null,
+        "tool_calls_used": 2,
+        "remaining_calls": 18,
+        "elapsed_seconds": 0.2,
+        "remaining_seconds": 119.8,
+        "mitigation_attempted": false,
+        "decision": "PROCEED"
+      },
+      "diagnostics": {
+        "requested_provider": "mock",
+        "resolved_provider": "mock",
+        "model": "react-rule-planner-v1",
+        "final_answer_length": 538,
+        "no_final_answer": false,
+        "invalid_tool_call_count": 0,
+        "malformed_json_count": 0,
+        "repeated_tool_count": 0,
+        "max_turns_exceeded": false,
+        "hallucinated_tool_names": []
+      },
+      "steps": [
+        {
+          "step": 0,
+          "thought": "First, I need to check the backend health to understand current device state. Also getting detailed qubit properties.",
+          "action": "get_backend_health",
+          "action_input": {},
+          "observation_length": 257,
+          "budget_decision": "PROCEED",
+          "timestamp": 1779537904.096,
+          "observation": "{\n  \"backend\": \"SyntheticDrift(FakeBrisbane)\",\n  \"num_qubits\": 127,\n  \"avg_1q_error\": 0.000369,\n  \"avg_2q_error\": 0.009141,\n  \"avg_readout_error\": 0.029398,\n  \"avg_t1_us\": 224.5,\n  \"avg_t2_us\": 144.5,\n  \"calibration_age_minutes\": 0.0,\n  \"drift_score\": 0.0\n}"
+        },
+        {
+          "step": 0,
+          "action": "get_qubit_properties",
+          "action_input": {
+            "qubits": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "observation_length": 816,
+          "budget_decision": "PROCEED",
+          "timestamp": 1779537904.098,
+          "observation": "{\n  \"qubits\": [\n    {\n      \"qubit\": 0,\n      \"t1_us\": 344.2,\n      \"t2_us\": 75.6,\n      \"readout_error\": 0.0252,\n      \"gate_errors\": {\n        \"1q\": 0.00018\n      }\n    },\n    {\n      \"qubit\": 1,\n      \"t1_us\": 358.4,\n      \"t2_us\": 251.4,\n      \"readout_error\": 0.0214,\n      \"gate_errors\": {\n        \"1q\": 0.000106\n      }\n    },\n    {\n      \"qubit\": 2,\n      \"t1_us\": 284.8,\n      \"t2_us\": 129.9,\n      \"readout_error\": 0.0075,\n      \"gate_errors\": {\n        \"1q\": 0.000763\n      }\n    },\n    {\n      \"qubit\": 3,\n      \"t1_us\": 283.4,\n      \"t2_us\": 381.0,\n      \"readout_error\": 0.025,\n      \"gate_errors\": {\n        \"1q\": 0.000102\n      }\n    },\n    {\n      \"qubit\": 4,\n      \"t1_us\": 312.2,\n      \"t2_us\": 252.9,\n      \"readout_error\": 0.0138,\n      \"gate_errors\": {\n        \"1q\": 0.00126\n      }\n    }\n  ]\n}"
+        },
+        {
+          "step": 1,
+          "thought": "I have gathered enough information. Preparing the final report.",
+          "observation_length": 0,
+          "budget_decision": "PROCEED",
+          "timestamp": 1779537904.1
+        }
+      ]
+    }
+  },
+  {
+    "task_id": "T1-02",
+    "system": "react_drift",
+    "success": true,
+    "fidelity": 0.9082,
+    "tool_calls": 3,
+    "wall_time_s": 0.543,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties",
+      "run_circuit"
+    ],
+    "error": null,
+    "requested_provider": "mock",
+    "resolved_provider": "mock",
+    "model": "react-rule-planner-v1",
+    "final_answer_length": 661,
+    "no_final_answer": false,
+    "invalid_tool_call_count": 0,
+    "malformed_json_count": 0,
+    "repeated_tool_count": 0,
+    "max_turns_exceeded": false,
+    "hallucinated_tool_names": [],
+    "trace": {
+      "user_prompt": "Find the 5 best qubits (lowest error rates) on this backend for running a 5-qubit circuit.",
+      "model": "react-rule-planner-v1",
+      "provider": "mock",
+      "backend": "SyntheticDrift(FakeBrisbane)",
+      "final_answer": "## QuantumGPT ReAct Analysis Report\n\n**Backend: SyntheticDrift(FakeBrisbane)** (127 qubits)\n  T1=224.5\u03bcs  T2=144.5\u03bcs\n  1Q err=0.000369  2Q err=0.009141  readout=0.029398\n  drift=0.0\n\n**Qubit Properties:**\n  Q0: T1=344.2\u03bcs T2=75.6\u03bcs readout_err=0.0252\n  Q1: T1=358.4\u03bcs T2=251.4\u03bcs readout_err=0.0214\n  Q2: T1=284.8\u03bcs T2=129.9\u03bcs readout_err=0.0075\n  Q3: T1=283.4\u03bcs T2=381.0\u03bcs readout_err=0.025\n  Q4: T1=312.2\u03bcs T2=252.9\u03bcs readout_err=0.0138\n\n**Circuit: ghz_5**\n  Fidelity: 0.9082  depth: 8  shots: 4096\n  Top counts: {'00000': 1863, '11111': 1857, '00001': 58}\n\n---\n**Budget:** 3 calls, 0.5s elapsed\n**Best fidelity:** 0.9082\n**Target:** 0.85  **Status:** GOAL_MET",
+      "total_tokens": 0,
+      "elapsed_seconds": 0.522,
+      "budget_summary": {
+        "target_fidelity": 0.85,
+        "best_fidelity": 0.9082,
+        "tool_calls_used": 3,
+        "remaining_calls": 17,
+        "elapsed_seconds": 0.5,
+        "remaining_seconds": 119.5,
+        "mitigation_attempted": false,
+        "decision": "GOAL_MET"
+      },
+      "diagnostics": {
+        "requested_provider": "mock",
+        "resolved_provider": "mock",
+        "model": "react-rule-planner-v1",
+        "final_answer_length": 661,
+        "no_final_answer": false,
+        "invalid_tool_call_count": 0,
+        "malformed_json_count": 0,
+        "repeated_tool_count": 0,
+        "max_turns_exceeded": false,
+        "hallucinated_tool_names": []
+      },
+      "steps": [
+        {
+          "step": 0,
+          "thought": "First, I need to check the backend health to understand current device state. Also getting detailed qubit properties.",
+          "action": "get_backend_health",
+          "action_input": {},
+          "observation_length": 257,
+          "budget_decision": "PROCEED",
+          "timestamp": 1779537904.282,
+          "observation": "{\n  \"backend\": \"SyntheticDrift(FakeBrisbane)\",\n  \"num_qubits\": 127,\n  \"avg_1q_error\": 0.000369,\n  \"avg_2q_error\": 0.009141,\n  \"avg_readout_error\": 0.029398,\n  \"avg_t1_us\": 224.5,\n  \"avg_t2_us\": 144.5,\n  \"calibration_age_minutes\": 0.0,\n  \"drift_score\": 0.0\n}"
+        },
+        {
+          "step": 0,
+          "action": "get_qubit_properties",
+          "action_input": {
+            "qubits": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "observation_length": 816,
+          "budget_decision": "PROCEED",
+          "timestamp": 1779537904.284,
+          "observation": "{\n  \"qubits\": [\n    {\n      \"qubit\": 0,\n      \"t1_us\": 344.2,\n      \"t2_us\": 75.6,\n      \"readout_error\": 0.0252,\n      \"gate_errors\": {\n        \"1q\": 0.00018\n      }\n    },\n    {\n      \"qubit\": 1,\n      \"t1_us\": 358.4,\n      \"t2_us\": 251.4,\n      \"readout_error\": 0.0214,\n      \"gate_errors\": {\n        \"1q\": 0.000106\n      }\n    },\n    {\n      \"qubit\": 2,\n      \"t1_us\": 284.8,\n      \"t2_us\": 129.9,\n      \"readout_error\": 0.0075,\n      \"gate_errors\": {\n        \"1q\": 0.000763\n      }\n    },\n    {\n      \"qubit\": 3,\n      \"t1_us\": 283.4,\n      \"t2_us\": 381.0,\n      \"readout_error\": 0.025,\n      \"gate_errors\": {\n        \"1q\": 0.000102\n      }\n    },\n    {\n      \"qubit\": 4,\n      \"t1_us\": 312.2,\n      \"t2_us\": 252.9,\n      \"readout_error\": 0.0138,\n      \"gate_errors\": {\n        \"1q\": 0.00126\n      }\n    }\n  ]\n}"
+        },
+        {
+          "step": 1,
+          "thought": "Running ghz_5 circuit to measure fidelity.",
+          "action": "run_circuit",
+          "action_input": {
+            "circuit_name": "ghz_5",
+            "shots": 4096
+          },
+          "observation_length": 317,
+          "fidelity_observed": 0.9082,
+          "budget_decision": "PROCEED",
+          "timestamp": 1779537904.286,
+          "observation": "{\n  \"circuit\": \"ghz_5\",\n  \"shots\": 4096,\n  \"fidelity\": 0.9082,\n  \"transpiled_depth\": 8,\n  \"top_counts\": {\n    \"00000\": 1863,\n    \"11111\": 1857,\n    \"00001\": 58,\n    \"01000\": 54,\n    \"11101\": 47\n  },\n  \"metadata\": {\n    \"backend\": \"SyntheticDrift(FakeBrisbane)\",\n    \"sim_time_hours\": 0.0,\n    \"drift_score\": 0.0\n  }\n}"
+        },
+        {
+          "step": 2,
+          "thought": "Fidelity target reached. Summarizing results.",
+          "observation_length": 0,
+          "budget_decision": "GOAL_MET",
+          "timestamp": 1779537904.804
+        }
+      ]
+    }
+  },
+  {
+    "task_id": "T1-03",
+    "system": "react_drift",
+    "success": true,
+    "fidelity": 0.9116,
+    "tool_calls": 3,
+    "wall_time_s": 0.454,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties",
+      "run_circuit"
+    ],
+    "error": null,
+    "requested_provider": "mock",
+    "resolved_provider": "mock",
+    "model": "react-rule-planner-v1",
+    "final_answer_length": 661,
+    "no_final_answer": false,
+    "invalid_tool_call_count": 0,
+    "malformed_json_count": 0,
+    "repeated_tool_count": 0,
+    "max_turns_exceeded": false,
+    "hallucinated_tool_names": [],
+    "trace": {
+      "user_prompt": "Compare FakeBrisbane and FakeSherbrooke. Which is better for running a 5-qubit GHZ circuit?",
+      "model": "react-rule-planner-v1",
+      "provider": "mock",
+      "backend": "SyntheticDrift(FakeBrisbane)",
+      "final_answer": "## QuantumGPT ReAct Analysis Report\n\n**Backend: SyntheticDrift(FakeBrisbane)** (127 qubits)\n  T1=224.5\u03bcs  T2=144.5\u03bcs\n  1Q err=0.000369  2Q err=0.009141  readout=0.029398\n  drift=0.0\n\n**Qubit Properties:**\n  Q0: T1=344.2\u03bcs T2=75.6\u03bcs readout_err=0.0252\n  Q1: T1=358.4\u03bcs T2=251.4\u03bcs readout_err=0.0214\n  Q2: T1=284.8\u03bcs T2=129.9\u03bcs readout_err=0.0075\n  Q3: T1=283.4\u03bcs T2=381.0\u03bcs readout_err=0.025\n  Q4: T1=312.2\u03bcs T2=252.9\u03bcs readout_err=0.0138\n\n**Circuit: ghz_5**\n  Fidelity: 0.9116  depth: 8  shots: 4096\n  Top counts: {'00000': 1869, '11111': 1865, '01000': 53}\n\n---\n**Budget:** 3 calls, 0.4s elapsed\n**Best fidelity:** 0.9116\n**Target:** 0.85  **Status:** GOAL_MET",
+      "total_tokens": 0,
+      "elapsed_seconds": 0.439,
+      "budget_summary": {
+        "target_fidelity": 0.85,
+        "best_fidelity": 0.9116,
+        "tool_calls_used": 3,
+        "remaining_calls": 17,
+        "elapsed_seconds": 0.4,
+        "remaining_seconds": 119.6,
+        "mitigation_attempted": false,
+        "decision": "GOAL_MET"
+      },
+      "diagnostics": {
+        "requested_provider": "mock",
+        "resolved_provider": "mock",
+        "model": "react-rule-planner-v1",
+        "final_answer_length": 661,
+        "no_final_answer": false,
+        "invalid_tool_call_count": 0,
+        "malformed_json_count": 0,
+        "repeated_tool_count": 0,
+        "max_turns_exceeded": false,
+        "hallucinated_tool_names": []
+      },
+      "steps": [
+        {
+          "step": 0,
+          "thought": "First, I need to check the backend health to understand current device state. Also getting detailed qubit properties.",
+          "action": "get_backend_health",
+          "action_input": {},
+          "observation_length": 257,
+          "budget_decision": "PROCEED",
+          "timestamp": 1779537905.119,
+          "observation": "{\n  \"backend\": \"SyntheticDrift(FakeBrisbane)\",\n  \"num_qubits\": 127,\n  \"avg_1q_error\": 0.000369,\n  \"avg_2q_error\": 0.009141,\n  \"avg_readout_error\": 0.029398,\n  \"avg_t1_us\": 224.5,\n  \"avg_t2_us\": 144.5,\n  \"calibration_age_minutes\": 0.0,\n  \"drift_score\": 0.0\n}"
+        },
+        {
+          "step": 0,
+          "action": "get_qubit_properties",
+          "action_input": {
+            "qubits": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "observation_length": 816,
+          "budget_decision": "PROCEED",
+          "timestamp": 1779537905.121,
+          "observation": "{\n  \"qubits\": [\n    {\n      \"qubit\": 0,\n      \"t1_us\": 344.2,\n      \"t2_us\": 75.6,\n      \"readout_error\": 0.0252,\n      \"gate_errors\": {\n        \"1q\": 0.00018\n      }\n    },\n    {\n      \"qubit\": 1,\n      \"t1_us\": 358.4,\n      \"t2_us\": 251.4,\n      \"readout_error\": 0.0214,\n      \"gate_errors\": {\n        \"1q\": 0.000106\n      }\n    },\n    {\n      \"qubit\": 2,\n      \"t1_us\": 284.8,\n      \"t2_us\": 129.9,\n      \"readout_error\": 0.0075,\n      \"gate_errors\": {\n        \"1q\": 0.000763\n      }\n    },\n    {\n      \"qubit\": 3,\n      \"t1_us\": 283.4,\n      \"t2_us\": 381.0,\n      \"readout_error\": 0.025,\n      \"gate_errors\": {\n        \"1q\": 0.000102\n      }\n    },\n    {\n      \"qubit\": 4,\n      \"t1_us\": 312.2,\n      \"t2_us\": 252.9,\n      \"readout_error\": 0.0138,\n      \"gate_errors\": {\n        \"1q\": 0.00126\n      }\n    }\n  ]\n}"
+        },
+        {
+          "step": 1,
+          "thought": "Running ghz_5 circuit to measure fidelity.",
+          "action": "run_circuit",
+          "action_input": {
+            "circuit_name": "ghz_5",
+            "shots": 4096
+          },
+          "observation_length": 317,
+          "fidelity_observed": 0.9116,
+          "budget_decision": "PROCEED",
+          "timestamp": 1779537905.123,
+          "observation": "{\n  \"circuit\": \"ghz_5\",\n  \"shots\": 4096,\n  \"fidelity\": 0.9116,\n  \"transpiled_depth\": 8,\n  \"top_counts\": {\n    \"00000\": 1869,\n    \"11111\": 1865,\n    \"01000\": 53,\n    \"10111\": 51,\n    \"00001\": 47\n  },\n  \"metadata\": {\n    \"backend\": \"SyntheticDrift(FakeBrisbane)\",\n    \"sim_time_hours\": 0.0,\n    \"drift_score\": 0.0\n  }\n}"
+        },
+        {
+          "step": 2,
+          "thought": "Fidelity target reached. Summarizing results.",
+          "observation_length": 0,
+          "budget_decision": "GOAL_MET",
+          "timestamp": 1779537905.558
+        }
+      ]
+    }
+  }
+]

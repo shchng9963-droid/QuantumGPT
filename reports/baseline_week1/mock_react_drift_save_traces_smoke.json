@@ -1,0 +1,227 @@
+[
+  {
+    "task_id": "T1-01",
+    "system": "react_drift",
+    "success": true,
+    "fidelity": null,
+    "tool_calls": 2,
+    "wall_time_s": 0.201,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties"
+    ],
+    "error": null,
+    "requested_provider": "mock",
+    "resolved_provider": "mock",
+    "model": "react-rule-planner-v1",
+    "final_answer_length": 538,
+    "no_final_answer": false,
+    "invalid_tool_call_count": 0,
+    "malformed_json_count": 0,
+    "repeated_tool_count": 0,
+    "max_turns_exceeded": false,
+    "hallucinated_tool_names": [],
+    "trace": {
+      "user_prompt": "Check the backend health and report the average gate errors and T1/T2 times.",
+      "model": "react-rule-planner-v1",
+      "provider": "mock",
+      "backend": "SyntheticDrift(FakeBrisbane)",
+      "final_answer": "## QuantumGPT ReAct Analysis Report\n\n**Backend: SyntheticDrift(FakeBrisbane)** (127 qubits)\n  T1=224.5\u03bcs  T2=144.5\u03bcs\n  1Q err=0.000369  2Q err=0.009141  readout=0.029398\n  drift=0.0\n\n**Qubit Properties:**\n  Q0: T1=344.2\u03bcs T2=75.6\u03bcs readout_err=0.0252\n  Q1: T1=358.4\u03bcs T2=251.4\u03bcs readout_err=0.0214\n  Q2: T1=284.8\u03bcs T2=129.9\u03bcs readout_err=0.0075\n  Q3: T1=283.4\u03bcs T2=381.0\u03bcs readout_err=0.025\n  Q4: T1=312.2\u03bcs T2=252.9\u03bcs readout_err=0.0138\n\n---\n**Budget:** 2 calls, 0.2s elapsed\n**Best fidelity:** None\n**Target:** 0.85  **Status:** PROCEED",
+      "total_tokens": 0,
+      "elapsed_seconds": 0.008,
+      "budget_summary": {
+        "target_fidelity": 0.85,
+        "best_fidelity": null,
+        "tool_calls_used": 2,
+        "remaining_calls": 18,
+        "elapsed_seconds": 0.2,
+        "remaining_seconds": 119.8,
+        "mitigation_attempted": false,
+        "decision": "PROCEED"
+      },
+      "diagnostics": {
+        "requested_provider": "mock",
+        "resolved_provider": "mock",
+        "model": "react-rule-planner-v1",
+        "final_answer_length": 538,
+        "no_final_answer": false,
+        "invalid_tool_call_count": 0,
+        "malformed_json_count": 0,
+        "repeated_tool_count": 0,
+        "max_turns_exceeded": false,
+        "hallucinated_tool_names": [],
+        "safety_block_count": 0,
+        "safety_dry_run_count": 0
+      },
+      "steps": [
+        {
+          "step": 0,
+          "thought": "First, I need to check the backend health to understand current device state. Also getting detailed qubit properties.",
+          "action": "get_backend_health",
+          "action_input": {},
+          "observation_length": 257,
+          "budget_decision": "PROCEED",
+          "state_summary": {
+            "task_id": null,
+            "backend_name": "SyntheticDrift(FakeBrisbane)",
+            "backend_snapshot_id": "artifact-e1f5a0e80a7e",
+            "current_step": 0,
+            "artifact_counts": {
+              "backend_snapshot": 1
+            },
+            "artifact_status_counts": {
+              "valid": 1
+            },
+            "recent_observations": [
+              "get_backend_health -> backend_snapshot"
+            ],
+            "budget_state": {},
+            "drift_state": {
+              "is_drifting": false,
+              "drift_score": 0.0,
+              "consecutive_drift_checks": 0,
+              "invalidated_results": [],
+              "recovery_steps": 0
+            },
+            "safety_status": {}
+          },
+          "timestamp": 1779551135.131,
+          "observation": "{\n  \"backend\": \"SyntheticDrift(FakeBrisbane)\",\n  \"num_qubits\": 127,\n  \"avg_1q_error\": 0.000369,\n  \"avg_2q_error\": 0.009141,\n  \"avg_readout_error\": 0.029398,\n  \"avg_t1_us\": 224.5,\n  \"avg_t2_us\": 144.5,\n  \"calibration_age_minutes\": 0.0,\n  \"drift_score\": 0.0\n}"
+        },
+        {
+          "step": 0,
+          "action": "get_qubit_properties",
+          "action_input": {
+            "qubits": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "observation_length": 816,
+          "budget_decision": "PROCEED",
+          "state_summary": {
+            "task_id": null,
+            "backend_name": "SyntheticDrift(FakeBrisbane)",
+            "backend_snapshot_id": "artifact-e1f5a0e80a7e",
+            "current_step": 0,
+            "artifact_counts": {
+              "backend_snapshot": 1,
+              "qubit_properties": 1
+            },
+            "artifact_status_counts": {
+              "valid": 2
+            },
+            "recent_observations": [
+              "get_backend_health -> backend_snapshot",
+              "get_qubit_properties -> qubit_properties"
+            ],
+            "budget_state": {},
+            "drift_state": {
+              "is_drifting": false,
+              "drift_score": 0.0,
+              "consecutive_drift_checks": 0,
+              "invalidated_results": [],
+              "recovery_steps": 0
+            },
+            "safety_status": {}
+          },
+          "timestamp": 1779551135.135,
+          "observation": "{\n  \"qubits\": [\n    {\n      \"qubit\": 0,\n      \"t1_us\": 344.2,\n      \"t2_us\": 75.6,\n      \"readout_error\": 0.0252,\n      \"gate_errors\": {\n        \"1q\": 0.00018\n      }\n    },\n    {\n      \"qubit\": 1,\n      \"t1_us\": 358.4,\n      \"t2_us\": 251.4,\n      \"readout_error\": 0.0214,\n      \"gate_errors\": {\n        \"1q\": 0.000106\n      }\n    },\n    {\n      \"qubit\": 2,\n      \"t1_us\": 284.8,\n      \"t2_us\": 129.9,\n      \"readout_error\": 0.0075,\n      \"gate_errors\": {\n        \"1q\": 0.000763\n      }\n    },\n    {\n      \"qubit\": 3,\n      \"t1_us\": 283.4,\n      \"t2_us\": 381.0,\n      \"readout_error\": 0.025,\n      \"gate_errors\": {\n        \"1q\": 0.000102\n      }\n    },\n    {\n      \"qubit\": 4,\n      \"t1_us\": 312.2,\n      \"t2_us\": 252.9,\n      \"readout_error\": 0.0138,\n      \"gate_errors\": {\n        \"1q\": 0.00126\n      }\n    }\n  ]\n}"
+        },
+        {
+          "step": 1,
+          "thought": "I have gathered enough information. Preparing the final report.",
+          "observation_length": 0,
+          "budget_decision": "PROCEED",
+          "timestamp": 1779551135.139
+        }
+      ],
+      "state_summary": {
+        "task_id": null,
+        "backend_name": "SyntheticDrift(FakeBrisbane)",
+        "backend_snapshot_id": "artifact-e1f5a0e80a7e",
+        "current_step": 0,
+        "artifact_counts": {
+          "backend_snapshot": 1,
+          "qubit_properties": 1
+        },
+        "artifact_status_counts": {
+          "valid": 2
+        },
+        "recent_observations": [
+          "get_backend_health -> backend_snapshot",
+          "get_qubit_properties -> qubit_properties"
+        ],
+        "budget_state": {},
+        "drift_state": {
+          "is_drifting": false,
+          "drift_score": 0.0,
+          "consecutive_drift_checks": 0,
+          "invalidated_results": [],
+          "recovery_steps": 0
+        },
+        "safety_status": {}
+      },
+      "artifacts": {
+        "artifact-e1f5a0e80a7e": {
+          "artifact_id": "artifact-e1f5a0e80a7e",
+          "artifact_type": "backend_snapshot",
+          "created_at_step": 0,
+          "depends_on": [],
+          "backend_snapshot_hash": "282875db8bb7b81a",
+          "status": "valid",
+          "invalidation_reason": null,
+          "invalidation_detail": null,
+          "payload_ref": "tool:get_backend_health:step:0",
+          "metadata": {
+            "tool_name": "get_backend_health",
+            "tool_input": {},
+            "result_keys": [
+              "avg_1q_error",
+              "avg_2q_error",
+              "avg_readout_error",
+              "avg_t1_us",
+              "avg_t2_us",
+              "backend",
+              "calibration_age_minutes",
+              "drift_score",
+              "num_qubits"
+            ],
+            "snapshot_hash": "282875db8bb7b81a"
+          }
+        },
+        "artifact-550ea70bef2d": {
+          "artifact_id": "artifact-550ea70bef2d",
+          "artifact_type": "qubit_properties",
+          "created_at_step": 0,
+          "depends_on": [
+            "artifact-e1f5a0e80a7e"
+          ],
+          "backend_snapshot_hash": "282875db8bb7b81a",
+          "status": "valid",
+          "invalidation_reason": null,
+          "invalidation_detail": null,
+          "payload_ref": "tool:get_qubit_properties:step:0",
+          "metadata": {
+            "tool_name": "get_qubit_properties",
+            "tool_input": {
+              "qubits": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            "result_keys": [
+              "qubits"
+            ]
+          }
+        }
+      }
+    }
+  }
+]

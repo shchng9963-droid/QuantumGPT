@@ -152,6 +152,7 @@ def qaoa_maxcut(n: int = 4, p: int = 1) -> tuple[QuantumCircuit, dict[str, float
 
 # Registry of all benchmark circuits
 BENCHMARKS = {
+    "ghz_3": {"builder": lambda: ghz(3), "description": "GHZ-3 entanglement state"},
     "ghz_5": {"builder": lambda: ghz(5), "description": "GHZ-5 entanglement state"},
     "qft_4": {"builder": lambda: qft(4), "description": "4-qubit Quantum Fourier Transform"},
     "bv_5": {"builder": lambda: bernstein_vazirani("10110"), "description": "Bernstein-Vazirani (secret=10110)"},
