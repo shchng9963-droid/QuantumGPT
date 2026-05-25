@@ -40,6 +40,9 @@ class TestToolDefinitions:
             "t1_experiment",
             "fit_t1",
             "diagnose_and_suggest",
+            "drag_calibration",
+            "randomized_benchmarking",
+            "next_best_experiment",
         }
         assert len(names) == len(set(names))
         assert set(names) == expected
