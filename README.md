@@ -38,11 +38,3 @@ conda activate .venv
 # Install dependencies
 pip install -r requirements.txt
 ```
-
-## Target
-
-ICLR 2027 Main Track
-
-## Status
-
-Phase 0 — Foundation (W1–W2)
