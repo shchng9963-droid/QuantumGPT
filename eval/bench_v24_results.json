@@ -1,0 +1,776 @@
+[
+  {
+    "task_id": "T1.1",
+    "tier": 1,
+    "name": "Backend health",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 2,
+    "tokens": 0,
+    "elapsed_s": 0.0,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 592,
+    "error": null
+  },
+  {
+    "task_id": "T1.1",
+    "tier": 1,
+    "name": "Backend health",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 1,
+    "tokens": 9217,
+    "elapsed_s": 5.26,
+    "tools_used": [
+      "get_backend_health"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 1068,
+    "error": null
+  },
+  {
+    "task_id": "T1.2",
+    "tier": 1,
+    "name": "Qubit properties",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 2,
+    "tokens": 0,
+    "elapsed_s": 0.01,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 592,
+    "error": null
+  },
+  {
+    "task_id": "T1.2",
+    "tier": 1,
+    "name": "Qubit properties",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 1,
+    "tokens": 9461,
+    "elapsed_s": 4.7,
+    "tools_used": [
+      "get_qubit_properties"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 819,
+    "error": null
+  },
+  {
+    "task_id": "T1.3",
+    "tier": 1,
+    "name": "Coupling map",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 3,
+    "tokens": 0,
+    "elapsed_s": 0.0,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties",
+      "get_coupling_map"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 633,
+    "error": null
+  },
+  {
+    "task_id": "T1.3",
+    "tier": 1,
+    "name": "Coupling map",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 2,
+    "tokens": 10760,
+    "elapsed_s": 5.57,
+    "tools_used": [
+      "get_coupling_map",
+      "get_qubit_properties"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 911,
+    "error": null
+  },
+  {
+    "task_id": "T1.4",
+    "tier": 1,
+    "name": "Run GHZ circuit",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 3,
+    "tokens": 0,
+    "elapsed_s": 1.43,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties",
+      "run_circuit"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 716,
+    "error": null
+  },
+  {
+    "task_id": "T1.4",
+    "tier": 1,
+    "name": "Run GHZ circuit",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 4,
+    "tokens": 20254,
+    "elapsed_s": 10.16,
+    "tools_used": [
+      "get_backend_health",
+      "list_benchmarks",
+      "predict_fidelity",
+      "run_circuit"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 1085,
+    "error": null
+  },
+  {
+    "task_id": "T1.5",
+    "tier": 1,
+    "name": "Transpile + run",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 4,
+    "tokens": 0,
+    "elapsed_s": 1.27,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties",
+      "transpile_circuit",
+      "run_circuit"
+    ],
+    "expected_tools_hit": 2,
+    "expected_tools_total": 2,
+    "answer_len": 766,
+    "error": null
+  },
+  {
+    "task_id": "T1.5",
+    "tier": 1,
+    "name": "Transpile + run",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 6,
+    "tokens": 31577,
+    "elapsed_s": 15.7,
+    "tools_used": [
+      "get_backend_health",
+      "list_benchmarks",
+      "transpile_circuit",
+      "get_coupling_map",
+      "predict_fidelity",
+      "run_circuit"
+    ],
+    "expected_tools_hit": 2,
+    "expected_tools_total": 2,
+    "answer_len": 1424,
+    "error": null
+  },
+  {
+    "task_id": "T1.6",
+    "tier": 1,
+    "name": "Fidelity prediction",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 4,
+    "tokens": 0,
+    "elapsed_s": 1.21,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties",
+      "predict_fidelity",
+      "run_circuit"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 808,
+    "error": null
+  },
+  {
+    "task_id": "T1.6",
+    "tier": 1,
+    "name": "Fidelity prediction",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 5,
+    "tokens": 16008,
+    "elapsed_s": 11.51,
+    "tools_used": [
+      "list_benchmarks",
+      "get_backend_health",
+      "predict_fidelity",
+      "predict_fidelity",
+      "get_qubit_properties"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 1616,
+    "error": null
+  },
+  {
+    "task_id": "T1.7",
+    "tier": 1,
+    "name": "ZNE mitigation",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 4,
+    "tokens": 0,
+    "elapsed_s": 4.43,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties",
+      "run_circuit",
+      "apply_mitigation"
+    ],
+    "expected_tools_hit": 2,
+    "expected_tools_total": 2,
+    "answer_len": 803,
+    "error": null
+  },
+  {
+    "task_id": "T1.7",
+    "tier": 1,
+    "name": "ZNE mitigation",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 6,
+    "tokens": 21295,
+    "elapsed_s": 15.37,
+    "tools_used": [
+      "get_backend_health",
+      "list_benchmarks",
+      "transpile_circuit",
+      "predict_fidelity",
+      "run_circuit",
+      "apply_mitigation"
+    ],
+    "expected_tools_hit": 2,
+    "expected_tools_total": 2,
+    "answer_len": 1291,
+    "error": null
+  },
+  {
+    "task_id": "T1.8",
+    "tier": 1,
+    "name": "Backend comparison",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 2,
+    "tokens": 0,
+    "elapsed_s": 0.01,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 592,
+    "error": null
+  },
+  {
+    "task_id": "T1.8",
+    "tier": 1,
+    "name": "Backend comparison",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 3,
+    "tokens": 36565,
+    "elapsed_s": 12.71,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties",
+      "get_qubit_properties"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 1741,
+    "error": null
+  },
+  {
+    "task_id": "T2.1",
+    "tier": 2,
+    "name": "Drift detection",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 2,
+    "tokens": 0,
+    "elapsed_s": 0.0,
+    "tools_used": [
+      "get_backend_health",
+      "detect_drift"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 385,
+    "error": null
+  },
+  {
+    "task_id": "T2.1",
+    "tier": 2,
+    "name": "Drift detection",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 3,
+    "tokens": 9391,
+    "elapsed_s": 4.38,
+    "tools_used": [
+      "get_backend_health",
+      "get_calibration_age",
+      "detect_drift"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 729,
+    "error": null
+  },
+  {
+    "task_id": "T2.2",
+    "tier": 2,
+    "name": "Calibration age",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 2,
+    "tokens": 0,
+    "elapsed_s": 0.01,
+    "tools_used": [
+      "get_backend_health",
+      "diagnose_and_suggest"
+    ],
+    "expected_tools_hit": 0,
+    "expected_tools_total": 1,
+    "answer_len": 402,
+    "error": null
+  },
+  {
+    "task_id": "T2.2",
+    "tier": 2,
+    "name": "Calibration age",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 2,
+    "tokens": 9158,
+    "elapsed_s": 3.6,
+    "tools_used": [
+      "get_calibration_age",
+      "get_backend_health"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 658,
+    "error": null
+  },
+  {
+    "task_id": "T2.3",
+    "tier": 2,
+    "name": "Drift + recalibrate",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 5,
+    "tokens": 0,
+    "elapsed_s": 0.34,
+    "tools_used": [
+      "get_backend_health",
+      "rabi_experiment",
+      "fit_rabi",
+      "diagnose_and_suggest",
+      "detect_drift"
+    ],
+    "expected_tools_hit": 2,
+    "expected_tools_total": 2,
+    "answer_len": 683,
+    "error": null
+  },
+  {
+    "task_id": "T2.3",
+    "tier": 2,
+    "name": "Drift + recalibrate",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 2,
+    "tokens": 9291,
+    "elapsed_s": 4.02,
+    "tools_used": [
+      "get_backend_health",
+      "detect_drift"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 2,
+    "answer_len": 688,
+    "error": null
+  },
+  {
+    "task_id": "T2.4",
+    "tier": 2,
+    "name": "Multi-qubit drift",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 2,
+    "tokens": 0,
+    "elapsed_s": 0.01,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 592,
+    "error": null
+  },
+  {
+    "task_id": "T2.4",
+    "tier": 2,
+    "name": "Multi-qubit drift",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 2,
+    "tokens": 9922,
+    "elapsed_s": 5.34,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 1149,
+    "error": null
+  },
+  {
+    "task_id": "T2.5",
+    "tier": 2,
+    "name": "Drift + diagnosis",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 3,
+    "tokens": 0,
+    "elapsed_s": 0.01,
+    "tools_used": [
+      "get_backend_health",
+      "diagnose_and_suggest",
+      "detect_drift"
+    ],
+    "expected_tools_hit": 2,
+    "expected_tools_total": 2,
+    "answer_len": 462,
+    "error": null
+  },
+  {
+    "task_id": "T2.5",
+    "tier": 2,
+    "name": "Drift + diagnosis",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 4,
+    "tokens": 15141,
+    "elapsed_s": 8.57,
+    "tools_used": [
+      "get_backend_health",
+      "detect_drift",
+      "get_calibration_age",
+      "get_qubit_properties"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 2,
+    "answer_len": 1857,
+    "error": null
+  },
+  {
+    "task_id": "T3.1",
+    "tier": 3,
+    "name": "Diagnose qubit",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 3,
+    "tokens": 0,
+    "elapsed_s": 0.01,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties",
+      "diagnose_and_suggest"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 669,
+    "error": null
+  },
+  {
+    "task_id": "T3.1",
+    "tier": 3,
+    "name": "Diagnose qubit",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 11,
+    "tokens": 62418,
+    "elapsed_s": 30.1,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties",
+      "rabi_experiment",
+      "ramsey_experiment",
+      "t1_experiment",
+      "fit_rabi",
+      "drag_calibration",
+      "randomized_benchmarking",
+      "list_benchmarks",
+      "run_circuit",
+      "diagnose_and_suggest"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 1,
+    "answer_len": 2187,
+    "error": null
+  },
+  {
+    "task_id": "T3.2",
+    "tier": 3,
+    "name": "Low fidelity recovery",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 4,
+    "tokens": 0,
+    "elapsed_s": 4.6,
+    "tools_used": [
+      "get_backend_health",
+      "run_circuit",
+      "apply_mitigation",
+      "diagnose_and_suggest"
+    ],
+    "expected_tools_hit": 3,
+    "expected_tools_total": 3,
+    "answer_len": 652,
+    "error": null
+  },
+  {
+    "task_id": "T3.2",
+    "tier": 3,
+    "name": "Low fidelity recovery",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 4,
+    "tokens": 20607,
+    "elapsed_s": 13.14,
+    "tools_used": [
+      "get_backend_health",
+      "list_benchmarks",
+      "run_circuit",
+      "apply_mitigation"
+    ],
+    "expected_tools_hit": 2,
+    "expected_tools_total": 3,
+    "answer_len": 1154,
+    "error": null
+  },
+  {
+    "task_id": "T3.3",
+    "tier": 3,
+    "name": "Full diagnosis pipeline",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 3,
+    "tokens": 0,
+    "elapsed_s": 0.96,
+    "tools_used": [
+      "get_backend_health",
+      "run_circuit",
+      "diagnose_and_suggest"
+    ],
+    "expected_tools_hit": 2,
+    "expected_tools_total": 2,
+    "answer_len": 565,
+    "error": null
+  },
+  {
+    "task_id": "T3.3",
+    "tier": 3,
+    "name": "Full diagnosis pipeline",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 11,
+    "tokens": 62163,
+    "elapsed_s": 35.85,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties",
+      "get_calibration_age",
+      "ramsey_experiment",
+      "t1_experiment",
+      "rabi_experiment",
+      "fit_rabi",
+      "fit_ramsey",
+      "fit_t1",
+      "ramsey_experiment",
+      "randomized_benchmarking"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 2,
+    "answer_len": 3303,
+    "error": null
+  },
+  {
+    "task_id": "T4.1",
+    "tier": 4,
+    "name": "Rabi calibration",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 3,
+    "tokens": 0,
+    "elapsed_s": 0.28,
+    "tools_used": [
+      "get_backend_health",
+      "rabi_experiment",
+      "fit_rabi"
+    ],
+    "expected_tools_hit": 2,
+    "expected_tools_total": 2,
+    "answer_len": 546,
+    "error": null
+  },
+  {
+    "task_id": "T4.1",
+    "tier": 4,
+    "name": "Rabi calibration",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 2,
+    "tokens": 15723,
+    "elapsed_s": 8.99,
+    "tools_used": [
+      "rabi_experiment",
+      "fit_rabi"
+    ],
+    "expected_tools_hit": 2,
+    "expected_tools_total": 2,
+    "answer_len": 1131,
+    "error": null
+  },
+  {
+    "task_id": "T4.2",
+    "tier": 4,
+    "name": "T2* measurement",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 2,
+    "tokens": 0,
+    "elapsed_s": 0.0,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties"
+    ],
+    "expected_tools_hit": 0,
+    "expected_tools_total": 2,
+    "answer_len": 592,
+    "error": null
+  },
+  {
+    "task_id": "T4.2",
+    "tier": 4,
+    "name": "T2* measurement",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 1,
+    "tokens": 10067,
+    "elapsed_s": 5.61,
+    "tools_used": [
+      "ramsey_experiment"
+    ],
+    "expected_tools_hit": 1,
+    "expected_tools_total": 2,
+    "answer_len": 1007,
+    "error": null
+  },
+  {
+    "task_id": "T4.3",
+    "tier": 4,
+    "name": "T1 measurement",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 2,
+    "tokens": 0,
+    "elapsed_s": 0.0,
+    "tools_used": [
+      "get_backend_health",
+      "get_qubit_properties"
+    ],
+    "expected_tools_hit": 0,
+    "expected_tools_total": 2,
+    "answer_len": 592,
+    "error": null
+  },
+  {
+    "task_id": "T4.3",
+    "tier": 4,
+    "name": "T1 measurement",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 2,
+    "tokens": 16572,
+    "elapsed_s": 10.21,
+    "tools_used": [
+      "t1_experiment",
+      "fit_t1"
+    ],
+    "expected_tools_hit": 2,
+    "expected_tools_total": 2,
+    "answer_len": 778,
+    "error": null
+  },
+  {
+    "task_id": "T4.4",
+    "tier": 4,
+    "name": "Full tune-up",
+    "provider": "mock",
+    "success": true,
+    "tool_calls": 3,
+    "tokens": 0,
+    "elapsed_s": 0.3,
+    "tools_used": [
+      "get_backend_health",
+      "rabi_experiment",
+      "fit_rabi"
+    ],
+    "expected_tools_hit": 2,
+    "expected_tools_total": 4,
+    "answer_len": 546,
+    "error": null
+  },
+  {
+    "task_id": "T4.4",
+    "tier": 4,
+    "name": "Full tune-up",
+    "provider": "deepseek",
+    "success": true,
+    "tool_calls": 4,
+    "tokens": 30912,
+    "elapsed_s": 22.15,
+    "tools_used": [
+      "rabi_experiment",
+      "fit_rabi",
+      "drag_calibration",
+      "randomized_benchmarking"
+    ],
+    "expected_tools_hit": 4,
+    "expected_tools_total": 4,
+    "answer_len": 1734,
+    "error": null
+  }
+]
