@@ -18,7 +18,7 @@ from typing import Any
 from backends.base import ShadowBackend
 from bench.circuits import get_benchmark, list_benchmarks as _list_bench
 from bench.mqtbench import get_mqtbench_circuits, MQTBenchCircuit
-from detection.drift_detector import DriftDetector
+from agent.drift_detection.drift_detector import DriftDetector
 
 
 # ═══════════════════════════════════════════════════════
@@ -468,6 +468,166 @@ TOOL_DEFINITIONS = [
             "required": ["delays_ns", "populations"],
         },
     },
+    {
+        "name": "drag_calibration",
+        "description": (
+            "Calibrate the DRAG (Derivative Removal by Adiabatic Gate) parameter "
+            "to suppress leakage to the |2⟩ state of a transmon qubit. "
+            "Sweeps the DRAG α parameter and finds the value that minimizes leakage. "
+            "Requires a pre-calibrated π-pulse amplitude (from rabi_experiment/fit_rabi). "
+            "Returns optimal α, minimum leakage, and gate fidelity estimate."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "qubit": {
+                    "type": "integer",
+                    "description": "Qubit index (used to fetch anharmonicity from backend). Default 0.",
+                    "default": 0,
+                },
+                "pi_amp_ghz": {
+                    "type": "number",
+                    "description": "Pre-calibrated π-pulse amplitude in GHz (from Rabi). Default 0.005.",
+                    "default": 0.005,
+                },
+                "anharmonicity_ghz": {
+                    "type": "number",
+                    "description": "Transmon anharmonicity δ = ω_12 - ω_01 in GHz (negative). Default -0.3.",
+                    "default": -0.3,
+                },
+                "pulse_duration_ns": {
+                    "type": "number",
+                    "description": "π-pulse duration in ns (default: 100).",
+                    "default": 100,
+                },
+                "pulse_shape": {
+                    "type": "string",
+                    "description": "Envelope shape: 'gaussian' or 'square' (default: gaussian).",
+                    "default": "gaussian",
+                },
+                "alpha_min": {
+                    "type": "number",
+                    "description": "Minimum DRAG α to sweep (default: -2.0).",
+                    "default": -2.0,
+                },
+                "alpha_max": {
+                    "type": "number",
+                    "description": "Maximum DRAG α to sweep (default: 2.0).",
+                    "default": 2.0,
+                },
+                "n_points": {
+                    "type": "integer",
+                    "description": "Number of α sweep points (default: 21).",
+                    "default": 21,
+                },
+                "refine": {
+                    "type": "boolean",
+                    "description": "Whether to do a fine sweep around the coarse optimum (default: true).",
+                    "default": True,
+                },
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "randomized_benchmarking",
+        "description": (
+            "Run a single-qubit Randomized Benchmarking (RB) experiment. "
+            "Applies random sequences of Clifford gates of increasing length, "
+            "measures survival probability decay, and extracts the Error Per "
+            "Clifford (EPC). This is the gold-standard metric for single-qubit "
+            "gate quality. Returns EPC, depolarizing parameter, and survival curve."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "qubit": {
+                    "type": "integer",
+                    "description": "Qubit index (default: 0).",
+                    "default": 0,
+                },
+                "sequence_lengths": {
+                    "type": "array",
+                    "items": {"type": "integer"},
+                    "description": "Clifford sequence lengths (default: [1,2,4,8,16,32,64]).",
+                },
+                "n_sequences": {
+                    "type": "integer",
+                    "description": "Random sequences per length (default: 20).",
+                    "default": 20,
+                },
+                "error_per_gate": {
+                    "type": "number",
+                    "description": "Depolarizing error per gate (default: uses backend gate error).",
+                },
+                "shots": {
+                    "type": "integer",
+                    "description": "Shots per sequence (default: 1024).",
+                    "default": 1024,
+                },
+                "seed": {
+                    "type": "integer",
+                    "description": "RNG seed for reproducibility (optional).",
+                },
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "next_best_experiment",
+        "description": (
+            "Use Bayesian Optimization to suggest the next most informative "
+            "calibration experiment. Maintains a Gaussian Process surrogate "
+            "over the parameter space and uses Expected Improvement to pick "
+            "the point that maximally improves the objective. "
+            "Pass previous observations as (parameters, objective) pairs. "
+            "Returns suggested parameter values with predicted outcome and rationale."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "parameter_bounds": {
+                    "type": "object",
+                    "description": (
+                        "Bounds for each parameter, e.g. "
+                        "{\"drag_alpha\": [-2, 2], \"pi_amp_ghz\": [0, 0.01]}."
+                    ),
+                },
+                "observations": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "parameters": {
+                                "type": "object",
+                                "description": "Parameter values for this observation.",
+                            },
+                            "objective": {
+                                "type": "number",
+                                "description": "Objective value (higher = better).",
+                            },
+                        },
+                    },
+                    "description": "List of previous observations [{parameters: {...}, objective: float}].",
+                },
+                "objective_name": {
+                    "type": "string",
+                    "description": "Name of the objective metric (default: fidelity).",
+                    "default": "fidelity",
+                },
+                "acquisition": {
+                    "type": "string",
+                    "description": "Acquisition function: 'ei', 'ucb', or 'thompson' (default: ei).",
+                    "default": "ei",
+                },
+                "seed": {
+                    "type": "integer",
+                    "description": "RNG seed (optional).",
+                },
+            },
+            "required": ["parameter_bounds", "observations"],
+        },
+    },
 ]
 
 
@@ -555,6 +715,12 @@ class ToolExecutor:
             return self._t1_experiment(tool_input)
         elif tool_name == "fit_t1":
             return self._fit_t1(tool_input)
+        elif tool_name == "drag_calibration":
+            return self._drag_calibration(tool_input)
+        elif tool_name == "randomized_benchmarking":
+            return self._randomized_benchmarking(tool_input)
+        elif tool_name == "next_best_experiment":
+            return self._next_best_experiment(tool_input)
         else:
             raise ValueError(f"Unknown tool: {tool_name}")
 
@@ -1332,3 +1498,165 @@ class ToolExecutor:
                 "note": "No fit result produced.",
             }
 
+    def _drag_calibration(self, inp: dict) -> dict:
+        """Run DRAG calibration sweep to find optimal α."""
+        from dynamics.drag import DRAGConfig, calibrate_drag
+
+        cfg = DRAGConfig(
+            pi_amp_ghz=inp.get("pi_amp_ghz", 0.005),
+            anharmonicity_ghz=inp.get("anharmonicity_ghz", -0.3),
+            pulse_duration_ns=inp.get("pulse_duration_ns", 100.0),
+            pulse_shape=inp.get("pulse_shape", "gaussian"),
+            alpha_range=(inp.get("alpha_min", -2.0), inp.get("alpha_max", 2.0)),
+            n_alphas=inp.get("n_points", 21),
+            n_pulses=2,
+            dt_ns=0.5,
+        )
+
+        refine = inp.get("refine", True)
+        result = calibrate_drag(cfg, refine=refine)
+
+        # Build JSON-serializable response
+        resp = {
+            "optimal_alpha": round(result["optimal_alpha"], 4),
+            "min_leakage": float(f"{result['min_leakage']:.2e}"),
+            "gate_fidelity": round(result["gate_fidelity"], 6),
+            "anharmonicity_ghz": cfg.anharmonicity_ghz,
+            "pi_amp_ghz": cfg.pi_amp_ghz,
+            "pulse_duration_ns": cfg.pulse_duration_ns,
+            "pulse_shape": cfg.pulse_shape,
+            "n_pulses_used": cfg.n_pulses,
+            "coarse_sweep": {
+                "alphas": [round(a, 4) for a in result["coarse_sweep"].alphas.tolist()],
+                "leakages": [float(f"{l:.4e}") for l in result["coarse_sweep"].leakages.tolist()],
+            },
+            "recommendation": (
+                f"Set DRAG alpha = {result['optimal_alpha']:.4f} for this qubit. "
+                f"Leakage suppressed to {result['min_leakage']:.2e} "
+                f"(gate fidelity ~ {result['gate_fidelity']:.4f}). "
+                "Proceed to Randomized Benchmarking to verify overall gate quality."
+            ),
+        }
+
+        if result["fine_sweep"] is not None:
+            resp["fine_sweep"] = {
+                "alphas": [round(a, 4) for a in result["fine_sweep"].alphas.tolist()],
+                "leakages": [float(f"{l:.4e}") for l in result["fine_sweep"].leakages.tolist()],
+            }
+
+        return resp
+
+    def _randomized_benchmarking(self, inp: dict) -> dict:
+        """Run Randomized Benchmarking experiment."""
+        from dynamics.rb import RBConfig, run_rb
+
+        # Get error rate from backend if not provided
+        error_per_gate = inp.get("error_per_gate")
+        if error_per_gate is None:
+            try:
+                health = self.backend.health()
+                error_per_gate = health.get("avg_gate_error", 0.001)
+            except Exception:
+                error_per_gate = 0.001
+
+        # Get readout error from backend
+        try:
+            health = self.backend.health()
+            readout_error = health.get("avg_readout_error", 0.01)
+        except Exception:
+            readout_error = 0.01
+
+        cfg = RBConfig(
+            sequence_lengths=inp.get("sequence_lengths", [1, 2, 4, 8, 16, 32, 64]),
+            n_sequences=inp.get("n_sequences", 20),
+            error_per_gate=error_per_gate,
+            readout_error=readout_error,
+            seed=inp.get("seed"),
+            shots=inp.get("shots", 1024),
+        )
+
+        result = run_rb(cfg)
+
+        # Fidelity = 1 - EPC
+        fidelity = 1 - result.error_per_clifford
+
+        resp = {
+            "error_per_clifford": round(result.error_per_clifford, 6),
+            "gate_fidelity": round(fidelity, 6),
+            "depolarizing_param": round(result.depolarizing_param, 6),
+            "fit_r_squared": round(result.r_squared, 4),
+            "sequence_lengths": result.sequence_lengths.tolist(),
+            "survival_probabilities": [round(p, 4) for p in result.survival_probs.tolist()],
+            "survival_stds": [round(s, 4) for s in result.survival_stds.tolist()],
+            "fit_parameters": {
+                "A": round(result.fit_a, 4),
+                "p": round(result.depolarizing_param, 6),
+                "B": round(result.fit_b, 4),
+                "model": "A * p^m + B",
+            },
+            "recommendation": (
+                f"Error per Clifford = {result.error_per_clifford:.2e} "
+                f"(gate fidelity = {fidelity:.4f}). "
+                + ("Gate quality is excellent (EPC < 1e-3). "
+                   if result.error_per_clifford < 1e-3
+                   else f"Gate quality may need improvement (EPC = {result.error_per_clifford:.2e}). "
+                        "Consider re-running DRAG calibration or checking qubit coherence. ")
+                + f"R² = {result.r_squared:.4f}."
+            ),
+        }
+
+        return resp
+
+    def _next_best_experiment(self, inp: dict) -> dict:
+        """Suggest the next best experiment using Bayesian Optimization."""
+        from dynamics.active_learning import ActiveLearningDesigner, DesignConfig
+
+        # Parse parameter bounds
+        raw_bounds = inp["parameter_bounds"]
+        bounds = {k: tuple(v) for k, v in raw_bounds.items()}
+
+        config = DesignConfig(
+            parameter_bounds=bounds,
+            objective_name=inp.get("objective_name", "fidelity"),
+            acquisition=inp.get("acquisition", "ei"),
+            seed=inp.get("seed"),
+        )
+
+        designer = ActiveLearningDesigner(config)
+
+        # Load previous observations
+        for obs in inp.get("observations", []):
+            designer.add_observation(
+                parameters=obs["parameters"],
+                objective=obs["objective"],
+            )
+
+        # Get suggestion
+        suggestion = designer.suggest_next()
+
+        # Get state summary
+        state = designer.get_state()
+
+        resp = {
+            "suggested_parameters": {
+                k: round(v, 6) for k, v in suggestion.parameters.items()
+            },
+            "predicted_objective": round(suggestion.predicted_mean, 4),
+            "predicted_uncertainty": round(suggestion.predicted_std, 4),
+            "acquisition_value": round(suggestion.acquisition_value, 6),
+            "rationale": suggestion.rationale,
+            "n_observations": len(state.observations),
+            "current_best": {
+                "parameters": {k: round(v, 6) for k, v in state.best_parameters.items()}
+                if state.best_parameters else None,
+                "objective": round(state.best_objective, 4) if state.best_objective > float("-inf") else None,
+            },
+            "recommendation": (
+                f"Run experiment with parameters: "
+                + ", ".join(f"{k}={v:.4f}" for k, v in suggestion.parameters.items())
+                + f". GP predicts {config.objective_name} = "
+                f"{suggestion.predicted_mean:.4f} ± {suggestion.predicted_std:.4f}."
+            ),
+        }
+
+        return resp

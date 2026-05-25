@@ -27,7 +27,7 @@ from typing import Any, Optional
 import numpy as np
 
 from backends.base import ShadowBackend
-from detection.drift_detector import DriftDetector, DriftReport, extract_features
+from agent.drift_detection.drift_detector import DriftDetector, DriftReport, extract_features
 
 
 # ═══════════════════════════════════════════════════════

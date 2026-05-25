@@ -203,7 +203,7 @@ def simulate_rabi(
     )
 
     # Reconstruct complex statevectors: shape (n_times, 2)
-    states = sol.y.T.view(np.complex128)  # (n_times, 2)
+    states = np.ascontiguousarray(sol.y.T).view(np.complex128)  # (n_times, 2)
     populations = np.abs(states[:, 1]) ** 2  # P(|1⟩)
 
     return RabiResult(

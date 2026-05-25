@@ -4,7 +4,7 @@ import pytest
 
 from backends.synthetic_drift import SyntheticDriftBackend, DriftProfile, STABLE, SUDDEN_DEGRADATION
 from backends.properties_stream import PropertiesStream
-from detection.drift_detector import (
+from agent.drift_detection.drift_detector import (
     DriftDetector,
     DriftReport,
     ChangePoint,

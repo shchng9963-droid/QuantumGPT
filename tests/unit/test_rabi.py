@@ -76,17 +76,18 @@ class TestSimulateRabi:
         assert r.amplitude == 0.0
 
     def test_square_analytic(self):
-        """Square pulse matches sin²(Ω·t/2) exactly."""
+        """Square pulse matches sin²(π·Ω·t) exactly (GHz convention with 2π factor)."""
         cfg = RabiConfig(pulse_duration_ns=100, pulse_shape="square", dt_ns=0.5)
-        amp = 0.02
+        amp = 0.002  # small amplitude in GHz
         r = simulate_rabi(amp, cfg)
-        analytic = np.sin(amp * r.times_ns / 2) ** 2
+        analytic = np.sin(np.pi * amp * r.times_ns) ** 2
         np.testing.assert_allclose(r.populations, analytic, atol=1e-8)
 
     def test_pi_pulse_square(self):
         """Square π-pulse gives P(|1⟩) ≈ 1."""
         T = 100
-        pi_amp = np.pi / T
+        # With 2π convention: P(|1⟩) = sin²(π·Ω·T), π-pulse when π·Ω·T = π/2 → Ω = 1/(2T)
+        pi_amp = 1.0 / (2 * T)
         cfg = RabiConfig(pulse_duration_ns=T, pulse_shape="square", dt_ns=0.1)
         r = simulate_rabi(pi_amp, cfg)
         assert r.final_p1 > 0.9999
@@ -94,7 +95,8 @@ class TestSimulateRabi:
     def test_2pi_pulse_returns(self):
         """2π-pulse returns to |0⟩."""
         T = 100
-        two_pi_amp = 2 * np.pi / T
+        # 2π-pulse: π·Ω·T = π → Ω = 1/T
+        two_pi_amp = 1.0 / T
         cfg = RabiConfig(pulse_duration_ns=T, pulse_shape="square", dt_ns=0.1)
         r = simulate_rabi(two_pi_amp, cfg)
         assert r.final_p1 < 1e-6
@@ -121,7 +123,7 @@ class TestDetuned:
     def test_detuned_reduces_max_population(self):
         """Off-resonance drive can't fully excite the qubit."""
         T = 100
-        pi_amp = np.pi / T  # Would be π on resonance
+        pi_amp = 1.0 / (2 * T)  # π-pulse on resonance
         cfg_on = RabiConfig(pulse_duration_ns=T, pulse_shape="square", dt_ns=0.5)
         cfg_off = RabiConfig(
             pulse_duration_ns=T, pulse_shape="square", dt_ns=0.5,
@@ -137,7 +139,7 @@ class TestDetuned:
             pulse_duration_ns=100, pulse_shape="square", dt_ns=1.0,
             drive_freq_ghz=5.0 + 1.0,  # 1 GHz detuning
         )
-        r = simulate_rabi(0.01, cfg)
+        r = simulate_rabi(0.001, cfg)  # small amp relative to detuning
         assert r.final_p1 < 0.01
 
 
@@ -147,7 +149,7 @@ class TestSweepRabi:
     def test_sweep_basic(self):
         cfg = RabiConfig(
             pulse_duration_ns=100, pulse_shape="square", dt_ns=1.0,
-            amp_range=(0, 0.05), n_amps=11,
+            amp_range=(0, 0.01), n_amps=11,
         )
         sw = sweep_rabi(cfg)
         assert len(sw.amplitudes) == 11
@@ -159,20 +161,19 @@ class TestSweepRabi:
         T = 100
         cfg = RabiConfig(
             pulse_duration_ns=T, pulse_shape="square", dt_ns=0.5,
-            amp_range=(0, 0.05), n_amps=51,
+            amp_range=(0, 0.01), n_amps=51,
         )
         sw = sweep_rabi(cfg)
-        analytic_pi = np.pi / T
-        assert abs(sw.pi_amplitude - analytic_pi) < 0.003  # within ~3 MHz
+        analytic_pi = 1.0 / (2 * T)  # = 0.005 GHz
+        assert abs(sw.pi_amplitude - analytic_pi) < 0.001
 
     def test_sweep_monotonic_start(self):
         """At small amplitudes, P(|1⟩) should increase monotonically."""
         cfg = RabiConfig(
             pulse_duration_ns=100, pulse_shape="square", dt_ns=1.0,
-            amp_range=(0, 0.015), n_amps=11,
+            amp_range=(0, 0.004), n_amps=11,  # below pi_amp (0.005), stays monotonic
         )
         sw = sweep_rabi(cfg)
-        # First few should be increasing (before π-amp)
         for i in range(1, 5):
             assert sw.final_populations[i] >= sw.final_populations[i - 1] - 1e-10
 
@@ -184,10 +185,10 @@ class TestEstimatePiPulse:
         T = 100
         cfg = RabiConfig(
             pulse_duration_ns=T, pulse_shape="square", dt_ns=0.5,
-            amp_range=(0, 0.05), n_amps=21,
+            amp_range=(0, 0.01), n_amps=21,
         )
         result = estimate_pi_pulse(cfg, refine=True)
-        analytic_pi = np.pi / T
+        analytic_pi = 1.0 / (2 * T)  # = 0.005 GHz
         assert abs(result["pi_amp"] - analytic_pi) < 0.001
         assert result["pi_fidelity"] > 0.999
         assert result["fine_sweep"] is not None
@@ -195,7 +196,7 @@ class TestEstimatePiPulse:
     def test_estimate_no_refine(self):
         cfg = RabiConfig(
             pulse_duration_ns=100, pulse_shape="square", dt_ns=1.0,
-            amp_range=(0, 0.05), n_amps=11,
+            amp_range=(0, 0.01), n_amps=11,
         )
         result = estimate_pi_pulse(cfg, refine=False)
         assert result["fine_sweep"] is None
@@ -204,7 +205,7 @@ class TestEstimatePiPulse:
     def test_half_pi_is_half(self):
         cfg = RabiConfig(
             pulse_duration_ns=100, pulse_shape="square", dt_ns=1.0,
-            amp_range=(0, 0.05), n_amps=11,
+            amp_range=(0, 0.01), n_amps=11,
         )
         result = estimate_pi_pulse(cfg, refine=False)
         assert abs(result["half_pi_amp"] - result["pi_amp"] / 2) < 1e-14

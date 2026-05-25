@@ -42,7 +42,7 @@ from backends.synthetic_drift import (
     SUDDEN_DEGRADATION,
 )
 from backends.properties_stream import PropertiesStream
-from detection.drift_detector import DriftDetector, extract_features, standardize
+from agent.drift_detection.drift_detector import DriftDetector, extract_features, standardize
 
 
 PROFILES = {
