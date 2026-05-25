@@ -46,30 +46,30 @@ t1_experiment, fit_t1, diagnose_and_suggest
 ### Stage F · LLM Provider (替换 mock planner)
 > v2.1 所有 demo 都跑 `provider="mock"` (规则引擎)。v2.2 接入真 LLM。
 
-| 任务 | 交付物 | 优先级 |
-|------|--------|--------|
-| F1. Claude / GPT-4o API 接入 | 修复 `_run_anthropic` / `_run_openai` | P0 |
-| F2. DeepSeek-V3 / Qwen-3 本地 vLLM 接入 | defer to v2.3 (GPU 资源待定) | P2 |
-| F3. Tool-calling schema 完善 | 14 工具 → JSON function calling schema | P0 |
-| F4. LLM vs Mock 对比测试 | 相同 10 个 prompt, mock vs LLM 对比表 | P1 |
-| F5. Cost / latency 追踪 | per-call token count + wall time 进 trace | P1 |
+| 任务 | 交付物 | 状态 |
+|------|--------|------|
+| F1. DeepSeek API 接入 | `provider="deepseek"` via OpenAI SDK | ✅ |
+| F2. DeepSeek-V3 / Qwen-3 本地 vLLM 接入 | defer to v2.3 (GPU 资源待定) | → v2.3 |
+| F3. Tool-calling schema 完善 | 18 工具 → JSON function calling schema | ✅ |
+| F4. LLM vs Mock 对比测试 | 10 prompt, 10/10 成功, avg 11.1s/task | ✅ |
+| F5. Cost / latency 追踪 | per-step token + latency + cost_summary | ✅ |
 
-**验收标准**: `qgpt --provider deepseek "Run GHZ-5 and mitigate if fidelity < 0.95"` 端到端通。
+**验收标准**: ✅ `qgpt --provider deepseek "Run GHZ-5 and mitigate if fidelity < 0.95"` 端到端通。
 
 ---
 
 ### Stage G · Eval 自动化 (QC-Agent-Bench skeleton)
 > v2 Plan Phase 4 的准备。先把框架搭好。
 
-| 任务 | 交付物 | 优先级 |
-|------|--------|--------|
-| G1. Task schema 定义 | `benchmark/tasks.yaml` — 20 个种子任务 | P0 |
-| G2. Eval runner | `eval/run_eval.py` 批量跑 + 结果持久化 | P0 (已有雏形) |
-| G3. 自动评分器 | fidelity / success / tool_count / wall_time 自动打分 | P0 |
+| 任务 | 交付物 | 状态 |
+|------|--------|------|
+| G1. Task schema 定义 | `benchmark/tasks.py` — 80 个任务 (含 Tier 4 Lab) | ✅ |
+| G2. Eval runner | `benchmark/runner.py` 批量跑 + 结果持久化 | ✅ (含 token/cost) |
+| G3. 自动评分器 | fidelity / success / tool_count / wall_time 自动打分 | ✅ |
 | G4. CI 集成 | `pytest tests/test_eval.py` 5 个 smoke task < 3 min | P1 |
 | G5. W&B 集成 | 每次 eval 自动上传 summary table | P2 |
 
-**验收标准**: `python eval/run_eval.py --tasks 20 --provider mock` 输出标准对比表。
+**验收标准**: ✅ `python benchmark/runner.py --tiers 4 --systems react_full` 输出标准对比表。
 
 ---
 
