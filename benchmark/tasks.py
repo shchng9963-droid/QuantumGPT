@@ -496,10 +496,163 @@ TIER_3_TASKS = [
 
 
 # ═══════════════════════════════════════════════════════
+# TIER 4: Lab Tasks (20) — v2 新增
+# Device-level characterization, tune-up, data interpretation
+# ═══════════════════════════════════════════════════════
+
+TIER_4_TASKS = [
+    # --- Tune-up Tasks (10) ---
+    BenchmarkTask(
+        id="T4-01", tier=4, name="Rabi Pi-Pulse",
+        prompt="Run a Rabi experiment on qubit 0 to find the pi-pulse amplitude.",
+        success_criteria={"must_call": ["rabi_experiment"], "must_report": ["pi_amplitude"]},
+        ground_truth={"pi_amplitude_range_ghz": [0.003, 0.01]},
+        difficulty="easy", tags=["lab", "rabi", "tune-up"],
+    ),
+    BenchmarkTask(
+        id="T4-02", tier=4, name="T2* Ramsey",
+        prompt="Measure the T2* dephasing time of qubit 0 using a Ramsey experiment.",
+        success_criteria={"must_call": ["ramsey_experiment"], "must_report": ["t2_star"]},
+        ground_truth={"t2_star_range_us": [50, 200]},
+        difficulty="easy", tags=["lab", "ramsey", "tune-up"],
+    ),
+    BenchmarkTask(
+        id="T4-03", tier=4, name="T1 Relaxation",
+        prompt="Measure the T1 relaxation time of qubit 0.",
+        success_criteria={"must_call": ["t1_experiment"], "must_report": ["t1"]},
+        ground_truth={"t1_range_us": [100, 400]},
+        difficulty="easy", tags=["lab", "t1", "tune-up"],
+    ),
+    BenchmarkTask(
+        id="T4-04", tier=4, name="Full Qubit Characterization",
+        prompt="Characterize qubit 0: find pi-pulse amplitude, T2*, and T1. Report all three.",
+        success_criteria={"must_call": ["rabi_experiment", "ramsey_experiment", "t1_experiment"],
+                         "must_report": ["pi_amplitude", "t2_star", "t1"]},
+        difficulty="medium", tags=["lab", "tune-up", "full-characterization"],
+    ),
+    BenchmarkTask(
+        id="T4-05", tier=4, name="Rabi + Fit",
+        prompt="Run a Rabi experiment and fit the oscillation curve. Report the pi-pulse with uncertainty.",
+        success_criteria={"must_call": ["rabi_experiment", "fit_rabi"],
+                         "must_report": ["pi_amplitude", "r_squared"]},
+        difficulty="medium", tags=["lab", "rabi", "fitting"],
+    ),
+    BenchmarkTask(
+        id="T4-06", tier=4, name="Ramsey + Fit + Detuning",
+        prompt="Run Ramsey fringes with 2 MHz artificial detuning and fit to extract T2* and the recovered detuning.",
+        success_criteria={"must_call": ["ramsey_experiment"],
+                         "must_report": ["t2_star", "detuning"]},
+        difficulty="medium", tags=["lab", "ramsey", "fitting"],
+    ),
+    BenchmarkTask(
+        id="T4-07", tier=4, name="T1 + Fit Quality",
+        prompt="Measure T1 and fit the decay curve. Report T1 with fit quality (R-squared).",
+        success_criteria={"must_call": ["t1_experiment", "fit_t1"],
+                         "must_report": ["t1", "r_squared"]},
+        difficulty="medium", tags=["lab", "t1", "fitting"],
+    ),
+    BenchmarkTask(
+        id="T4-08", tier=4, name="Multi-Qubit Characterization",
+        prompt="Measure T1 and T2* for qubits 0, 1, and 2. Which qubit has the best coherence?",
+        success_criteria={"must_call": ["ramsey_experiment", "t1_experiment"],
+                         "must_report": ["best_qubit"]},
+        difficulty="hard", tags=["lab", "tune-up", "multi-qubit"],
+    ),
+    BenchmarkTask(
+        id="T4-09", tier=4, name="Tune-Up Sequence",
+        prompt="Run a full tune-up: Rabi, then Ramsey, then T1. If any fit has R² < 0.95, retry with more points.",
+        success_criteria={"must_call": ["rabi_experiment", "ramsey_experiment", "t1_experiment"],
+                         "min_tool_calls": 3},
+        difficulty="hard", tags=["lab", "tune-up", "sequence"],
+    ),
+    BenchmarkTask(
+        id="T4-10", tier=4, name="Characterize and Diagnose",
+        prompt="Characterize qubit 0 (Rabi + Ramsey + T1), then diagnose if any parameter is suboptimal.",
+        success_criteria={"must_call": ["rabi_experiment", "diagnose_and_suggest"],
+                         "min_tool_calls": 4},
+        difficulty="hard", tags=["lab", "tune-up", "diagnosis"],
+    ),
+
+    # --- Data Interpretation Tasks (5) ---
+    BenchmarkTask(
+        id="T4-11", tier=4, name="Interpret Rabi Data",
+        prompt="A Rabi experiment gave pi-amplitude = 0.005 GHz with a 100ns square pulse. "
+               "Is this physically reasonable? What Rabi frequency does this correspond to?",
+        success_criteria={"must_report": ["rabi_frequency", "assessment"]},
+        difficulty="medium", tags=["lab", "interpretation", "rabi"],
+    ),
+    BenchmarkTask(
+        id="T4-12", tier=4, name="T1 vs T2 Consistency",
+        prompt="Qubit 0 has T1 = 200 μs and T2* = 500 μs. Is this physically consistent? Explain.",
+        success_criteria={"must_report": ["consistency_assessment"]},
+        difficulty="medium", tags=["lab", "interpretation", "coherence"],
+    ),
+    BenchmarkTask(
+        id="T4-13", tier=4, name="Compare Qubit Health",
+        prompt="Get T1, T2, and gate errors for qubits 0-4. Rank them by overall quality and explain your ranking.",
+        success_criteria={"must_call": ["get_qubit_properties"], "must_report": ["ranking"]},
+        difficulty="medium", tags=["lab", "interpretation", "ranking"],
+    ),
+    BenchmarkTask(
+        id="T4-14", tier=4, name="Fit Quality Assessment",
+        prompt="Run T1 measurement. If R² < 0.99, explain what might cause a poor fit and suggest improvements.",
+        success_criteria={"must_call": ["t1_experiment"], "must_report": ["fit_assessment"]},
+        difficulty="hard", tags=["lab", "interpretation", "fitting"],
+    ),
+    BenchmarkTask(
+        id="T4-15", tier=4, name="Coherence Budget",
+        prompt="Measure T1 and T2* for qubit 0. Calculate the pure dephasing rate (1/T_phi = 1/T2* - 1/(2*T1)). "
+               "Is dephasing dominated by T1 or pure dephasing?",
+        success_criteria={"must_call": ["t1_experiment", "ramsey_experiment"],
+                         "must_report": ["t_phi", "dominant_mechanism"]},
+        difficulty="hard", tags=["lab", "interpretation", "coherence-budget"],
+    ),
+
+    # --- Cross-device Transfer Tasks (5) ---
+    BenchmarkTask(
+        id="T4-16", tier=4, name="Compare Backends for Lab",
+        prompt="Compare qubit properties of FakeBrisbane. Which qubits would you select for a 3-qubit tune-up experiment?",
+        success_criteria={"must_call": ["get_qubit_properties"], "must_report": ["selected_qubits"]},
+        difficulty="medium", tags=["lab", "transfer", "selection"],
+    ),
+    BenchmarkTask(
+        id="T4-17", tier=4, name="Tune-Up Under Drift",
+        prompt="The backend may have drifted. Check health, then run Rabi + T1 to verify qubit 0 is still calibrated.",
+        drift_profile="linear_decay", drift_time=8.0,
+        success_criteria={"must_call": ["get_backend_health", "rabi_experiment", "t1_experiment"]},
+        difficulty="hard", tags=["lab", "transfer", "drift"],
+    ),
+    BenchmarkTask(
+        id="T4-18", tier=4, name="Post-Drift Recharacterize",
+        prompt="After drift was detected, recharacterize qubit 0 (Rabi + Ramsey + T1) and compare with pre-drift values from backend properties.",
+        drift_profile="sudden", drift_time=6.0,
+        success_criteria={"must_call": ["rabi_experiment", "ramsey_experiment", "t1_experiment", "get_qubit_properties"],
+                         "must_report": ["comparison"]},
+        difficulty="hard", tags=["lab", "transfer", "recharacterize"],
+    ),
+    BenchmarkTask(
+        id="T4-19", tier=4, name="Coherence Time Monitoring",
+        prompt="Measure T1 of qubit 0 under diurnal drift. Compare with the backend's reported T1. Are they consistent?",
+        drift_profile="diurnal", drift_time=12.0,
+        success_criteria={"must_call": ["t1_experiment", "get_qubit_properties"],
+                         "must_report": ["comparison"]},
+        difficulty="hard", tags=["lab", "transfer", "monitoring"],
+    ),
+    BenchmarkTask(
+        id="T4-20", tier=4, name="Full Lab Pipeline",
+        prompt="Health check → detect drift → characterize qubit 0 (Rabi+Ramsey+T1) → diagnose → report.",
+        success_criteria={"min_tool_calls": 6, "must_call": ["get_backend_health", "rabi_experiment",
+                                                              "ramsey_experiment", "t1_experiment"]},
+        difficulty="hard", tags=["lab", "pipeline", "full"],
+    ),
+]
+
+
+# ═══════════════════════════════════════════════════════
 # Combined task list
 # ═══════════════════════════════════════════════════════
 
-TASKS: list[BenchmarkTask] = TIER_1_TASKS + TIER_2_TASKS + TIER_3_TASKS
+TASKS: list[BenchmarkTask] = TIER_1_TASKS + TIER_2_TASKS + TIER_3_TASKS + TIER_4_TASKS
 
 
 def get_tier(tier: int) -> list[BenchmarkTask]:
@@ -521,6 +674,7 @@ def summary():
     print(f"  Tier 1 (Static):  {len(TIER_1_TASKS)} tasks")
     print(f"  Tier 2 (Drift):   {len(TIER_2_TASKS)} tasks")
     print(f"  Tier 3 (Failure): {len(TIER_3_TASKS)} tasks")
+    print(f"  Tier 4 (Lab):     {len(TIER_4_TASKS)} tasks")
     print(f"\nDifficulty distribution:")
     for d in ["easy", "medium", "hard"]:
         n = sum(1 for t in TASKS if t.difficulty == d)
@@ -528,7 +682,7 @@ def summary():
     print(f"\nTag distribution:")
     from collections import Counter
     tags = Counter(tag for t in TASKS for tag in t.tags)
-    for tag, count in tags.most_common(10):
+    for tag, count in tags.most_common(15):
         print(f"  {tag}: {count}")
 
 

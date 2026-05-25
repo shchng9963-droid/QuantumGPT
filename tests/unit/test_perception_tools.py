@@ -35,6 +35,10 @@ class TestToolDefinitions:
             "predict_fidelity",
             "rabi_experiment",
             "fit_rabi",
+            "ramsey_experiment",
+            "fit_ramsey",
+            "t1_experiment",
+            "fit_t1",
             "diagnose_and_suggest",
         }
         assert len(names) == len(set(names))

@@ -15,11 +15,12 @@
 | memory_demo / drift_demo / showcase runner | ✅ |
 | Handout v2.1 | ✅ |
 
-**当前工具清单 (14 个)**:
+**当前工具清单 (18 个)**:
 get_backend_health, get_qubit_properties, run_circuit, list_benchmarks,
 get_coupling_map, detect_drift, get_calibration_age, compare_backends,
 transpile_circuit, apply_mitigation, predict_fidelity,
-rabi_experiment, fit_rabi, diagnose_and_suggest
+rabi_experiment, fit_rabi, ramsey_experiment, fit_ramsey,
+t1_experiment, fit_t1, diagnose_and_suggest
 
 **当前 backend**: FakeBackendAdapter (门级), SyntheticDriftBackend, ReplayBackend
 
@@ -27,16 +28,16 @@ rabi_experiment, fit_rabi, diagnose_and_suggest
 
 ## v2.2 目标 (2 周)
 
-### Stage E · 新实验工具: Ramsey + T1 + fit
+### Stage E · 新实验工具: Ramsey + T1 + fit ✅
 > v2 Plan 附录 B 的 #14 (ramsey_experiment), #24 (extract_t1_t2), #23 (fit_ramsey)
 
-| 任务 | 交付物 | 优先级 |
-|------|--------|--------|
-| E1. `ramsey_experiment` 工具 | 仿真跑 Ramsey 并输出 IQ 衰减曲线 | P0 |
-| E2. `fit_ramsey` 工具 | 拟合 T2* + detuning | P0 |
-| E3. `t1_experiment` + `fit_t1` | 输出 T1 衰减 + 拟合 | P0 |
-| E4. Planner 集成 | agent 能根据 prompt 自主选择 rabi/ramsey/t1 | P0 |
-| E5. Demo: `tune_up_demo.py` | cavity→rabi→ramsey→T1 全链 | P1 |
+| 任务 | 交付物 | 状态 |
+|------|--------|------|
+| E1. `ramsey_experiment` 工具 | 仿真跑 Ramsey 并输出 IQ 衰减曲线 | ✅ |
+| E2. `fit_ramsey` 工具 | 拟合 T2* + detuning | ✅ |
+| E3. `t1_experiment` + `fit_t1` | 输出 T1 衰减 + 拟合 | ✅ |
+| E4. Planner 集成 | agent 能根据 prompt 自主选择 rabi/ramsey/t1 | → Stage F |
+| E5. Demo: `tune_up_demo.py` | cavity→rabi→ramsey→T1 全链 | ✅ |
 
 **验收标准**: `qgpt "measure T2* of qubit 0"` 自动跑 Ramsey + fit，报告 T2* 和 detuning。
 
@@ -47,8 +48,8 @@ rabi_experiment, fit_rabi, diagnose_and_suggest
 
 | 任务 | 交付物 | 优先级 |
 |------|--------|--------|
-| F1. DeepSeek-V3 / Qwen-3 本地 vLLM 接入 | `_run_vllm()` 方法 | P0 |
-| F2. Claude / GPT-4o API 接入 (已有骨架) | 修复 `_run_anthropic` / `_run_openai` | P1 |
+| F1. Claude / GPT-4o API 接入 | 修复 `_run_anthropic` / `_run_openai` | P0 |
+| F2. DeepSeek-V3 / Qwen-3 本地 vLLM 接入 | defer to v2.3 (GPU 资源待定) | P2 |
 | F3. Tool-calling schema 完善 | 14 工具 → JSON function calling schema | P0 |
 | F4. LLM vs Mock 对比测试 | 相同 10 个 prompt, mock vs LLM 对比表 | P1 |
 | F5. Cost / latency 追踪 | per-call token count + wall time 进 trace | P1 |

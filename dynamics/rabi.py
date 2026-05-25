@@ -1,5 +1,5 @@
 """
-Rabi oscillation simulator using qiskit-dynamics.
+Rabi oscillation simulator (pure numpy + scipy).
 
 Models a single transmon qubit driven by a resonant microwave pulse.
 The qubit Hamiltonian in the rotating frame is:
@@ -8,7 +8,8 @@ The qubit Hamiltonian in the rotating frame is:
 
 where Ω(t) is the drive envelope (Gaussian or square) and Δ is the detuning.
 
-The Solver evolves |0⟩ under H(t) and we read out P(|1⟩) = |⟨1|ψ(t)⟩|².
+We solve the Schrödinger equation i dψ/dt = H(t)ψ with scipy.integrate.solve_ivp
+and read out P(|1⟩) = |⟨1|ψ(t)⟩|².
 A sweep over drive amplitudes produces the classic Rabi oscillation curve
 from which the π-pulse amplitude can be extracted.
 """
@@ -21,7 +22,7 @@ from typing import Literal
 
 import numpy as np
 from numpy.typing import NDArray
-from qiskit_dynamics import Solver, Signal
+from scipy.integrate import solve_ivp
 
 
 # ---------- Pauli matrices (2x2) ----------
@@ -140,6 +141,9 @@ def simulate_rabi(
     where Δ = ω_drive - ω_qubit (detuning) and Ω(t) is the envelope
     scaled by ``amplitude``.
 
+    Uses scipy solve_ivp (DOP853) to integrate the Schrödinger equation:
+        i dψ/dt = 2π H(t) ψ   (factor 2π converts GHz → rad/ns)
+
     Parameters
     ----------
     amplitude : float
@@ -155,31 +159,16 @@ def simulate_rabi(
     cfg = config or RabiConfig()
     envelope_fn = _make_envelope_fn(cfg, amp=amplitude)
 
-    # Build the Hamiltonian in rotating frame
+    # Detuning in GHz
     delta = cfg.detuning_ghz
 
-    # Static Hamiltonian: detuning term (can be zero matrix)
+    # Static Hamiltonian: detuning term
     static_ham = -(delta / 2.0) * _SIGMA_Z
 
-    # Drive operator: (1/2) σ_x  — amplitude comes via the signal
+    # Drive operator: (1/2) σ_x
     drive_op = 0.5 * _SIGMA_X
 
-    # Build solver with channel-based API
-    solver = Solver(
-        static_hamiltonian=static_ham,
-        hamiltonian_operators=[drive_op],
-        hamiltonian_channels=["d0"],
-        channel_carrier_freqs={"d0": 0.0},  # already in rotating frame
-        dt=cfg.dt_ns,
-    )
-
-    # Initial state |0⟩
-    y0 = np.array([1.0 + 0j, 0.0 + 0j])
-
-    # Build the drive signal (callable envelope, list-based per channel)
-    drive_signal = Signal(envelope=envelope_fn, carrier_freq=0.0)
-
-    # Evaluation times — subsample for memory efficiency
+    # Evaluation times
     n_steps = int(cfg.pulse_duration_ns / cfg.dt_ns)
     times = np.linspace(0, cfg.pulse_duration_ns, n_steps + 1)
     max_eval_points = 500
@@ -189,18 +178,32 @@ def simulate_rabi(
     else:
         t_eval = times
 
-    result = solver.solve(
+    # Schrödinger equation: i dψ/dt = 2π H(t) ψ
+    # → dψ/dt = -i 2π H(t) ψ
+    # H(t) = static_ham + envelope(t) * drive_op
+    def schrodinger_rhs(t, y):
+        psi = y.view(np.complex128)
+        omega_t = envelope_fn(t)
+        H = static_ham + omega_t * drive_op
+        dpsi = -1j * 2.0 * np.pi * H @ psi
+        return dpsi.view(np.float64)
+
+    # Initial state |0⟩ as real-valued array (real, imag interleaved)
+    y0 = np.array([1.0 + 0j, 0.0 + 0j])
+    y0_real = y0.view(np.float64)
+
+    sol = solve_ivp(
+        schrodinger_rhs,
         t_span=[float(times[0]), float(times[-1])],
-        y0=y0,
-        signals=[drive_signal],
+        y0=y0_real,
         t_eval=t_eval,
         method="DOP853",
         atol=1e-10,
         rtol=1e-10,
     )
 
-    # result.y shape: (n_times, 2)
-    states = np.array(result.y)
+    # Reconstruct complex statevectors: shape (n_times, 2)
+    states = sol.y.T.view(np.complex128)  # (n_times, 2)
     populations = np.abs(states[:, 1]) ** 2  # P(|1⟩)
 
     return RabiResult(

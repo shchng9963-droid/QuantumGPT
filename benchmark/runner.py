@@ -50,6 +50,11 @@ class EvalResult:
     max_turns_exceeded: bool = False
     hallucinated_tool_names: list[str] | None = None
     trace: dict[str, Any] | None = None
+    # F5: token and cost tracking
+    total_tokens: int = 0
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    cost_usd: float = 0.0
 
 
 # ═══════════════════════════════════════════════════════
@@ -272,6 +277,10 @@ def run_benchmark(
                     max_turns_exceeded=getattr(diagnostics, "max_turns_exceeded", False) if diagnostics else False,
                     hallucinated_tool_names=getattr(diagnostics, "hallucinated_tool_names", []) if diagnostics else [],
                     trace=trace_payload,
+                    total_tokens=getattr(trace, "total_tokens", 0),
+                    prompt_tokens=getattr(trace, "prompt_tokens_total", 0),
+                    completion_tokens=getattr(trace, "completion_tokens_total", 0),
+                    cost_usd=getattr(trace, "cost_summary", {}).get("total_cost_usd", 0.0) if hasattr(trace, "cost_summary") else 0.0,
                 ))
             except Exception as e:
                 results.append(EvalResult(

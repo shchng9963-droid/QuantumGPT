@@ -1,0 +1,27 @@
+{
+  "rabi": {
+    "pi_amplitude_ghz": 0.03487179487179487,
+    "half_pi_amplitude_ghz": 0.017435897435897435,
+    "r_squared": 0.0,
+    "elapsed_s": 0.23967695236206055
+  },
+  "ramsey": {
+    "T2_star_us": 90.78818098938464,
+    "detuning_mhz": 2.0004529916964784,
+    "r_squared": 0.9954269413751368,
+    "elapsed_s": 0.3204777240753174
+  },
+  "t1": {
+    "T1_us": 203.45909799535534,
+    "T1_configured_us": 200.0,
+    "r_squared": 0.9983826841371845,
+    "elapsed_s": 0.8195943832397461
+  },
+  "total_elapsed_s": 1.379749059677124,
+  "backend": {
+    "name": "DynamicsSim",
+    "qubit_freq_ghz": 5.0,
+    "configured_t1_us": 200.0,
+    "configured_t2_us": 150.0
+  }
+}

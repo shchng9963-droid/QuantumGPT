@@ -340,6 +340,134 @@ TOOL_DEFINITIONS = [
             "required": [],
         },
     },
+    {
+        "name": "ramsey_experiment",
+        "description": (
+            "Run a Ramsey fringe experiment on a simulated qubit. "
+            "Applies two pi/2 pulses separated by a variable delay with "
+            "artificial detuning. Returns the decay envelope and oscillation data. "
+            "Use fit_ramsey to extract T2* and detuning from the results."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "qubit": {
+                    "type": "integer",
+                    "description": "Qubit index (default: 0)",
+                    "default": 0,
+                },
+                "delay_max_ns": {
+                    "type": "number",
+                    "description": "Maximum delay between pi/2 pulses in ns (default: 5000)",
+                    "default": 5000.0,
+                },
+                "n_points": {
+                    "type": "integer",
+                    "description": "Number of delay points (default: 50)",
+                    "default": 50,
+                },
+                "artificial_detuning_mhz": {
+                    "type": "number",
+                    "description": "Artificial detuning frequency in MHz (default: 2.0)",
+                    "default": 2.0,
+                },
+                "shots": {
+                    "type": "integer",
+                    "description": "Shots per point (default: 1024)",
+                    "default": 1024,
+                },
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "fit_ramsey",
+        "description": (
+            "Fit Ramsey fringe data to extract T2* (dephasing time) and detuning. "
+            "Takes delay values and P(|1>) populations from ramsey_experiment. "
+            "Returns T2* in microseconds, detuning in MHz, and fit quality."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "delays_ns": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "Delay values in nanoseconds",
+                },
+                "populations": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "P(|1>) values at each delay",
+                },
+                "artificial_detuning_mhz": {
+                    "type": "number",
+                    "description": "Detuning used in experiment for initial guess (default: 2.0)",
+                    "default": 2.0,
+                },
+            },
+            "required": ["delays_ns", "populations"],
+        },
+    },
+    {
+        "name": "t1_experiment",
+        "description": (
+            "Run a T1 energy relaxation experiment on a simulated qubit. "
+            "Applies a pi-pulse to excite the qubit, then measures decay "
+            "as a function of wait time. Returns population vs delay data. "
+            "Use fit_t1 to extract the T1 relaxation time."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "qubit": {
+                    "type": "integer",
+                    "description": "Qubit index (default: 0)",
+                    "default": 0,
+                },
+                "delay_max_ns": {
+                    "type": "number",
+                    "description": "Maximum delay after pi-pulse in ns (default: 500000 = 500 us)",
+                    "default": 500000.0,
+                },
+                "n_points": {
+                    "type": "integer",
+                    "description": "Number of delay points (default: 50)",
+                    "default": 50,
+                },
+                "shots": {
+                    "type": "integer",
+                    "description": "Shots per point (default: 1024)",
+                    "default": 1024,
+                },
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "fit_t1",
+        "description": (
+            "Fit T1 relaxation data to extract the energy relaxation time T1. "
+            "Takes delay values and P(|1>) populations from t1_experiment. "
+            "Returns T1 in microseconds, amplitude, offset, and fit quality."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "delays_ns": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "Delay values in nanoseconds",
+                },
+                "populations": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "P(|1>) values at each delay",
+                },
+            },
+            "required": ["delays_ns", "populations"],
+        },
+    },
 ]
 
 
@@ -419,6 +547,14 @@ class ToolExecutor:
             return self._rabi_experiment(tool_input)
         elif tool_name == "fit_rabi":
             return self._fit_rabi(tool_input)
+        elif tool_name == "ramsey_experiment":
+            return self._ramsey_experiment(tool_input)
+        elif tool_name == "fit_ramsey":
+            return self._fit_ramsey(tool_input)
+        elif tool_name == "t1_experiment":
+            return self._t1_experiment(tool_input)
+        elif tool_name == "fit_t1":
+            return self._fit_t1(tool_input)
         else:
             raise ValueError(f"Unknown tool: {tool_name}")
 
@@ -991,3 +1127,208 @@ class ToolExecutor:
                 "fit_error": str(e),
                 "note": "Fallback to argmax; sinusoidal fit failed.",
             }
+
+    # ═══════════════════════════════════════════════════════
+    # Ramsey experiment tools
+    # ═══════════════════════════════════════════════════════
+
+    def _ramsey_experiment(self, inp: dict) -> dict:
+        """Run Ramsey experiment using DynamicsLabAdapter."""
+        from experiments.ramsey_experiment import RamseyExperiment
+        from backends.dynamics_lab_adapter import DynamicsLabAdapter
+
+        # Resolve pi/2 amplitude from calibration store or default
+        pi_amp = 0.03  # default pi amplitude
+        if hasattr(self.backend, '_adapter') and hasattr(self.backend._adapter, '_fake'):
+            pass  # gate-level, won't work for pulse
+        if hasattr(self.backend, '_calibration_store'):
+            pi_amp = self.backend._calibration_store.get("q0_pi_amplitude", 0.03)
+        half_pi_amp = pi_amp / 2 if pi_amp > 0 else 0.015
+
+        # Use DynamicsLabAdapter for pulse-level simulation
+        if isinstance(self.backend, DynamicsLabAdapter):
+            lab = self.backend
+        else:
+            # Create a standalone dynamics sim for the experiment
+            lab = DynamicsLabAdapter(
+                num_qubits=1,
+                qubit_freq_ghz=5.0,
+                t1_us=200.0,
+                t2_us=150.0,
+            )
+
+        exp = RamseyExperiment(
+            qubit=inp.get("qubit", 0),
+            delay_max_ns=inp.get("delay_max_ns", 5000.0),
+            n_points=inp.get("n_points", 50),
+            pi_half_amplitude=half_pi_amp,
+            artificial_detuning_mhz=inp.get("artificial_detuning_mhz", 2.0),
+            shots=inp.get("shots", 1024),
+        )
+
+        result = exp.run(lab)
+        result = exp.analyze(result)
+
+        resp: dict = {
+            "experiment": "ramsey",
+            "qubit": exp.qubit,
+            "n_points": exp.n_points,
+            "delay_max_ns": exp.delay_max_ns,
+            "artificial_detuning_mhz": exp.artificial_detuning_mhz,
+            "delays_ns": [round(float(d), 2) for d in result.sweep_values],
+            "populations": [round(float(p), 4) for p in result.measured_values],
+        }
+
+        if result.fit:
+            resp["fit"] = {
+                "T2_star_us": result.fit.parameters.get("T2_star_us"),
+                "T2_star_ns": result.fit.parameters.get("T2_star_ns"),
+                "detuning_mhz": result.fit.parameters.get("detuning_mhz"),
+                "r_squared": round(result.fit.r_squared, 4),
+                "model": result.fit.model,
+            }
+            if result.fit.uncertainties:
+                resp["fit"]["uncertainties"] = {
+                    k: round(v, 4) for k, v in result.fit.uncertainties.items()
+                }
+        else:
+            resp["fit"] = None
+
+        return resp
+
+    def _fit_ramsey(self, inp: dict) -> dict:
+        """Fit Ramsey fringe data standalone (no backend needed)."""
+        import numpy as np
+        from experiments.ramsey_experiment import RamseyExperiment
+        from experiments.base import ExperimentResult
+
+        delays = np.array(inp["delays_ns"])
+        pops = np.array(inp["populations"])
+        detuning = inp.get("artificial_detuning_mhz", 2.0)
+
+        result = ExperimentResult(
+            protocol_name="ramsey",
+            sweep_parameter="delay_ns",
+            sweep_values=delays,
+            measured_values=pops,
+            metadata={"qubit": 0},
+        )
+
+        exp = RamseyExperiment(artificial_detuning_mhz=detuning)
+        result = exp.analyze(result)
+
+        if result.fit:
+            return {
+                "T2_star_us": result.fit.parameters.get("T2_star_us"),
+                "T2_star_ns": result.fit.parameters.get("T2_star_ns"),
+                "detuning_mhz": result.fit.parameters.get("detuning_mhz"),
+                "amplitude": result.fit.parameters.get("amplitude"),
+                "offset": result.fit.parameters.get("offset"),
+                "r_squared": round(result.fit.r_squared, 4),
+                "model": result.fit.model,
+                "fit_successful": result.fit.r_squared > 0.5,
+            }
+        else:
+            return {
+                "fit_successful": False,
+                "note": "No fit result produced.",
+            }
+
+    # ═══════════════════════════════════════════════════════
+    # T1 experiment tools
+    # ═══════════════════════════════════════════════════════
+
+    def _t1_experiment(self, inp: dict) -> dict:
+        """Run T1 relaxation experiment using DynamicsLabAdapter."""
+        from experiments.t1_experiment import T1Experiment
+        from backends.dynamics_lab_adapter import DynamicsLabAdapter
+
+        # Resolve pi amplitude from calibration store or default
+        pi_amp = 0.03
+        if hasattr(self.backend, '_calibration_store'):
+            pi_amp = self.backend._calibration_store.get("q0_pi_amplitude", 0.03)
+
+        if isinstance(self.backend, DynamicsLabAdapter):
+            lab = self.backend
+        else:
+            lab = DynamicsLabAdapter(
+                num_qubits=1,
+                qubit_freq_ghz=5.0,
+                t1_us=200.0,
+                t2_us=150.0,
+            )
+
+        exp = T1Experiment(
+            qubit=inp.get("qubit", 0),
+            delay_max_ns=inp.get("delay_max_ns", 500_000.0),
+            n_points=inp.get("n_points", 50),
+            pi_amplitude=pi_amp,
+            shots=inp.get("shots", 1024),
+        )
+
+        result = exp.run(lab)
+        result = exp.analyze(result)
+
+        resp: dict = {
+            "experiment": "t1",
+            "qubit": exp.qubit,
+            "n_points": exp.n_points,
+            "delay_max_ns": exp.delay_max_ns,
+            "delays_ns": [round(float(d), 2) for d in result.sweep_values],
+            "populations": [round(float(p), 4) for p in result.measured_values],
+        }
+
+        if result.fit:
+            resp["fit"] = {
+                "T1_us": result.fit.parameters.get("T1_us"),
+                "T1_ns": result.fit.parameters.get("T1_ns"),
+                "amplitude": result.fit.parameters.get("amplitude"),
+                "offset": result.fit.parameters.get("offset"),
+                "r_squared": round(result.fit.r_squared, 4),
+                "model": result.fit.model,
+            }
+            if result.fit.uncertainties:
+                resp["fit"]["uncertainties"] = {
+                    k: round(v, 4) for k, v in result.fit.uncertainties.items()
+                }
+        else:
+            resp["fit"] = None
+
+        return resp
+
+    def _fit_t1(self, inp: dict) -> dict:
+        """Fit T1 data standalone (no backend needed)."""
+        import numpy as np
+        from experiments.t1_experiment import T1Experiment
+        from experiments.base import ExperimentResult
+
+        delays = np.array(inp["delays_ns"])
+        pops = np.array(inp["populations"])
+
+        result = ExperimentResult(
+            protocol_name="t1",
+            sweep_parameter="delay_ns",
+            sweep_values=delays,
+            measured_values=pops,
+            metadata={"qubit": 0},
+        )
+
+        exp = T1Experiment()
+        result = exp.analyze(result)
+
+        if result.fit:
+            return {
+                "T1_us": result.fit.parameters.get("T1_us"),
+                "T1_ns": result.fit.parameters.get("T1_ns"),
+                "amplitude": result.fit.parameters.get("amplitude"),
+                "offset": result.fit.parameters.get("offset"),
+                "r_squared": round(result.fit.r_squared, 4),
+                "model": result.fit.model,
+                "fit_successful": result.fit.r_squared > 0.5,
+            }
+        else:
+            return {
+                "fit_successful": False,
+                "note": "No fit result produced.",
+            }
+

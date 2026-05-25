@@ -63,7 +63,14 @@ Your capabilities:
 - Apply error mitigation (ZNE)
 - Predict fidelity before running circuits
 - Run Rabi oscillation experiments for qubit characterization
+- Run Ramsey fringe experiments to measure T2* (dephasing time) and detuning
+- Run T1 relaxation experiments to measure energy relaxation time
 - Diagnose problems and suggest concrete actions
+
+Available experiment tools:
+- rabi_experiment / fit_rabi: drive amplitude sweep → pi-pulse calibration
+- ramsey_experiment / fit_ramsey: delay sweep with artificial detuning → T2* and frequency offset
+- t1_experiment / fit_t1: post-excitation delay sweep → T1 relaxation time
 
 WORKFLOW:
 1. Thought: reason about what information you need and why
@@ -101,6 +108,10 @@ class TraceStep:
     budget_decision: str | None = None
     state_summary: dict[str, Any] | None = None
     timestamp: float = 0.0
+    # F5: per-step token and latency tracking
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    api_latency_ms: float = 0.0
 
     def to_dict(self, include_observation: bool = False) -> dict:
         data = {k: v for k, v in {
@@ -113,6 +124,9 @@ class TraceStep:
             "budget_decision": self.budget_decision,
             "state_summary": self.state_summary,
             "timestamp": round(self.timestamp, 3),
+            "prompt_tokens": self.prompt_tokens or None,
+            "completion_tokens": self.completion_tokens or None,
+            "api_latency_ms": round(self.api_latency_ms, 1) if self.api_latency_ms else None,
         }.items() if v is not None}
         if include_observation and self.observation is not None:
             data["observation"] = self.observation
@@ -166,10 +180,35 @@ class AgentTrace:
     budget_summary: dict = field(default_factory=dict)
     diagnostics: TraceDiagnostics = field(default_factory=TraceDiagnostics)
     state: AgentState | None = None
+    # F5: detailed token breakdown
+    prompt_tokens_total: int = 0
+    completion_tokens_total: int = 0
 
     @property
     def best_fidelity(self) -> float:
         return self.budget_summary.get("best_fidelity", 0.0)
+
+    @property
+    def cost_summary(self) -> dict:
+        """Estimate API cost based on provider pricing (USD per 1M tokens)."""
+        PRICING = {
+            "deepseek": {"input": 0.27, "output": 1.10},  # DeepSeek-V3
+            "openai": {"input": 3.00, "output": 15.00},   # GPT-4o
+            "anthropic": {"input": 3.00, "output": 15.00}, # Claude Sonnet
+            "mock": {"input": 0.0, "output": 0.0},
+        }
+        rates = PRICING.get(self.provider, PRICING["openai"])
+        input_cost = self.prompt_tokens_total * rates["input"] / 1_000_000
+        output_cost = self.completion_tokens_total * rates["output"] / 1_000_000
+        return {
+            "provider": self.provider,
+            "prompt_tokens": self.prompt_tokens_total,
+            "completion_tokens": self.completion_tokens_total,
+            "total_tokens": self.total_tokens,
+            "input_cost_usd": round(input_cost, 6),
+            "output_cost_usd": round(output_cost, 6),
+            "total_cost_usd": round(input_cost + output_cost, 6),
+        }
 
     @property
     def num_tool_calls(self) -> int:
@@ -192,6 +231,7 @@ class AgentTrace:
             "final_answer": self.final_answer,
             "total_tokens": self.total_tokens,
             "elapsed_seconds": round(self.elapsed_seconds, 3),
+            "cost_summary": self.cost_summary,
             "budget_summary": self.budget_summary,
             "diagnostics": self.diagnostics.to_dict(),
             "steps": [
@@ -964,7 +1004,25 @@ class ReActAgent:
                 pass
 
         if not self.use_mock:
-            if provider in ("openai", "auto"):
+            # ── DeepSeek (first-class: OpenAI-compatible API) ──────────
+            if provider in ("deepseek", "auto"):
+                ds_key = api_key or os.environ.get("DEEPSEEK_API_KEY")
+                ds_base = base_url or "https://api.deepseek.com"
+                if ds_key:
+                    try:
+                        from openai import OpenAI
+                        self.client = OpenAI(
+                            api_key=ds_key,
+                            base_url=ds_base,
+                        )
+                        self.provider = "deepseek"
+                        if model == DEFAULT_MODEL:
+                            self.model = "deepseek-chat"
+                    except ImportError:
+                        pass
+
+            # ── OpenAI ─────────────────────────────────────────────────
+            if self.client is None and provider in ("openai", "auto"):
                 oai_key = api_key or os.environ.get("OPENAI_API_KEY")
                 oai_base = base_url or os.environ.get("OPENAI_BASE_URL")
                 if oai_key:
@@ -978,6 +1036,7 @@ class ReActAgent:
                     except ImportError:
                         pass
 
+            # ── Anthropic ──────────────────────────────────────────────
             if self.client is None and provider in ("anthropic", "auto"):
                 anth_key = api_key or os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")
                 if anth_key:
@@ -985,22 +1044,6 @@ class ReActAgent:
                         import anthropic
                         self.client = anthropic.Anthropic(api_key=anth_key)
                         self.provider = "anthropic"
-                    except ImportError:
-                        pass
-
-            # DeepSeek fallback
-            if self.client is None and provider in ("deepseek", "auto"):
-                ds_key = api_key or os.environ.get("DEEPSEEK_API_KEY")
-                if ds_key:
-                    try:
-                        from openai import OpenAI
-                        self.client = OpenAI(
-                            api_key=ds_key,
-                            base_url="https://api.deepseek.com",
-                        )
-                        self.provider = "openai"
-                        if model == DEFAULT_MODEL:
-                            self.model = "deepseek-chat"
                     except ImportError:
                         pass
 
@@ -1098,6 +1141,10 @@ class ReActAgent:
             "detect_drift": ArtifactType.DRIFT_REPORT,
             "rabi_experiment": ArtifactType.LAB_EXPERIMENT_RESULT,
             "fit_rabi": ArtifactType.FIT_RESULT,
+            "ramsey_experiment": ArtifactType.LAB_EXPERIMENT_RESULT,
+            "fit_ramsey": ArtifactType.FIT_RESULT,
+            "t1_experiment": ArtifactType.LAB_EXPERIMENT_RESULT,
+            "fit_t1": ArtifactType.FIT_RESULT,
         }.get(tool_name)
 
     def _hash_payload(self, payload: Any) -> str:
@@ -1295,7 +1342,7 @@ class ReActAgent:
 
         if self.use_mock:
             trace = self._run_mock(user_prompt, memory_context=memory_context)
-        elif self.provider == "openai":
+        elif self.provider in ("openai", "deepseek"):
             trace = self._run_openai(user_prompt, memory_context=memory_context)
         else:
             trace = self._run_anthropic(user_prompt, memory_context=memory_context)
@@ -1479,20 +1526,28 @@ class ReActAgent:
             budget_msg = self.budget.budget_prompt_insert()
             messages.append({"role": "system", "content": budget_msg})
 
+            api_t0 = time.time()
             response = self.client.chat.completions.create(
                 model=self.model,
                 max_tokens=2048,
                 tools=openai_tools,
                 messages=messages,
             )
+            api_latency_ms = (time.time() - api_t0) * 1000
 
             # Remove the ephemeral budget injection
             messages.pop()
 
             choice = response.choices[0]
             usage = response.usage
+            step_prompt_tokens = 0
+            step_completion_tokens = 0
             if usage:
-                trace.total_tokens += (usage.prompt_tokens or 0) + (usage.completion_tokens or 0)
+                step_prompt_tokens = usage.prompt_tokens or 0
+                step_completion_tokens = usage.completion_tokens or 0
+                trace.total_tokens += step_prompt_tokens + step_completion_tokens
+                trace.prompt_tokens_total += step_prompt_tokens
+                trace.completion_tokens_total += step_completion_tokens
 
             msg = choice.message
             thought_text = (msg.content or "").strip()
@@ -1506,6 +1561,9 @@ class ReActAgent:
                     step_num=step_num, thought=thought_text,
                     budget_decision=self.budget.decide().name,
                     timestamp=time.time(),
+                    prompt_tokens=step_prompt_tokens,
+                    completion_tokens=step_completion_tokens,
+                    api_latency_ms=api_latency_ms,
                 ))
                 break
 
@@ -1524,6 +1582,9 @@ class ReActAgent:
                     step_num=step_num, thought=thought_text,
                     action=tool_name, action_input=tool_input,
                     timestamp=time.time(),
+                    prompt_tokens=step_prompt_tokens,
+                    completion_tokens=step_completion_tokens,
+                    api_latency_ms=api_latency_ms,
                 )
 
                 if self.verbose:
