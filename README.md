@@ -38,26 +38,17 @@ a target fidelity is reached.
 ## Quick Start
 
 ```bash
-# 1. Create environment
-conda create -p .venv python=3.11 -y
-conda activate ./.venv
-
-# 2. Install dependencies
-pip install -r requirements.txt
-
-# 3. Run the tune-up demo (no API key needed)
-python demos/tuneup_demo.py
-
-# 4. Run with an LLM (optional)
-export OPENAI_API_KEY=sk-...
-python demos/tuneup_demo.py --mode agent --provider openai
+git clone https://github.com/shchng9963-droid/QuantumGPT.git
+cd QuantumGPT
+cp .env.example .env
+make setup
+make doctor
+make smoke-test       # offline ReAct loop; no API key required
 ```
 
-### One-liner
-
-```bash
-conda create -p .venv python=3.11 -y && conda run -p .venv pip install -r requirements.txt && conda run -p .venv python demos/tuneup_demo.py
-```
+All developer commands use `.venv/bin/...`; see [INSTALL.md](INSTALL.md) for environment details.
+For a new contributor, start with [docs/HANDOFF.md](docs/HANDOFF.md) and
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ---
 
