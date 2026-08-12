@@ -20,6 +20,7 @@ dependencies = [
     "rich>=13.0",
     "openai>=1.0",
     "anthropic>=0.40",
+    "langgraph>=0.2.50,<0.3",
 ]
 
 [project.scripts]
@@ -27,8 +28,24 @@ qgpt = "cli:main"
 
 [tool.setuptools]
 py-modules = ["cli"]
-packages = ["agent", "advisor", "backends", "bench", "data", "dynamics", "eval", "tools"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+    "agent*",
+    "advisor*",
+    "backends*",
+    "bench*",
+    "benchmark*",
+    "data*",
+    "dynamics*",
+    "eval*",
+    "tools*",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
+markers = [
+    "slow: integration tests that load real backends (Qiskit FakeBrisbane, etc.)",
+]

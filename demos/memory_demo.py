@@ -8,8 +8,8 @@ Trial 2: warm run — agent receives memory_context about the prior low fidelity
 Trial 3: control — identical to Trial 1 (proves Trial 2 difference is causal).
 
 Usage:
-    cd /home/wangshuchang/quantumgpt
-    PYTHONPATH=. python demos/memory_demo.py
+    cd /path/to/QuantumGPT
+    .venv/bin/python demos/memory_demo.py
 """
 
 from __future__ import annotations

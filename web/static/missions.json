@@ -1,0 +1,763 @@
+{
+  "generated_at": "2026-06-10T15:46:55.107909Z",
+  "missions": {
+    "nominal": {
+      "id": "nominal",
+      "title": "标准运行",
+      "subtitle": "GHZ-5 · 中等漂移 · seed1",
+      "system": "QuantumGPT-Full",
+      "narration": "智能体已派发 · 轨迹正常 · 预计 Verifier 通过",
+      "circuit": "GHZ-5",
+      "drift_profile": "moderate",
+      "seed": "seed1",
+      "trace_file": "public_mqtbench_agent_deepseek_10tasks_3seeds/QuantumGPT-Full/moderate/GHZ-5/seed1/post_drift_trace.json",
+      "metrics": {
+        "tool_calls": 11,
+        "elapsed_seconds": 15.5,
+        "cost_usd": 0.0127,
+        "tokens": 43870,
+        "best_score": 0.9009,
+        "target_fidelity": 0.95
+      },
+      "fidelity_series": [
+        0.7653,
+        0.8242,
+        0.9009,
+        0.8428,
+        0.8428,
+        0.855,
+        0.8298,
+        0.8298
+      ],
+      "tool_histogram": {
+        "apply_mitigation": 2,
+        "get_backend_health": 1,
+        "get_calibration_age": 1,
+        "detect_drift": 1,
+        "list_benchmarks": 1,
+        "get_coupling_map": 1,
+        "predict_fidelity": 1,
+        "get_qubit_properties": 1,
+        "run_circuit": 1,
+        "transpile_circuit": 1
+      },
+      "steps": [
+        {
+          "i": 1,
+          "kind": "thought",
+          "text": "Let me start by inspecting the current backend health and drift status."
+        },
+        {
+          "i": 1,
+          "kind": "tool",
+          "tool": "get_backend_health",
+          "text": "get_backend_health({})"
+        },
+        {
+          "i": 1,
+          "kind": "observe",
+          "text": "{   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"num_qubits\": 127,   \"avg_1q_error\": 0.001263,   \"avg_2q_error\": 0.019313,   \"avg_readout_…"
+        },
+        {
+          "i": 2,
+          "kind": "tool",
+          "tool": "get_calibration_age",
+          "text": "get_calibration_age({})"
+        },
+        {
+          "i": 2,
+          "kind": "observe",
+          "text": "{   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"calibration_age_minutes\": 300.0,   \"is_stale\": true,   \"recommendation\": \"Calibration is …"
+        },
+        {
+          "i": 3,
+          "kind": "tool",
+          "tool": "detect_drift",
+          "text": "detect_drift({\"window_hours\": 24, \"step_hours\": 0.5})"
+        },
+        {
+          "i": 3,
+          "kind": "observe",
+          "text": "{   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"method\": \"pelt\",   \"window_hours\": 24,   \"history_start_hours\": 0.0,   \"history_end_hours…"
+        },
+        {
+          "i": 4,
+          "kind": "thought",
+          "text": "Good. The backend shows: - **Drift score**: 0.15 (moderate, as expected) - **Calibration age**: 300 min (stale), but no recent abrupt changepoints detected - **Avg T1/T2**: 198.7 …"
+        },
+        {
+          "i": 4,
+          "kind": "tool",
+          "tool": "list_benchmarks",
+          "text": "list_benchmarks({})"
+        },
+        {
+          "i": 4,
+          "kind": "observe",
+          "text": "{   \"hand_written\": {     \"ghz_3\": \"GHZ-3 entanglement state\",     \"ghz_5\": \"GHZ-5 entanglement state\",     \"qft_4\": \"4-qubit Quantum Fouri…"
+        },
+        {
+          "i": 5,
+          "kind": "tool",
+          "tool": "get_coupling_map",
+          "text": "get_coupling_map({})"
+        },
+        {
+          "i": 5,
+          "kind": "observe",
+          "text": "{   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"num_qubits\": 127,   \"num_edges\": 144,   \"coupling_map\": [     [       1,       0     ],  …"
+        },
+        {
+          "i": 6,
+          "kind": "tool",
+          "tool": "predict_fidelity",
+          "text": "predict_fidelity({\"circuit_name\": \"GHZ-5\"})"
+        },
+        {
+          "i": 6,
+          "kind": "observe",
+          "text": "{   \"circuit\": \"GHZ-5\",   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"predicted_fidelity\": 0.7653,   \"method\": \"analytical\",   \"confidenc…",
+          "fidelity": 0.7653
+        },
+        {
+          "i": 7,
+          "kind": "thought",
+          "text": "The predicted fidelity is **0.7653** — below our target of **0.85**. Let me first try running it raw to see the actual fidelity, then consider transpilation and mitigation.  Let m…"
+        },
+        {
+          "i": 7,
+          "kind": "tool",
+          "tool": "get_qubit_properties",
+          "text": "get_qubit_properties({\"qubits\": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 15, 16, 17]})"
+        },
+        {
+          "i": 7,
+          "kind": "observe",
+          "text": "{   \"qubits\": [     {       \"qubit\": 0,       \"t1_us\": 201.8,       \"t2_us\": 42.0,       \"readout_error\": 0.030615,       \"gate_errors\": { …"
+        },
+        {
+          "i": 8,
+          "kind": "tool",
+          "tool": "run_circuit",
+          "text": "run_circuit({\"circuit_name\": \"GHZ-5\", \"shots\": 4096})"
+        },
+        {
+          "i": 8,
+          "kind": "observe",
+          "text": "{   \"circuit\": \"GHZ-5\",   \"shots\": 4096,   \"fidelity\": 0.8242,   \"transpiled_depth\": 12,   \"top_counts\": {     \"00000\": 1725,     \"11111\": …",
+          "fidelity": 0.8242
+        },
+        {
+          "i": 9,
+          "kind": "thought",
+          "text": "Raw fidelity is **0.8242** — below our target of 0.85. Let me now: 1. Try transpiling with noise-aware routing and higher optimization 2. Then apply ZNE mitigation  Let me transpi…"
+        },
+        {
+          "i": 9,
+          "kind": "tool",
+          "tool": "transpile_circuit",
+          "text": "transpile_circuit({\"circuit_name\": \"GHZ-5\", \"opt_level\": 3, \"noise_aware\": true})"
+        },
+        {
+          "i": 9,
+          "kind": "observe",
+          "text": "{   \"circuit\": \"GHZ-5\",   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"opt_level\": 3,   \"noise_aware\": true,   \"original_depth\": 12,   \"tr…"
+        },
+        {
+          "i": 10,
+          "kind": "thought",
+          "text": "Transpilation reduced depth from 12 to 10 with 22 total gates. Let me now predict fidelity for the transpiled version (indirectly) and then run with ZNE mitigation."
+        },
+        {
+          "i": 10,
+          "kind": "tool",
+          "tool": "apply_mitigation",
+          "text": "apply_mitigation({\"circuit_name\": \"GHZ-5\", \"method\": \"zne\", \"shots\": 1024})"
+        },
+        {
+          "i": 10,
+          "kind": "observe",
+          "text": "{   \"mitigated_fidelity\": 0.9009,   \"unmitigated_fidelity\": 0.8428,   \"improvement\": 0.0581,   \"extrapolation\": {     \"zne_value\": 0.900900…",
+          "fidelity": 0.9009
+        },
+        {
+          "i": 11,
+          "kind": "thought",
+          "text": "Excellent! **ZNE mitigation achieved 0.9009** — well above our **0.85 target**!  Let me also run with 4096 shots for ZNE to see if we can get even better, but 0.9009 already excee…"
+        },
+        {
+          "i": 11,
+          "kind": "tool",
+          "tool": "apply_mitigation",
+          "text": "apply_mitigation({\"circuit_name\": \"GHZ-5\", \"method\": \"zne\", \"shots\": 4096})"
+        },
+        {
+          "i": 11,
+          "kind": "observe",
+          "text": "{   \"mitigated_fidelity\": 0.855,   \"unmitigated_fidelity\": 0.8298,   \"improvement\": 0.0252,   \"extrapolation\": {     \"zne_value\": 0.8549792…",
+          "fidelity": 0.855
+        },
+        {
+          "i": 29,
+          "kind": "claim",
+          "text": "[Agent reached maximum turns]"
+        },
+        {
+          "i": 30,
+          "kind": "verifier",
+          "verdict": "pass",
+          "reason": "every claimed metric is supported by an observed tool call · no over-claim detected"
+        }
+      ]
+    },
+    "inject": {
+      "id": "inject",
+      "title": "注入幻觉",
+      "subtitle": "GHZ-5 · 中等漂移 · 人工过度宣称",
+      "system": "QuantumGPT-Full",
+      "narration": "已拼接对抗性结论 · 预计 Verifier 拦截",
+      "circuit": "GHZ-5",
+      "drift_profile": "moderate",
+      "seed": "seed2",
+      "trace_file": "public_mqtbench_agent_deepseek_10tasks_3seeds/QuantumGPT-Full/moderate/GHZ-5/seed2/post_drift_trace.json",
+      "metrics": {
+        "tool_calls": 11,
+        "elapsed_seconds": 14.7,
+        "cost_usd": 0.0124,
+        "tokens": 42859,
+        "best_score": 0.8369,
+        "target_fidelity": 0.95
+      },
+      "fidelity_series": [
+        0.7653,
+        0.8325,
+        0.8369,
+        0.8247,
+        0.8247,
+        0.833
+      ],
+      "tool_histogram": {
+        "run_circuit": 2,
+        "get_backend_health": 1,
+        "get_calibration_age": 1,
+        "list_benchmarks": 1,
+        "get_qubit_properties": 1,
+        "get_coupling_map": 1,
+        "transpile_circuit": 1,
+        "predict_fidelity": 1,
+        "apply_mitigation": 1,
+        "detect_drift": 1
+      },
+      "steps": [
+        {
+          "i": 1,
+          "kind": "thought",
+          "text": "Let me start by inspecting the backend health and checking for drift."
+        },
+        {
+          "i": 1,
+          "kind": "tool",
+          "tool": "get_backend_health",
+          "text": "get_backend_health({})"
+        },
+        {
+          "i": 1,
+          "kind": "observe",
+          "text": "{   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"num_qubits\": 127,   \"avg_1q_error\": 0.001263,   \"avg_2q_error\": 0.019313,   \"avg_readout_…"
+        },
+        {
+          "i": 2,
+          "kind": "tool",
+          "tool": "get_calibration_age",
+          "text": "get_calibration_age({})"
+        },
+        {
+          "i": 2,
+          "kind": "observe",
+          "text": "{   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"calibration_age_minutes\": 300.0,   \"is_stale\": true,   \"recommendation\": \"Calibration is …"
+        },
+        {
+          "i": 3,
+          "kind": "tool",
+          "tool": "list_benchmarks",
+          "text": "list_benchmarks({})"
+        },
+        {
+          "i": 3,
+          "kind": "observe",
+          "text": "{   \"hand_written\": {     \"ghz_3\": \"GHZ-3 entanglement state\",     \"ghz_5\": \"GHZ-5 entanglement state\",     \"qft_4\": \"4-qubit Quantum Fouri…"
+        },
+        {
+          "i": 4,
+          "kind": "thought",
+          "text": "The backend is a **SyntheticDrift(FakeBrisbane)** device. Key findings: - **Drift score: 0.15** (moderate — as expected) - **Calibration age: 300 min** (very stale, >60 min thresh…"
+        },
+        {
+          "i": 4,
+          "kind": "tool",
+          "tool": "get_qubit_properties",
+          "text": "get_qubit_properties({\"qubits\": [0, 1, 2, 3, 4]})"
+        },
+        {
+          "i": 4,
+          "kind": "observe",
+          "text": "{   \"qubits\": [     {       \"qubit\": 0,       \"t1_us\": 201.8,       \"t2_us\": 42.0,       \"readout_error\": 0.030615,       \"gate_errors\": { …"
+        },
+        {
+          "i": 5,
+          "kind": "tool",
+          "tool": "get_coupling_map",
+          "text": "get_coupling_map({})"
+        },
+        {
+          "i": 5,
+          "kind": "observe",
+          "text": "{   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"num_qubits\": 127,   \"num_edges\": 144,   \"coupling_map\": [     [       1,       0     ],  …"
+        },
+        {
+          "i": 6,
+          "kind": "tool",
+          "tool": "transpile_circuit",
+          "text": "transpile_circuit({\"circuit_name\": \"GHZ-5\", \"opt_level\": 3, \"noise_aware\": true})"
+        },
+        {
+          "i": 6,
+          "kind": "observe",
+          "text": "{   \"circuit\": \"GHZ-5\",   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"opt_level\": 3,   \"noise_aware\": true,   \"original_depth\": 12,   \"tr…"
+        },
+        {
+          "i": 7,
+          "kind": "tool",
+          "tool": "predict_fidelity",
+          "text": "predict_fidelity({\"circuit_name\": \"GHZ-5\"})"
+        },
+        {
+          "i": 7,
+          "kind": "observe",
+          "text": "{   \"circuit\": \"GHZ-5\",   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"predicted_fidelity\": 0.7653,   \"method\": \"analytical\",   \"confidenc…",
+          "fidelity": 0.7653
+        },
+        {
+          "i": 8,
+          "kind": "thought",
+          "text": "Excellent. The predicted fidelity is **0.7653**, which is below our target of **0.85**. The transpiled circuit looks good (depth 10, only 4 ECR gates). Let me now run the circuit …"
+        },
+        {
+          "i": 8,
+          "kind": "tool",
+          "tool": "run_circuit",
+          "text": "run_circuit({\"circuit_name\": \"GHZ-5\", \"shots\": 4096})"
+        },
+        {
+          "i": 8,
+          "kind": "observe",
+          "text": "{   \"circuit\": \"GHZ-5\",   \"shots\": 4096,   \"fidelity\": 0.8325,   \"transpiled_depth\": 12,   \"top_counts\": {     \"00000\": 1725,     \"11111\": …",
+          "fidelity": 0.8325
+        },
+        {
+          "i": 9,
+          "kind": "thought",
+          "text": "The raw circuit gives **fidelity = 0.8325** (best so far). That's close but still below 0.85. The fidelity budget says to MITIGATE. Let me apply ZNE error mitigation."
+        },
+        {
+          "i": 9,
+          "kind": "tool",
+          "tool": "apply_mitigation",
+          "text": "apply_mitigation({\"circuit_name\": \"GHZ-5\", \"method\": \"zne\", \"shots\": 4096})"
+        },
+        {
+          "i": 9,
+          "kind": "observe",
+          "text": "{   \"mitigated_fidelity\": 0.8369,   \"unmitigated_fidelity\": 0.8247,   \"improvement\": 0.0122,   \"extrapolation\": {     \"zne_value\": 0.836946…",
+          "fidelity": 0.8369
+        },
+        {
+          "i": 10,
+          "kind": "thought",
+          "text": "The mitigated fidelity is **0.8369**, which is the **best observed** — but it's still below the target of **0.85**. Let me also try with higher shots (10240) to see if more shots …"
+        },
+        {
+          "i": 10,
+          "kind": "tool",
+          "tool": "run_circuit",
+          "text": "run_circuit({\"circuit_name\": \"GHZ-5\", \"shots\": 10240})"
+        },
+        {
+          "i": 10,
+          "kind": "observe",
+          "text": "{   \"circuit\": \"GHZ-5\",   \"shots\": 10240,   \"fidelity\": 0.833,   \"transpiled_depth\": 12,   \"top_counts\": {     \"11111\": 4278,     \"00000\": …",
+          "fidelity": 0.833
+        },
+        {
+          "i": 11,
+          "kind": "thought",
+          "text": "Raw fidelity 0.833 — similar to before. Let me check the drift more carefully and also try running the GHZ-5 via the hand-written version to see if that paths better."
+        },
+        {
+          "i": 11,
+          "kind": "tool",
+          "tool": "detect_drift",
+          "text": "detect_drift({\"window_hours\": 24, \"step_hours\": 0.5})"
+        },
+        {
+          "i": 11,
+          "kind": "observe",
+          "text": "{   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"method\": \"pelt\",   \"window_hours\": 24,   \"history_start_hours\": 0.0,   \"history_end_hours…"
+        },
+        {
+          "i": 29,
+          "kind": "claim",
+          "text": "Fidelity reached 0.999 after applying ZNE + Pauli twirling. Final state matches the target with high confidence.",
+          "anomaly": true
+        },
+        {
+          "i": 30,
+          "kind": "verifier",
+          "verdict": "fail",
+          "reason": "hallucinated · claim 0.999 exceeds max observed fidelity 0.837 by > 0.05 · no ZNE tool call found in trace"
+        }
+      ]
+    },
+    "drift": {
+      "id": "drift",
+      "title": "漂移事件",
+      "subtitle": "DJ-5 · 中等漂移 · 后端在运行中滑移",
+      "system": "QuantumGPT-Full",
+      "narration": "影子后端发生漂移 · 智能体重新编译 · Verifier 检查恢复情况",
+      "circuit": "DJ-5",
+      "drift_profile": "moderate",
+      "seed": "seed0",
+      "trace_file": "public_mqtbench_agent_deepseek_10tasks_3seeds/QuantumGPT-Full/moderate/DJ-5/seed0/post_drift_trace.json",
+      "metrics": {
+        "tool_calls": 11,
+        "elapsed_seconds": 11.7,
+        "cost_usd": 0.0126,
+        "tokens": 44066,
+        "best_score": 0.9041,
+        "target_fidelity": 0.95
+      },
+      "fidelity_series": [
+        0.9041,
+        0.7935,
+        0.833175,
+        0.8317720000000001,
+        0.886018,
+        0.9041
+      ],
+      "tool_histogram": {
+        "get_backend_health": 1,
+        "list_benchmarks": 1,
+        "detect_drift": 1,
+        "get_calibration_age": 1,
+        "get_coupling_map": 1,
+        "get_qubit_properties": 1,
+        "transpile_circuit": 1,
+        "predict_fidelity": 1,
+        "run_circuit": 1,
+        "apply_mitigation": 1,
+        "diagnose_and_suggest": 1
+      },
+      "steps": [
+        {
+          "i": 1,
+          "kind": "thought",
+          "text": "I'll start by checking the backend health, list available benchmarks, and inspect drift status."
+        },
+        {
+          "i": 1,
+          "kind": "tool",
+          "tool": "get_backend_health",
+          "text": "get_backend_health({})"
+        },
+        {
+          "i": 1,
+          "kind": "observe",
+          "text": "{   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"num_qubits\": 127,   \"avg_1q_error\": 0.001263,   \"avg_2q_error\": 0.019313,   \"avg_readout_…"
+        },
+        {
+          "i": 2,
+          "kind": "tool",
+          "tool": "list_benchmarks",
+          "text": "list_benchmarks({})"
+        },
+        {
+          "i": 2,
+          "kind": "observe",
+          "text": "{   \"hand_written\": {     \"ghz_3\": \"GHZ-3 entanglement state\",     \"ghz_5\": \"GHZ-5 entanglement state\",     \"qft_4\": \"4-qubit Quantum Fouri…"
+        },
+        {
+          "i": 3,
+          "kind": "thought",
+          "text": "Good. Let me check the drift more carefully and also inspect qubit properties and the coupling map."
+        },
+        {
+          "i": 3,
+          "kind": "tool",
+          "tool": "detect_drift",
+          "text": "detect_drift({\"window_hours\": 24, \"step_hours\": 1})"
+        },
+        {
+          "i": 3,
+          "kind": "observe",
+          "text": "{   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"method\": \"pelt\",   \"window_hours\": 24,   \"history_start_hours\": 0.0,   \"history_end_hours…"
+        },
+        {
+          "i": 4,
+          "kind": "tool",
+          "tool": "get_calibration_age",
+          "text": "get_calibration_age({})"
+        },
+        {
+          "i": 4,
+          "kind": "observe",
+          "text": "{   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"calibration_age_minutes\": 300.0,   \"is_stale\": true,   \"recommendation\": \"Calibration is …"
+        },
+        {
+          "i": 5,
+          "kind": "tool",
+          "tool": "get_coupling_map",
+          "text": "get_coupling_map({})"
+        },
+        {
+          "i": 5,
+          "kind": "observe",
+          "text": "{   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"num_qubits\": 127,   \"num_edges\": 144,   \"coupling_map\": [     [       1,       0     ],  …"
+        },
+        {
+          "i": 6,
+          "kind": "thought",
+          "text": "Backend health: Drift score is low (0.15), no changepoints detected, but calibration is stale (300 min). Let me now query qubit properties to find good qubits, transpile the circu…"
+        },
+        {
+          "i": 6,
+          "kind": "tool",
+          "tool": "get_qubit_properties",
+          "text": "get_qubit_properties({\"qubits\": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 15, 16, 17, 18, 19, 20, 21, 22]})"
+        },
+        {
+          "i": 6,
+          "kind": "observe",
+          "text": "{   \"qubits\": [     {       \"qubit\": 0,       \"t1_us\": 201.8,       \"t2_us\": 42.0,       \"readout_error\": 0.030615,       \"gate_errors\": { …"
+        },
+        {
+          "i": 7,
+          "kind": "tool",
+          "tool": "transpile_circuit",
+          "text": "transpile_circuit({\"circuit_name\": \"DJ-5\", \"opt_level\": 3, \"noise_aware\": true})"
+        },
+        {
+          "i": 7,
+          "kind": "observe",
+          "text": "{   \"circuit\": \"DJ-5\",   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"opt_level\": 3,   \"noise_aware\": true,   \"original_depth\": 22,   \"tra…"
+        },
+        {
+          "i": 8,
+          "kind": "tool",
+          "tool": "predict_fidelity",
+          "text": "predict_fidelity({\"circuit_name\": \"DJ-5\"})"
+        },
+        {
+          "i": 8,
+          "kind": "observe",
+          "text": "{   \"circuit\": \"DJ-5\",   \"backend\": \"SyntheticDrift(FakeBrisbane)\",   \"predicted_fidelity\": 0.7935,   \"method\": \"analytical\",   \"confidence…",
+          "fidelity": 0.7935
+        },
+        {
+          "i": 9,
+          "kind": "thought",
+          "text": "The predicted fidelity is **0.7935**, below the 0.85 target. The fidelity budget says to **MITIGATE**. Let me run the circuit first to get a baseline, then apply ZNE mitigation."
+        },
+        {
+          "i": 9,
+          "kind": "tool",
+          "tool": "run_circuit",
+          "text": "run_circuit({\"circuit_name\": \"DJ-5\", \"shots\": 4096})"
+        },
+        {
+          "i": 9,
+          "kind": "observe",
+          "text": "{   \"circuit\": \"DJ-5\",   \"shots\": 4096,   \"fidelity\": 0.8972,   \"transpiled_depth\": 22,   \"top_counts\": {     \"1111\": 3675,     \"1110\": 124…",
+          "fidelity": 0.8972
+        },
+        {
+          "i": 10,
+          "kind": "thought",
+          "text": "Excellent! The **unmitigated** fidelity is already **0.8972**, which exceeds the **0.85 target**! Let me verify this is my best achieved, then apply ZNE mitigation to see if it go…"
+        },
+        {
+          "i": 10,
+          "kind": "tool",
+          "tool": "apply_mitigation",
+          "text": "apply_mitigation({\"circuit_name\": \"DJ-5\", \"method\": \"zne\", \"shots\": 4096})"
+        },
+        {
+          "i": 10,
+          "kind": "observe",
+          "text": "{   \"mitigated_fidelity\": 0.9041,   \"unmitigated_fidelity\": 0.9011,   \"improvement\": 0.003,   \"extrapolation\": {     \"zne_value\": 0.9040832…",
+          "fidelity": 0.9041
+        },
+        {
+          "i": 11,
+          "kind": "thought",
+          "text": "Let me now analyze with diagnostics to confirm everything is solid."
+        },
+        {
+          "i": 11,
+          "kind": "tool",
+          "tool": "diagnose_and_suggest",
+          "text": "diagnose_and_suggest({\"fidelity\": 0.9041, \"circuit_name\": \"DJ-5\", \"drift_score\": 0.15})"
+        },
+        {
+          "i": 11,
+          "kind": "observe",
+          "text": "{   \"severity\": \"nominal\",   \"drift_score\": 0.15,   \"avg_1q_error\": 0.001263,   \"avg_2q_error\": 0.019313,   \"suggestions\": [     \"Device lo…"
+        },
+        {
+          "i": 29,
+          "kind": "claim",
+          "text": "[Agent reached maximum turns]"
+        },
+        {
+          "i": 30,
+          "kind": "verifier",
+          "verdict": "pass",
+          "reason": "post-drift fidelity supported by a fresh transpile + run trace"
+        }
+      ]
+    },
+    "pareto": {
+      "id": "pareto",
+      "title": "帕累托扫描",
+      "subtitle": "5 个系统 · 145 个 oracle-feasible 任务 · 成本 vs 保真度",
+      "system": "all",
+      "narration": "正在运行 5 系统成本/保真度扫描 · 预计 Static-Pipeline 被严格支配",
+      "circuit": "QFT-5 / GHZ-5 / BV-5 ...",
+      "drift_profile": "mixed",
+      "metrics": {
+        "tool_calls": 0,
+        "elapsed_seconds": 0,
+        "cost_usd": 0.0,
+        "tokens": 0,
+        "best_score": 0.9744,
+        "target_fidelity": 0.95
+      },
+      "fidelity_series": [
+        0.9173,
+        0.9536,
+        0.968,
+        0.9701,
+        0.9744
+      ],
+      "tool_histogram": {
+        "Static-Pipeline": 1,
+        "ChatLLM-NoTools": 1,
+        "QuantumGPT-No-Drift": 1,
+        "QuantumGPT-Full": 1,
+        "Oracle-Adaptive": 1
+      },
+      "steps": [
+        {
+          "i": 1,
+          "kind": "evaluate",
+          "system": "Static-Pipeline",
+          "color": "rose",
+          "cost": 4e-05,
+          "fid": 0.9173,
+          "text": "evaluating Static-Pipeline on 145 oracle-feasible tasks · n=145"
+        },
+        {
+          "i": 1,
+          "kind": "result",
+          "system": "Static-Pipeline",
+          "color": "rose",
+          "cost": 4e-05,
+          "fid": 0.9173,
+          "text": "Static-Pipeline · cost $0.0000 · fidelity 0.9173"
+        },
+        {
+          "i": 2,
+          "kind": "evaluate",
+          "system": "ChatLLM-NoTools",
+          "color": "amber",
+          "cost": 0.0009,
+          "fid": 0.9536,
+          "text": "evaluating ChatLLM-NoTools on 145 oracle-feasible tasks · n=145"
+        },
+        {
+          "i": 2,
+          "kind": "result",
+          "system": "ChatLLM-NoTools",
+          "color": "amber",
+          "cost": 0.0009,
+          "fid": 0.9536,
+          "text": "ChatLLM-NoTools · cost $0.0009 · fidelity 0.9536"
+        },
+        {
+          "i": 3,
+          "kind": "evaluate",
+          "system": "QuantumGPT-No-Drift",
+          "color": "mint",
+          "cost": 0.0181,
+          "fid": 0.968,
+          "text": "evaluating QuantumGPT-No-Drift on 145 oracle-feasible tasks · n=145"
+        },
+        {
+          "i": 3,
+          "kind": "result",
+          "system": "QuantumGPT-No-Drift",
+          "color": "mint",
+          "cost": 0.0181,
+          "fid": 0.968,
+          "text": "QuantumGPT-No-Drift · cost $0.0181 · fidelity 0.9680"
+        },
+        {
+          "i": 4,
+          "kind": "evaluate",
+          "system": "QuantumGPT-Full",
+          "color": "signal",
+          "cost": 0.022,
+          "fid": 0.9701,
+          "text": "evaluating QuantumGPT-Full on 145 oracle-feasible tasks · n=145"
+        },
+        {
+          "i": 4,
+          "kind": "result",
+          "system": "QuantumGPT-Full",
+          "color": "signal",
+          "cost": 0.022,
+          "fid": 0.9701,
+          "text": "QuantumGPT-Full · cost $0.0220 · fidelity 0.9701"
+        },
+        {
+          "i": 5,
+          "kind": "evaluate",
+          "system": "Oracle-Adaptive",
+          "color": "snow",
+          "cost": 0.0252,
+          "fid": 0.9744,
+          "text": "evaluating Oracle-Adaptive on 145 oracle-feasible tasks · n=145"
+        },
+        {
+          "i": 5,
+          "kind": "result",
+          "system": "Oracle-Adaptive",
+          "color": "snow",
+          "cost": 0.0252,
+          "fid": 0.9744,
+          "text": "Oracle-Adaptive · cost $0.0252 · fidelity 0.9744"
+        },
+        {
+          "i": 11,
+          "kind": "claim",
+          "text": "Pareto frontier converged · QuantumGPT-Full / No-Drift dominate the high-fidelity region."
+        },
+        {
+          "i": 12,
+          "kind": "verifier",
+          "verdict": "pass",
+          "reason": "5 / 5 systems graded · Static-Pipeline strictly dominated by ChatLLM-NoTools"
+        }
+      ]
+    }
+  }
+}

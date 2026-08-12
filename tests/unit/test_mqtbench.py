@@ -1,7 +1,9 @@
 """Unit tests for MQTBench integration."""
 
 import sys
-sys.path.insert(0, "/home/wangshuchang/quantumgpt")
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
 
 import pytest
 from qiskit.circuit import QuantumCircuit
@@ -13,6 +15,9 @@ from bench.mqtbench import (
     list_mqtbench_available,
     MQTBenchCircuit,
     DEFAULT_MQTBENCH_SELECTION,
+    EXTENDED_MQTBENCH_SELECTION,
+    ORACLE_REQUIRED_LABELS,
+    assert_pool_matches_oracle,
 )
 
 
@@ -86,6 +91,45 @@ def test_runnable_on_aer():
         job = sim.run(tc, shots=100)
         counts = job.result().get_counts()
         assert sum(counts.values()) == 100, f"{c.label} shot count mismatch"
+
+
+def test_oracle_required_labels_match_extended():
+    """ORACLE_REQUIRED_LABELS must equal EXTENDED labels — single source of truth."""
+    extended_labels = {label for _, _, label, _ in EXTENDED_MQTBENCH_SELECTION}
+    assert ORACLE_REQUIRED_LABELS == extended_labels, (
+        "ORACLE_REQUIRED_LABELS drifted from EXTENDED_MQTBENCH_SELECTION; "
+        "fix bench/mqtbench.py so they remain in sync."
+    )
+
+
+def test_assert_pool_matches_oracle_passes_for_extended():
+    """assert_pool_matches_oracle accepts the EXTENDED pool."""
+    extended_labels = {label for _, _, label, _ in EXTENDED_MQTBENCH_SELECTION}
+    # No exception expected.
+    assert_pool_matches_oracle(extended_labels)
+
+
+def test_assert_pool_matches_oracle_rejects_default_only():
+    """Default-only pool must be rejected: this was the v3_main_agent pollution."""
+    default_labels = {label for _, _, label, _ in DEFAULT_MQTBENCH_SELECTION}
+    with pytest.raises(AssertionError) as excinfo:
+        assert_pool_matches_oracle(default_labels)
+    msg = str(excinfo.value)
+    # Should name the missing EXTENDED-only labels.
+    for missing_label in ("Adder-6", "HHL-3", "RealAmpRandom-5", "WState-5", "QAOA-6"):
+        assert missing_label in msg, f"Expected {missing_label} in error message"
+
+
+def test_tool_executor_pool_matches_oracle():
+    """The agent's ToolExecutor must mount the full Oracle pool at construction."""
+    from backends.synthetic_drift import SyntheticDriftBackend
+    from tools.quantum_tools import ToolExecutor
+
+    backend = SyntheticDriftBackend("FakeBrisbane")
+    executor = ToolExecutor(backend)
+    pool = executor._get_mqt_circuits()
+    # Should not raise; pool should contain everything the Oracle expects.
+    assert_pool_matches_oracle(set(pool.keys()))
 
 
 if __name__ == "__main__":

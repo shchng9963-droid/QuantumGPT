@@ -14,6 +14,39 @@ from typing import Optional
 from qiskit.circuit import QuantumCircuit
 
 
+# v2.5 Sprint A circuit-pool consistency contract.
+# When the agent toolset and the deterministic Oracle disagree on which
+# circuit labels are reachable, the agent silently fails on every "extra"
+# circuit ("Unknown circuit 'Adder-6'") while the Oracle quietly evaluates
+# them, producing a benchmark gap that is purely a registration bug rather
+# than a capability gap. The pollution observed in v3_main_agent (132/450
+# polluted rows) traced back to exactly this drift.
+#
+# Anything that mounts circuits for the agent should call this contract
+# before evaluation, so any future divergence fails loudly at startup.
+ORACLE_REQUIRED_LABELS: set[str] = set()  # populated below after EXTENDED_MQTBENCH_SELECTION
+
+
+def assert_pool_matches_oracle(agent_pool_labels: set[str]) -> None:
+    """Raise if the agent's MQTBench pool is missing labels the Oracle expects.
+
+    Args:
+        agent_pool_labels: labels currently exposed to the agent (e.g. keys of
+            ToolExecutor._mqt_cache).
+
+    Raises:
+        AssertionError: when ``ORACLE_REQUIRED_LABELS - agent_pool_labels`` is
+            non-empty.
+    """
+    missing = ORACLE_REQUIRED_LABELS - set(agent_pool_labels)
+    if missing:
+        raise AssertionError(
+            "Agent MQTBench pool is missing circuits the Oracle expects: "
+            f"{sorted(missing)}. Either extend the agent selection (see "
+            "EXTENDED_MQTBENCH_SELECTION) or shrink the Oracle benchmark set."
+        )
+
+
 @dataclass
 class MQTBenchCircuit:
     """A benchmark circuit from MQT Bench with metadata."""
@@ -36,6 +69,22 @@ DEFAULT_MQTBENCH_SELECTION = [
     ("qftentangled", 5, "QFTent-5",     "QFT + entanglement"),
     ("vqe_su2",      4, "VQE_SU2-4",    "Variational SU(2) ansatz"),
 ]
+
+
+# v2.5 Sprint A — extended candidate pool for "decisive-region" circuit screening.
+# These circuits have distinct depth / 2q-count profiles to span the noise-sensitivity spectrum.
+EXTENDED_MQTBENCH_SELECTION = DEFAULT_MQTBENCH_SELECTION + [
+    ("qaoa",                     6, "QAOA-6",         "6-qubit QAOA MaxCut, depth ~60"),
+    ("vqe_real_amp",             5, "RealAmpRandom-5", "Hardware-efficient ansatz, depth ~30"),
+    ("wstate",                   5, "WState-5",       "W-state preparation, shallow"),
+    ("hhl",                      3, "HHL-3",          "HHL 3-qubit, long-depth fixed"),
+    ("cdkm_ripple_carry_adder",  6, "Adder-6",        "CDKM ripple-carry adder, depth ~100"),
+]
+
+
+# Oracle / multi_shock evaluator binds against the EXTENDED pool, so the agent
+# must too. Treat this as the source of truth.
+ORACLE_REQUIRED_LABELS = {label for _, _, label, _ in EXTENDED_MQTBENCH_SELECTION}
 
 
 def get_mqtbench_circuits(
@@ -68,6 +117,13 @@ def get_mqtbench_circuits(
             target=target,
         )
         ops = dict(circ.count_ops())
+        # Some MQTBench circuits (e.g. QAOA) ship without measurements; the agent
+        # and oracle backends both rely on counts, so add measure_all when no
+        # measurements are present. Preserves the partial-measurement design of
+        # algorithms like HHL that intentionally measure only a subset.
+        if ops.get("measure", 0) == 0:
+            circ.measure_all()
+            ops = dict(circ.count_ops())
         ecr = ops.get("ecr", 0)
         total = sum(v for k, v in ops.items() if k not in ("measure", "barrier"))
 

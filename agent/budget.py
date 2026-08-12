@@ -65,6 +65,8 @@ class FidelityBudget:
     def record_tool_call(self, tool_name: str, fidelity: float | None = None):
         """Record a tool call and optionally update best fidelity."""
         self.tool_calls_used += 1
+        if tool_name == "apply_mitigation":
+            self.mitigation_attempted = True
         obs = {"tool": tool_name, "t": round(self.elapsed, 2)}
         if fidelity is not None:
             obs["fidelity"] = fidelity

@@ -19,14 +19,16 @@ import hashlib
 import os
 import re
 import time
-from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Optional
 
 from backends.base import ShadowBackend
 from tools.quantum_tools import TOOL_DEFINITIONS, ToolExecutor
+from tools.registry import get_tool_runtime_spec
 from agent.budget import FidelityBudget, BudgetDecision
+from agent.planners.rule import ReActRulePlanner
 from agent.state import AgentState, ArtifactType, ArtifactStatus, InvalidationReason
+from agent.trace import AgentTrace, TraceDiagnostics, TraceStep
 
 # Optional instrumented executor
 try:
@@ -96,826 +98,12 @@ MAX_TURNS = 20
 # Trace data structures
 # ═══════════════════════════════════════════════════════
 
-@dataclass
-class TraceStep:
-    """One step in the ReAct trace."""
-    step_num: int
-    thought: str | None = None
-    action: str | None = None
-    action_input: dict | None = None
-    observation: str | None = None
-    fidelity_observed: float | None = None
-    budget_decision: str | None = None
-    state_summary: dict[str, Any] | None = None
-    timestamp: float = 0.0
-    # F5: per-step token and latency tracking
-    prompt_tokens: int = 0
-    completion_tokens: int = 0
-    api_latency_ms: float = 0.0
-
-    def to_dict(self, include_observation: bool = False) -> dict:
-        data = {k: v for k, v in {
-            "step": self.step_num,
-            "thought": self.thought,
-            "action": self.action,
-            "action_input": self.action_input,
-            "observation_length": len(self.observation) if self.observation else 0,
-            "fidelity_observed": self.fidelity_observed,
-            "budget_decision": self.budget_decision,
-            "state_summary": self.state_summary,
-            "timestamp": round(self.timestamp, 3),
-            "prompt_tokens": self.prompt_tokens or None,
-            "completion_tokens": self.completion_tokens or None,
-            "api_latency_ms": round(self.api_latency_ms, 1) if self.api_latency_ms else None,
-        }.items() if v is not None}
-        if include_observation and self.observation is not None:
-            data["observation"] = self.observation
-        return data
-
-
-@dataclass
-class TraceDiagnostics:
-    """Structured reliability diagnostics for one agent run."""
-    requested_provider: str = "mock"
-    resolved_provider: str = "mock"
-    model: str = ""
-    final_answer_length: int = 0
-    no_final_answer: bool = False
-    invalid_tool_call_count: int = 0
-    malformed_json_count: int = 0
-    repeated_tool_count: int = 0
-    max_turns_exceeded: bool = False
-    hallucinated_tool_names: list[str] = field(default_factory=list)
-    safety_block_count: int = 0
-    safety_dry_run_count: int = 0
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "requested_provider": self.requested_provider,
-            "resolved_provider": self.resolved_provider,
-            "model": self.model,
-            "final_answer_length": self.final_answer_length,
-            "no_final_answer": self.no_final_answer,
-            "invalid_tool_call_count": self.invalid_tool_call_count,
-            "malformed_json_count": self.malformed_json_count,
-            "repeated_tool_count": self.repeated_tool_count,
-            "max_turns_exceeded": self.max_turns_exceeded,
-            "hallucinated_tool_names": self.hallucinated_tool_names,
-            "safety_block_count": self.safety_block_count,
-            "safety_dry_run_count": self.safety_dry_run_count,
-        }
-
-
-@dataclass
-class AgentTrace:
-    """Full trace of a ReAct agent run."""
-    user_prompt: str
-    model: str
-    provider: str
-    backend: str
-    steps: list[TraceStep] = field(default_factory=list)
-    final_answer: str = ""
-    total_tokens: int = 0
-    elapsed_seconds: float = 0.0
-    budget_summary: dict = field(default_factory=dict)
-    diagnostics: TraceDiagnostics = field(default_factory=TraceDiagnostics)
-    state: AgentState | None = None
-    # F5: detailed token breakdown
-    prompt_tokens_total: int = 0
-    completion_tokens_total: int = 0
-
-    @property
-    def best_fidelity(self) -> float:
-        return self.budget_summary.get("best_fidelity", 0.0)
-
-    @property
-    def cost_summary(self) -> dict:
-        """Estimate API cost based on provider pricing (USD per 1M tokens)."""
-        PRICING = {
-            "deepseek": {"input": 0.27, "output": 1.10},  # DeepSeek-V3
-            "openai": {"input": 3.00, "output": 15.00},   # GPT-4o
-            "anthropic": {"input": 3.00, "output": 15.00}, # Claude Sonnet
-            "mock": {"input": 0.0, "output": 0.0},
-        }
-        rates = PRICING.get(self.provider, PRICING["openai"])
-        input_cost = self.prompt_tokens_total * rates["input"] / 1_000_000
-        output_cost = self.completion_tokens_total * rates["output"] / 1_000_000
-        return {
-            "provider": self.provider,
-            "prompt_tokens": self.prompt_tokens_total,
-            "completion_tokens": self.completion_tokens_total,
-            "total_tokens": self.total_tokens,
-            "input_cost_usd": round(input_cost, 6),
-            "output_cost_usd": round(output_cost, 6),
-            "total_cost_usd": round(input_cost + output_cost, 6),
-        }
-
-    @property
-    def num_tool_calls(self) -> int:
-        return sum(1 for s in self.steps if s.action is not None)
-
-    @property
-    def tool_calls_made(self) -> list[dict]:
-        return [
-            {"turn": s.step_num, "tool": s.action, "input": s.action_input}
-            for s in self.steps if s.action is not None
-        ]
-
-    def to_dict(self, include_observations: bool = False) -> dict[str, Any]:
-        """Serialize trace with compact steps and structured diagnostics."""
-        data = {
-            "user_prompt": self.user_prompt,
-            "model": self.model,
-            "provider": self.provider,
-            "backend": self.backend,
-            "final_answer": self.final_answer,
-            "total_tokens": self.total_tokens,
-            "elapsed_seconds": round(self.elapsed_seconds, 3),
-            "cost_summary": self.cost_summary,
-            "budget_summary": self.budget_summary,
-            "diagnostics": self.diagnostics.to_dict(),
-            "steps": [
-                s.to_dict(include_observation=include_observations)
-                for s in self.steps
-            ],
-        }
-        if self.state is not None:
-            data["state_summary"] = self.state.summary_for_prompt()
-            data["artifacts"] = self.state.artifacts.to_dict()
-        return data
-
-    def to_agent_result(self):
-        """Convert to legacy AgentResult for compatibility."""
-        from agent.loop import AgentResult, AgentTurn
-        turns = [AgentTurn(role="user", content=self.user_prompt, timestamp=0)]
-        for s in self.steps:
-            if s.thought:
-                turns.append(AgentTurn(role="assistant", content=f"Thought: {s.thought}", timestamp=s.timestamp))
-            if s.action:
-                turns.append(AgentTurn(
-                    role="assistant",
-                    content=f"[tool] {s.action}",
-                    tool_calls=[{"name": s.action, "input": s.action_input}],
-                    timestamp=s.timestamp,
-                ))
-        turns.append(AgentTurn(role="assistant", content=self.final_answer, timestamp=time.time()))
-
-        return AgentResult(
-            final_answer=self.final_answer,
-            turns=turns,
-            tool_calls_made=self.tool_calls_made,
-            total_tokens=self.total_tokens,
-            elapsed_seconds=self.elapsed_seconds,
-            model=self.model,
-        )
 
 
 # ═══════════════════════════════════════════════════════
 # ReAct Rule Planner (mock mode)
 # ═══════════════════════════════════════════════════════
 
-class ReActRulePlanner:
-    """Deterministic ReAct planner — generates structured Thought/Action pairs.
-
-    Enhanced over the basic RulePlanner with:
-    - Budget awareness
-    - Phase 2 tool support (transpile, mitigation, predict, rabi, fit)
-    - Structured thoughts
-    - Multi-circuit planning
-    - Keyword-driven tool selection
-    """
-
-    # All known benchmark circuits
-    ALL_CIRCUITS = ["ghz_3", "ghz_5", "qft_4", "bv_5", "vqe_4", "qaoa_4"]
-
-    def plan(
-        self,
-        user_prompt: str,
-        history: list[dict],
-        budget: FidelityBudget,
-        memory_context: str = "",
-    ) -> tuple[str | None, list[dict], str | None]:
-        """Return (thought, tool_calls, final_text).
-
-        If tool_calls non-empty → execute them; final_text is None.
-        If tool_calls empty → final_text is the answer.
-        """
-        prompt_lower = user_prompt.lower()
-        past_tools = [h["tool"] for h in history]
-        decision = budget.decide()
-
-        # ─── Intent detection ─────────────────────────────────────
-        intents = self._detect_intents(prompt_lower)
-
-        # ─── Budget says stop ─────────────────────────────────────
-        if decision == BudgetDecision.STOP:
-            return (
-                "Budget exhausted. Summarizing findings.",
-                [],
-                self._synthesize(user_prompt, history, budget),
-            )
-
-        # ─── Budget says goal met — check pending work ────────────
-        if decision == BudgetDecision.GOAL_MET:
-            pending = self._get_pending_actions(prompt_lower, intents, history, budget)
-            if not pending:
-                return (
-                    "Fidelity target reached. Summarizing results.",
-                    [],
-                    self._synthesize(user_prompt, history, budget),
-                )
-            # else fall through to continue
-
-        # ─── Phase 1: health check ───────────────────────────────
-        if "get_backend_health" not in past_tools:
-            thought = "First, I need to check the backend health to understand current device state."
-            calls = [{"name": "get_backend_health", "input": {}}]
-
-            # Also get qubit properties if relevant. Lab characterization tasks
-            # such as Rabi should proceed to the experiment after the health
-            # snapshot instead of detouring into generic qubit-property scans.
-            if intents.get("qubit_properties") and not intents.get("rabi"):
-                thought += " Also getting detailed qubit properties."
-                calls.append({"name": "get_qubit_properties", "input": {"qubits": [0, 1, 2, 3, 4]}})
-
-            # Also get coupling map if relevant
-            if intents.get("coupling_map"):
-                thought += " Getting the coupling map for topology analysis."
-                calls.append({"name": "get_coupling_map", "input": {}})
-
-            return thought, calls, None
-
-        # ─── Phase: coupling map (if not yet done) ────────────────
-        if intents.get("coupling_map") and "get_coupling_map" not in past_tools:
-            thought = "Getting the coupling map to analyze qubit connectivity."
-            return thought, [{"name": "get_coupling_map", "input": {}}], None
-
-        # ─── Phase: qubit properties (if not yet done) ────────────
-        if intents.get("qubit_properties") and not intents.get("rabi") and "get_qubit_properties" not in past_tools:
-            thought = "Getting detailed qubit properties."
-            # Get more qubits for selection tasks
-            n_qubits = 20 if "best" in prompt_lower or "select" in prompt_lower else 5
-            qubits = list(range(n_qubits))
-            return thought, [{"name": "get_qubit_properties", "input": {"qubits": qubits}}], None
-
-        # ─── Phase: Rabi experiment ───────────────────────────────
-        if intents.get("rabi"):
-            if "rabi_experiment" not in past_tools:
-                thought = "Running a Rabi oscillation experiment for qubit characterization."
-                params = {}
-                freq_match = re.search(r'(\d+\.?\d*)\s*ghz', prompt_lower)
-                if freq_match:
-                    params["qubit_freq_ghz"] = float(freq_match.group(1))
-                dur_match = re.search(r'(\d+)\s*ns', prompt_lower)
-                if dur_match:
-                    params["pulse_duration_ns"] = float(dur_match.group(1))
-                if "gaussian" in prompt_lower:
-                    params["pulse_shape"] = "gaussian"
-                return thought, [{"name": "rabi_experiment", "input": params}], None
-
-            if "fit_rabi" not in past_tools:
-                for h in reversed(history):
-                    if h["tool"] == "rabi_experiment" and h.get("result"):
-                        try:
-                            r = json.loads(h["result"])
-                            thought = "Fitting the Rabi data to extract π-pulse amplitude."
-                            return thought, [{"name": "fit_rabi", "input": {
-                                "amplitudes": r["amplitudes"],
-                                "populations": r["populations"],
-                            }}], None
-                        except Exception:
-                            pass
-
-        # ─── Phase: memory-informed preflight ─────────────────────
-        memory_hit = self._low_fidelity_circuit_from_memory(
-            memory_context, prompt_lower, budget.target_fidelity
-        )
-        if (
-            memory_hit
-            and "get_backend_health" in past_tools
-            and "diagnose_and_suggest" not in past_tools
-        ):
-            low_fidelity_circuit, remembered_fidelity = memory_hit
-            thought = (
-                f"Memory shows prior low fidelity for {low_fidelity_circuit}; "
-                "diagnosing likely causes before repeating the run."
-            )
-            diag_input: dict[str, Any] = {
-                "circuit_name": low_fidelity_circuit,
-                "fidelity": remembered_fidelity,
-            }
-            return thought, [{"name": "diagnose_and_suggest", "input": diag_input}], None
-
-        # ─── Phase: transpile ─────────────────────────────────────
-        if intents.get("transpile"):
-            circ_name = self._extract_circuit_name(prompt_lower) or "ghz_5"
-            if not any(h["tool"] == "transpile_circuit" for h in history):
-                thought = f"Transpiling {circ_name} to see the compiled depth and gate count."
-                opt_level = 1
-                # Check if multiple optimization levels requested
-                if "level" in prompt_lower and any(str(i) in prompt_lower for i in range(4)):
-                    levels = [i for i in range(4) if str(i) in prompt_lower]
-                    opt_level = levels[0] if levels else 1
-                return thought, [{"name": "transpile_circuit", "input": {
-                    "circuit_name": circ_name, "optimization_level": opt_level
-                }}], None
-            # If multiple levels requested, try next level
-            if "level" in prompt_lower or "optimiz" in prompt_lower:
-                done_levels = set()
-                for h in history:
-                    if h["tool"] == "transpile_circuit":
-                        done_levels.add(h.get("input", {}).get("optimization_level", 1))
-                for lvl in [0, 1, 2, 3]:
-                    if lvl not in done_levels and str(lvl) in prompt_lower:
-                        thought = f"Transpiling {circ_name} at optimization level {lvl}."
-                        return thought, [{"name": "transpile_circuit", "input": {
-                            "circuit_name": circ_name, "optimization_level": lvl
-                        }}], None
-
-        # ─── Phase: predict fidelity ──────────────────────────────
-        if intents.get("predict"):
-            all_circuits = self._get_circuits_to_predict(prompt_lower)
-            for circ_name in all_circuits:
-                already_predicted = any(
-                    h["tool"] == "predict_fidelity" and
-                    h.get("input", {}).get("circuit_name") == circ_name
-                    for h in history
-                )
-                if not already_predicted:
-                    thought = f"Predicting fidelity for {circ_name} without running it."
-                    return thought, [{"name": "predict_fidelity", "input": {"circuit_name": circ_name}}], None
-
-        # ─── Phase: list benchmarks ───────────────────────────────
-        if intents.get("list_benchmarks") and "list_benchmarks" not in past_tools:
-            thought = "Listing available benchmark circuits."
-            return thought, [{"name": "list_benchmarks", "input": {}}], None
-
-        # ─── Phase: run circuit(s) ────────────────────────────────
-        # If a prior diagnose_and_suggest produced recommended_overrides,
-        # apply them to the next run_circuit (shots, optimization_level, etc.).
-        diag_overrides = self._get_diagnose_overrides(history)
-
-        all_circuits = self._get_circuits_to_run(prompt_lower, history)
-        for circ_name in all_circuits:
-            failed_attempts = self._failed_tool_count(history, "run_circuit", circuit_name=circ_name)
-            already_succeeded = any(
-                h["tool"] == "run_circuit"
-                and h.get("input", {}).get("circuit_name") == circ_name
-                and not self._result_has_error(h.get("result"))
-                for h in history
-            )
-            if not already_succeeded:
-                if failed_attempts >= 2:
-                    if not any(h["tool"] == "diagnose_and_suggest" for h in history):
-                        thought = f"{circ_name} failed repeatedly. Diagnosing instead of looping on the same tool."
-                        return thought, [{"name": "diagnose_and_suggest", "input": {"circuit_name": circ_name}}], None
-                    continue
-                retry_note = "Retrying" if failed_attempts else "Running"
-                run_input: dict[str, Any] = {"circuit_name": circ_name, "shots": 4096}
-                if diag_overrides:
-                    run_input.update(diag_overrides)
-                    retry_note += f" (with overrides from diagnosis: {diag_overrides})"
-                thought = f"{retry_note} {circ_name} circuit to measure fidelity."
-                return thought, [{"name": "run_circuit", "input": run_input}], None
-
-        # ─── Phase: mitigation ────────────────────────────────────
-        if intents.get("mitigate") and not budget.mitigation_attempted:
-            circ_name = self._last_circuit(history) or "ghz_5"
-            thought = f"Applying ZNE error mitigation to {circ_name}."
-            budget.mitigation_attempted = True
-            return thought, [{"name": "apply_mitigation", "input": {"circuit_name": circ_name, "shots": 4096}}], None
-
-        # Budget-driven mitigation (fidelity below target)
-        if decision == BudgetDecision.MITIGATE and not budget.mitigation_attempted:
-            circ_name = self._last_circuit(history) or "ghz_5"
-            thought = f"Fidelity below target. Applying ZNE error mitigation to {circ_name}."
-            budget.mitigation_attempted = True
-            return thought, [{"name": "apply_mitigation", "input": {"circuit_name": circ_name, "shots": 4096}}], None
-
-        # ─── Phase: diagnose ──────────────────────────────────────
-        if intents.get("diagnose") and "diagnose_and_suggest" not in past_tools:
-            thought = "Diagnosing potential issues with the backend."
-            inp = {}
-            for h in reversed(history):
-                if h["tool"] == "run_circuit" and h.get("result"):
-                    try:
-                        r = json.loads(h["result"])
-                        inp["fidelity"] = r.get("fidelity")
-                        inp["circuit_name"] = r.get("circuit")
-                    except Exception:
-                        pass
-                    break
-            return thought, [{"name": "diagnose_and_suggest", "input": inp}], None
-
-        # ─── Phase: drift check ───────────────────────────────────
-        if intents.get("drift") and "detect_drift" not in past_tools:
-            thought = "Checking for hardware drift."
-            return thought, [{"name": "detect_drift", "input": {}}], None
-
-        # ─── Final synthesis ──────────────────────────────────────
-        return (
-            "I have gathered enough information. Preparing the final report.",
-            [],
-            self._synthesize(user_prompt, history, budget),
-        )
-
-    def _detect_intents(self, prompt_lower: str) -> dict[str, bool]:
-        """Detect user intents from the prompt."""
-        return {
-            "coupling_map": any(kw in prompt_lower for kw in [
-                "coupling", "topology", "connected", "degree", "coupling map"
-            ]),
-            "qubit_properties": any(kw in prompt_lower for kw in [
-                "qubit", "t1", "t2", "best", "worst", "select", "properties"
-            ]),
-            "rabi": any(kw in prompt_lower for kw in [
-                "rabi", "pi pulse", "pi-pulse", "characteriz"
-            ]) or ("pulse" in prompt_lower and "pi" in prompt_lower),
-            "transpile": any(kw in prompt_lower for kw in [
-                "transpil", "compile", "optimiz"
-            ]) and "level" in prompt_lower or "transpil" in prompt_lower,
-            "predict": any(kw in prompt_lower for kw in [
-                "predict", "estimat", "error budget", "break down", "error source",
-                "breakdown", "impact", "analyze the impact", "assess"
-            ]),
-            "mitigate": any(kw in prompt_lower for kw in [
-                "mitigat", "zne", "error correct", "zero-noise", "zero noise"
-            ]),
-            "diagnose": any(kw in prompt_lower for kw in [
-                "diagnose", "wrong", "suggest", "problem", "issue", "cause",
-                "what happened", "failure", "recommend", "recovery", "recalib"
-            ]),
-            "drift": any(kw in prompt_lower for kw in [
-                "drift", "degrad", "monitor", "stable", "drifting", "detect",
-                "spike", "sudden"
-            ]),
-            "list_benchmarks": any(kw in prompt_lower for kw in [
-                "list", "available", "all circuit", "all benchmark", "sweep"
-            ]),
-            "compare": any(kw in prompt_lower for kw in [
-                "compare", "rank", "which", "best", "worst"
-            ]),
-            "all_circuits": any(kw in prompt_lower for kw in [
-                "all circuit", "all available", "all benchmark", "every circuit",
-                "each circuit", "sweep"
-            ]),
-        }
-
-    def _get_pending_actions(self, prompt_lower, intents, history, budget):
-        """Check if there are still pending actions after goal is met."""
-        pending = []
-        past_tools = [h["tool"] for h in history]
-
-        # Unrun circuits
-        all_circuits = self._get_circuits_to_run(prompt_lower, history)
-        for c in all_circuits:
-            if not any(h["tool"] == "run_circuit" and h.get("input", {}).get("circuit_name") == c for h in history):
-                pending.append(f"run_{c}")
-
-        # Pending mitigation
-        if intents.get("mitigate") and not budget.mitigation_attempted:
-            pending.append("mitigate")
-
-        # Pending diagnosis
-        if intents.get("diagnose") and "diagnose_and_suggest" not in past_tools:
-            pending.append("diagnose")
-
-        # Pending prediction
-        if intents.get("predict") and "predict_fidelity" not in past_tools:
-            pending.append("predict")
-
-        # Pending coupling map
-        if intents.get("coupling_map") and "get_coupling_map" not in past_tools:
-            pending.append("coupling_map")
-
-        # Pending transpile
-        if intents.get("transpile") and "transpile_circuit" not in past_tools:
-            pending.append("transpile")
-
-        # Pending rabi
-        if intents.get("rabi") and "rabi_experiment" not in past_tools:
-            pending.append("rabi")
-
-        return pending
-
-    def _low_fidelity_circuit_from_memory(
-        self,
-        memory_context: str,
-        prompt_lower: str,
-        target_fidelity: float,
-    ) -> tuple[str, float] | None:
-        """Scan an injected memory context for a prior low-fidelity run of the
-        circuit the user is currently asking about.
-
-        Returns (circuit_name, remembered_fidelity) or None.
-
-        Accepts two formats so the planner stays useful regardless of how
-        memory is rendered:
-
-          1. ``circuit=ghz_5 ... fidelity=0.62`` (key=value, legacy/test)
-          2. ``[MEMORY] ...`` bullets produced by
-             ``AgentMemory.get_context_summary``, which look like:
-                 ``1. Prior ghz_5 run had low fidelity (fidelity=0.62, ...)``
-        """
-        if not memory_context:
-            return None
-        requested = self._extract_circuit_name(prompt_lower)
-        known = [name for _, name in self._circuit_patterns()]
-
-        for line in memory_context.splitlines():
-            fidelity_match = re.search(
-                r"fidelity[=:]\s*([0-9]*\.?[0-9]+)", line, flags=re.IGNORECASE
-            )
-            if not fidelity_match:
-                continue
-            try:
-                fidelity = float(fidelity_match.group(1))
-            except ValueError:
-                continue
-            if fidelity >= target_fidelity:
-                continue
-
-            # Format 1 — explicit circuit=<name>
-            circuit_match = re.search(
-                r"circuit[=:]\s*([a-z0-9_\-]+)", line, flags=re.IGNORECASE
-            )
-            if circuit_match:
-                circuit = circuit_match.group(1).lower().replace("-", "_")
-            else:
-                # Format 2 — fall back to scanning the line for any known
-                # circuit name (handles "Prior ghz_5 run had ...").
-                circuit = None
-                lowered = line.lower()
-                for name in known:
-                    if re.search(rf"\b{re.escape(name)}\b", lowered):
-                        circuit = name
-                        break
-                if circuit is None:
-                    continue
-
-            if requested and circuit != requested:
-                continue
-            return (circuit, fidelity)
-        return None
-
-    def _result_has_error(self, result: str | None) -> bool:
-        if not result:
-            return False
-        try:
-            parsed = json.loads(result)
-        except Exception:
-            return False
-        return isinstance(parsed, dict) and bool(parsed.get("error"))
-
-    @staticmethod
-    def _get_diagnose_overrides(history: list[dict]) -> dict:
-        """Extract recommended_overrides from the most recent diagnose_and_suggest result."""
-        for h in reversed(history):
-            if h.get("tool") == "diagnose_and_suggest" and h.get("result"):
-                try:
-                    parsed = json.loads(h["result"])
-                    overrides = parsed.get("recommended_overrides", {})
-                    if isinstance(overrides, dict) and overrides:
-                        return overrides
-                except Exception:
-                    pass
-                break
-        return {}
-
-    def _failed_tool_count(
-        self,
-        history: list[dict],
-        tool_name: str,
-        circuit_name: str | None = None,
-    ) -> int:
-        count = 0
-        for h in history:
-            if h.get("tool") != tool_name:
-                continue
-            if circuit_name is not None and h.get("input", {}).get("circuit_name") != circuit_name:
-                continue
-            if self._result_has_error(h.get("result")):
-                count += 1
-        return count
-
-    def _get_circuits_to_run(self, prompt_lower: str, history: list[dict]) -> list[str]:
-        """Determine which circuits to run based on prompt."""
-        # Check for "all circuits" intent
-        if any(kw in prompt_lower for kw in [
-            "all circuit", "all available", "all benchmark", "every circuit",
-            "each circuit", "sweep"
-        ]):
-            # If we already listed benchmarks, use that list
-            for h in history:
-                if h["tool"] == "list_benchmarks" and h.get("result"):
-                    try:
-                        r = json.loads(h["result"])
-                        circuits = []
-                        for key in ["hand_written", "circuits"]:
-                            if key in r:
-                                if isinstance(r[key], dict):
-                                    circuits.extend(r[key].keys())
-                                elif isinstance(r[key], list):
-                                    circuits.extend(r[key])
-                        if circuits:
-                            return circuits
-                    except Exception:
-                        pass
-            # Fallback: all known circuits
-            return list(self.ALL_CIRCUITS)
-
-        # Extract explicitly named circuits
-        found = self._extract_all_circuits(prompt_lower)
-
-        # A lab characterization request such as "run a Rabi experiment" is not
-        # a circuit benchmark request. For physics-facing demos, do not append a
-        # default GHZ run unless the user explicitly names a circuit.
-        is_lab_characterization = any(kw in prompt_lower for kw in [
-            "rabi", "ramsey", "t1", "pi pulse", "pi-pulse", "characteriz"
-        ])
-        if is_lab_characterization and not found:
-            return []
-
-        # If prompt mentions running/fidelity but no specific circuit, default to ghz_5
-        if not found and any(kw in prompt_lower for kw in ["run", "circuit", "fidelity", "execute"]):
-            found = ["ghz_5"]
-
-        return found
-
-    def _get_circuits_to_predict(self, prompt_lower: str) -> list[str]:
-        """Determine which circuits to predict fidelity for."""
-        if any(kw in prompt_lower for kw in ["all", "each", "every"]):
-            return list(self.ALL_CIRCUITS)
-
-        found = self._extract_all_circuits(prompt_lower)
-        if not found:
-            found = ["ghz_5"]
-        return found
-
-    def _extract_circuit_name(self, prompt_lower: str) -> str | None:
-        """Extract first matching circuit name from prompt."""
-        for pattern, name in self._circuit_patterns():
-            if re.search(pattern, prompt_lower):
-                return name
-        return None
-
-    def _extract_all_circuits(self, prompt_lower: str) -> list[str]:
-        """Extract all matching circuit names from prompt."""
-        found = []
-        for pattern, name in self._circuit_patterns():
-            if re.search(pattern, prompt_lower):
-                found.append(name)
-        return found
-
-    @staticmethod
-    def _circuit_patterns():
-        return [
-            (r"ghz[_\-]?3", "ghz_3"), (r"ghz[_\-]?5", "ghz_5"),
-            (r"qft[_\-]?4", "qft_4"),
-            (r"bv[_\-]?5|bernstein.vazirani", "bv_5"),
-            (r"vqe[_\-]?4", "vqe_4"),
-            (r"qaoa[_\-]?4|maxcut", "qaoa_4"),
-        ]
-
-    def _last_circuit(self, history: list[dict]) -> str | None:
-        for h in reversed(history):
-            if h["tool"] == "run_circuit" and h.get("input"):
-                return h["input"].get("circuit_name")
-        return None
-
-    def _synthesize(self, user_prompt: str, history: list[dict], budget: FidelityBudget) -> str:
-        sections = ["## QuantumGPT ReAct Analysis Report\n"]
-        for h in history:
-            if not h.get("result"):
-                continue
-            try:
-                r = json.loads(h["result"])
-            except Exception:
-                continue
-
-            if r.get("error"):
-                sections.append(f"**Tool issue: {h['tool']}**")
-                sections.append(f"  error: {r.get('error')}")
-                if r.get("reason"):
-                    sections.append(f"  reason: {r.get('reason')}")
-                if isinstance(r.get("safety"), dict):
-                    sections.append(f"  safety_status: {r['safety'].get('status')}")
-                sections.append("")
-                continue
-
-            if h["tool"] == "get_backend_health":
-                sections.append(f"**Backend: {r.get('backend', '?')}** ({r.get('num_qubits')} qubits)")
-                sections.append(f"  T1={r.get('avg_t1_us')}μs  T2={r.get('avg_t2_us')}μs")
-                sections.append(f"  1Q err={r.get('avg_1q_error')}  2Q err={r.get('avg_2q_error')}  readout={r.get('avg_readout_error')}")
-                sections.append(f"  drift={r.get('drift_score')}\n")
-
-            elif h["tool"] == "get_qubit_properties":
-                sections.append("**Qubit Properties:**")
-                for q in r.get("qubits", []):
-                    sections.append(f"  Q{q['qubit']}: T1={q['t1_us']}μs T2={q['t2_us']}μs readout_err={q['readout_error']}")
-                sections.append("")
-
-            elif h["tool"] == "get_coupling_map":
-                sections.append("**Coupling Map:**")
-                edges = r.get("edges", [])
-                sections.append(f"  {r.get('num_qubits', '?')} qubits, {len(edges)} edges")
-                # Find most connected qubit
-                from collections import Counter
-                degree = Counter()
-                for e in edges:
-                    degree[e[0]] += 1
-                    degree[e[1]] += 1
-                if degree:
-                    top = degree.most_common(3)
-                    sections.append(f"  Most connected: Q{top[0][0]} (degree {top[0][1]})")
-                sections.append("")
-
-            elif h["tool"] == "run_circuit":
-                sections.append(f"**Circuit: {r.get('circuit')}**")
-                sections.append(f"  Fidelity: {r.get('fidelity')}  depth: {r.get('transpiled_depth')}  shots: {r.get('shots')}")
-                tc = r.get("top_counts", {})
-                if tc:
-                    top3 = sorted(tc.items(), key=lambda x: -x[1])[:3]
-                    sections.append(f"  Top counts: {dict(top3)}")
-                sections.append("")
-
-            elif h["tool"] == "transpile_circuit":
-                sections.append(f"**Transpile: {r.get('circuit')}**")
-                sections.append(f"  Depth: {r.get('original_depth')} → {r.get('transpiled_depth')}  2Q gates: {r.get('two_qubit_gates')}")
-                sections.append("")
-
-            elif h["tool"] == "apply_mitigation":
-                sections.append(f"**Error Mitigation (ZNE): {r.get('circuit', '?')}**")
-                sections.append(f"  Unmitigated: {r.get('unmitigated_fidelity')}  Mitigated: {r.get('mitigated_fidelity')}  Δ: {r.get('improvement')}")
-                sections.append("")
-
-            elif h["tool"] == "predict_fidelity":
-                sections.append(f"**Predicted Fidelity: {r.get('circuit')}**")
-                sections.append(f"  F_predicted={r.get('predicted_fidelity')} ({r.get('confidence')})")
-                b = r.get("breakdown", {})
-                sections.append(f"  1Q={b.get('f_1q_gates')} 2Q={b.get('f_2q_gates')} readout={b.get('f_readout')}")
-                sections.append("")
-
-            elif h["tool"] == "rabi_experiment":
-                sections.append(f"**Rabi Experiment** ({r.get('pulse_shape')} pulse, {r.get('pulse_duration_ns')}ns)")
-                sections.append(f"  Qubit freq: {r.get('qubit_freq_ghz')} GHz")
-                sections.append(f"  π-pulse amplitude: {r.get('pi_amplitude_mhz')} MHz")
-                sections.append(f"  Max P(|1⟩): {r.get('max_population')}")
-                sections.append("")
-
-            elif h["tool"] == "fit_rabi":
-                sections.append(f"**Rabi Fit Result**")
-                sections.append(f"  π-amplitude: {r.get('pi_amplitude_mhz')} MHz ± {r.get('pi_uncertainty_ghz', 'N/A')} GHz")
-                sections.append(f"  π/2-amplitude: {r.get('half_pi_amplitude_ghz')} GHz")
-                sections.append(f"  R²: {r.get('r_squared')}")
-                sections.append("")
-
-            elif h["tool"] == "diagnose_and_suggest":
-                sections.append(f"**Diagnosis:** severity={r.get('severity')}")
-                for s in r.get("suggestions", []):
-                    sections.append(f"  • {s}")
-                sections.append("")
-
-            elif h["tool"] == "list_benchmarks":
-                hw = r.get("hand_written", {})
-                mqt = r.get("mqtbench", {})
-                if isinstance(hw, dict):
-                    sections.append(f"**Circuits:** {len(hw)} hand-written + {len(mqt)} MQTBench\n")
-                else:
-                    sections.append(f"**Circuits:** {len(r.get('circuits', []))} available\n")
-
-            elif h["tool"] == "detect_drift":
-                sections.append(f"**Drift Check:**")
-                sections.append(f"  Drift detected: {r.get('drift_detected')}")
-                sections.append(f"  Drift score: {r.get('drift_score')}")
-                sections.append("")
-
-        # Budget summary
-        bs = budget.summary()
-        sections.append(f"---\n**Budget:** {bs['tool_calls_used']} calls, {bs['elapsed_seconds']}s elapsed")
-        sections.append(f"**Best fidelity:** {bs['best_fidelity']}")
-        sections.append(f"**Target:** {bs['target_fidelity']}  **Status:** {bs['decision']}")
-
-        # Execution mode banner — tells the reader this was simulation.
-        # If any safety block or dry-run was encountered, note it explicitly.
-        mode_tags = ["simulation"]
-        safety_blocks = sum(
-            1 for h in history
-            if h.get("result")
-            and '"blocked_by_safety_policy"' in str(h.get("result", ""))
-        )
-        safety_dry_runs = sum(
-            1 for h in history
-            if h.get("result")
-            and '"dry_run"' in str(h.get("result", ""))
-        )
-        if safety_blocks:
-            mode_tags.append(f"{safety_blocks} safety block(s)")
-        if safety_dry_runs:
-            mode_tags.append(f"{safety_dry_runs} dry-run step(s)")
-        sections.append(f"\n**Mode:** {' | '.join(mode_tags)} — no physical hardware was modified.")
-
-        return "\n".join(sections)
 
 
 # ═══════════════════════════════════════════════════════
@@ -1129,23 +317,11 @@ class ReActAgent:
         return self.executor.execute(tool_name, tool_input)
 
     def _artifact_type_for_tool(self, tool_name: str) -> ArtifactType | None:
-        """Map tool names to state artifact types."""
-        return {
-            "get_backend_health": ArtifactType.BACKEND_SNAPSHOT,
-            "get_qubit_properties": ArtifactType.QUBIT_PROPERTIES,
-            "get_coupling_map": ArtifactType.COUPLING_MAP,
-            "transpile_circuit": ArtifactType.TRANSPILED_CIRCUIT,
-            "predict_fidelity": ArtifactType.PREDICTED_FIDELITY,
-            "run_circuit": ArtifactType.CIRCUIT_RESULT,
-            "apply_mitigation": ArtifactType.MITIGATION_RESULT,
-            "detect_drift": ArtifactType.DRIFT_REPORT,
-            "rabi_experiment": ArtifactType.LAB_EXPERIMENT_RESULT,
-            "fit_rabi": ArtifactType.FIT_RESULT,
-            "ramsey_experiment": ArtifactType.LAB_EXPERIMENT_RESULT,
-            "fit_ramsey": ArtifactType.FIT_RESULT,
-            "t1_experiment": ArtifactType.LAB_EXPERIMENT_RESULT,
-            "fit_t1": ArtifactType.FIT_RESULT,
-        }.get(tool_name)
+        """Resolve state-artifact metadata from the canonical tool registry."""
+        spec = get_tool_runtime_spec(tool_name)
+        if spec is None or spec.artifact_type is None:
+            return None
+        return ArtifactType(spec.artifact_type)
 
     def _hash_payload(self, payload: Any) -> str:
         encoded = json.dumps(payload, sort_keys=True, default=str).encode("utf-8")
@@ -1255,34 +431,64 @@ class ReActAgent:
         step.state_summary = state.summary_for_prompt()
 
     def _record_drift_after_tool(self, trace: AgentTrace, step: TraceStep) -> None:
-        """Poll drift monitor and invalidate stale state artifacts if drift appears."""
-        if trace.state is None or self.drift_monitor is None:
+        """Poll drift monitor and invalidate stale state artifacts if drift appears.
+
+        Also surfaces a one-shot DRIFT ALERT into trace._pending_drift_alert
+        so the next LLM turn (in _run_openai/_run_anthropic) can see the
+        device parameter shift and replan. Counts each stable→drifting
+        transition in trace.diagnostics.drift_alert_count, and sets
+        trace.diagnostics.replan_triggered the first time drift is observed.
+        """
+        if self.drift_monitor is None:
             return
 
+        was_drifting = bool(getattr(self.drift_monitor.state, "is_drifting", False))
         drift_state = self.drift_monitor.step()
-        state = trace.state
-        state.drift_state = {
-            "is_drifting": bool(getattr(drift_state, "is_drifting", False)),
-            "drift_score": float(getattr(drift_state, "drift_score", 0.0) or 0.0),
-            "consecutive_drift_checks": int(getattr(drift_state, "consecutive_drift_checks", 0) or 0),
-            "invalidated_results": list(getattr(drift_state, "invalidated_results", []) or []),
-            "recovery_steps": int(getattr(drift_state, "recovery_steps", 0) or 0),
-        }
 
-        if state.drift_state["is_drifting"] and state.backend_snapshot_id:
-            invalidated = state.artifacts.invalidate_dependents(
-                state.backend_snapshot_id,
-                reason=InvalidationReason.BACKEND_DRIFT,
-                detail=f"drift_score={state.drift_state['drift_score']:.3f}",
-                status=ArtifactStatus.STALE,
-            )
-            if invalidated:
-                invalidated_types = sorted({a.artifact_type.value for a in invalidated})
-                state.observations.append(
-                    "backend drift invalidated " + ", ".join(invalidated_types)
+        if trace.state is not None:
+            state = trace.state
+            state.drift_state = {
+                "is_drifting": bool(getattr(drift_state, "is_drifting", False)),
+                "drift_score": float(getattr(drift_state, "drift_score", 0.0) or 0.0),
+                "consecutive_drift_checks": int(getattr(drift_state, "consecutive_drift_checks", 0) or 0),
+                "invalidated_results": list(getattr(drift_state, "invalidated_results", []) or []),
+                "recovery_steps": int(getattr(drift_state, "recovery_steps", 0) or 0),
+            }
+
+            if state.drift_state["is_drifting"] and state.backend_snapshot_id:
+                invalidated = state.artifacts.invalidate_dependents(
+                    state.backend_snapshot_id,
+                    reason=InvalidationReason.BACKEND_DRIFT,
+                    detail=f"drift_score={state.drift_state['drift_score']:.3f}",
+                    status=ArtifactStatus.STALE,
                 )
+                if invalidated:
+                    invalidated_types = sorted({a.artifact_type.value for a in invalidated})
+                    state.observations.append(
+                        "backend drift invalidated " + ", ".join(invalidated_types)
+                    )
 
-        step.state_summary = state.summary_for_prompt()
+            step.state_summary = state.summary_for_prompt()
+
+        is_drifting = bool(getattr(drift_state, "is_drifting", False))
+        if is_drifting and not was_drifting:
+            trace.diagnostics.drift_alert_count += 1
+            trace.diagnostics.replan_triggered = True
+            trace.diagnostics.drift_alert_steps.append(int(getattr(step, "step_num", 0)))
+            invalidated = list(getattr(drift_state, "invalidated_results", []) or [])
+            score = float(getattr(drift_state, "drift_score", 0.0) or 0.0)
+            alert_lines = [
+                "[DRIFT ALERT] Device parameters have shifted since your last action.",
+                f"  drift_score={score:.3f} (threshold={getattr(self.drift_monitor, 'drift_threshold', 0.3)})",
+            ]
+            if invalidated:
+                alert_lines.append(
+                    "  Invalidated artifacts: " + ", ".join(str(x) for x in invalidated)
+                )
+                alert_lines.append(
+                    "  ACTION REQUIRED: re-check backend health, retranspile, and re-run the affected circuit before trusting earlier results."
+                )
+            trace._pending_drift_alert = "\n".join(alert_lines)
 
     def _safety_status_from_result(self, result_str: str) -> str | None:
         try:
@@ -1320,6 +526,23 @@ class ReActAgent:
         except Exception:
             pass
         return None
+
+    def _budget_stop_step(self, step_num: int, thought: str = "") -> TraceStep:
+        return TraceStep(
+            step_num=step_num,
+            thought=thought,
+            budget_decision=BudgetDecision.STOP.name,
+            timestamp=time.time(),
+        )
+
+    def _maybe_stop_for_budget(self, trace: AgentTrace, step_num: int, thought: str = "") -> bool:
+        if self.budget.remaining_calls > 0 and self.budget.remaining_seconds > 0:
+            return False
+        if not trace.final_answer:
+            trace.final_answer = "[Budget exhausted before executing additional tools]"
+        if not trace.steps or trace.steps[-1].budget_decision != BudgetDecision.STOP.name:
+            trace.steps.append(self._budget_stop_step(step_num, thought=thought))
+        return True
 
     def run(self, user_prompt: str, memory_context: str = "") -> AgentTrace:
         """Run the ReAct agent loop.
@@ -1411,6 +634,9 @@ class ReActAgent:
             print(f"\nUser: {user_prompt}\n")
 
         for step_num in range(self.max_turns):
+            if self._maybe_stop_for_budget(trace, step_num):
+                break
+
             thought, tool_calls, final_text = self.planner.plan(
                 user_prompt, history, self.budget, memory_context=memory_context
             )
@@ -1428,6 +654,9 @@ class ReActAgent:
 
             # Execute tool calls
             for call in tool_calls:
+                if self._maybe_stop_for_budget(trace, step_num, thought=thought):
+                    break
+
                 tool_name = call["name"]
                 tool_input = call["input"]
                 self._record_tool_diagnostics(trace, tool_name, tool_input, seen_calls)
@@ -1522,9 +751,15 @@ class ReActAgent:
             print(f"\nUser: {user_prompt}\n")
 
         for step_num in range(self.max_turns):
+            if self._maybe_stop_for_budget(trace, step_num):
+                break
+
             # Inject budget status
             budget_msg = self.budget.budget_prompt_insert()
             messages.append({"role": "system", "content": budget_msg})
+            pending_alert = getattr(trace, "_pending_drift_alert", "")
+            if pending_alert:
+                messages.append({"role": "system", "content": pending_alert})
 
             api_t0 = time.time()
             response = self.client.chat.completions.create(
@@ -1535,7 +770,10 @@ class ReActAgent:
             )
             api_latency_ms = (time.time() - api_t0) * 1000
 
-            # Remove the ephemeral budget injection
+            # Remove the ephemeral budget injection (and drift alert if any)
+            if pending_alert:
+                messages.pop()
+                trace._pending_drift_alert = ""
             messages.pop()
 
             choice = response.choices[0]
@@ -1570,6 +808,9 @@ class ReActAgent:
             messages.append(msg.model_dump())
 
             for tc in msg.tool_calls:
+                if self._maybe_stop_for_budget(trace, step_num, thought=thought_text):
+                    break
+
                 tool_name = tc.function.name
                 try:
                     tool_input = json.loads(tc.function.arguments)
@@ -1651,11 +892,19 @@ class ReActAgent:
             print(f"\nUser: {user_prompt}\n")
 
         for step_num in range(self.max_turns):
+            if self._maybe_stop_for_budget(trace, step_num):
+                break
+
             sys_prompt = REACT_SYSTEM_PROMPT
             if memory_context:
                 sys_prompt += "\n\n" + memory_context
             sys_prompt += "\n\n" + self.budget.budget_prompt_insert()
+            pending_alert = getattr(trace, "_pending_drift_alert", "")
+            if pending_alert:
+                sys_prompt += "\n\n" + pending_alert
+                trace._pending_drift_alert = ""
 
+            api_t0 = time.time()
             response = self.client.messages.create(
                 model=self.model,
                 max_tokens=2048,
@@ -1663,7 +912,12 @@ class ReActAgent:
                 tools=list(TOOL_DEFINITIONS) + ([AgentMemory.tool_definition()] if self.memory else []),
                 messages=messages,
             )
-            trace.total_tokens += response.usage.input_tokens + response.usage.output_tokens
+            api_latency_ms = (time.time() - api_t0) * 1000
+            step_prompt_tokens = int(getattr(response.usage, "input_tokens", 0) or 0)
+            step_completion_tokens = int(getattr(response.usage, "output_tokens", 0) or 0)
+            trace.total_tokens += step_prompt_tokens + step_completion_tokens
+            trace.prompt_tokens_total += step_prompt_tokens
+            trace.completion_tokens_total += step_completion_tokens
 
             tool_use_blocks = [b for b in response.content if b.type == "tool_use"]
             text_blocks = [b for b in response.content if b.type == "text"]
@@ -1678,6 +932,9 @@ class ReActAgent:
                     step_num=step_num, thought=thought_text,
                     budget_decision=self.budget.decide().name,
                     timestamp=time.time(),
+                    prompt_tokens=step_prompt_tokens,
+                    completion_tokens=step_completion_tokens,
+                    api_latency_ms=api_latency_ms,
                 ))
                 break
 
@@ -1695,6 +952,9 @@ class ReActAgent:
 
             tool_results_content = []
             for block in tool_use_blocks:
+                if self._maybe_stop_for_budget(trace, step_num, thought=thought_text):
+                    break
+
                 tool_name = block.name
                 tool_input = block.input
                 self._record_tool_diagnostics(trace, tool_name, tool_input, seen_calls)
@@ -1703,6 +963,9 @@ class ReActAgent:
                     step_num=step_num, thought=thought_text,
                     action=tool_name, action_input=tool_input,
                     timestamp=time.time(),
+                    prompt_tokens=step_prompt_tokens,
+                    completion_tokens=step_completion_tokens,
+                    api_latency_ms=api_latency_ms,
                 )
 
                 if self.verbose:

@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>QuantumGPT 量子任务控制台</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --abyss: #050507;
+    --carbon: #0c0c0d;
+    --carbon-2: #141416;
+    --charcoal: #2c2a29;
+    --charcoal-soft: #1c1b1a;
+    --signal: #00d992;
+    --mint: #2fd6a1;
+    --rose: #fb565b;
+    --amber: #ffba00;
+    --snow: #f2f2f2;
+    --parchment: #b8b3b0;
+    --slate: #8b949e;
+    --emerald-fade: rgba(0, 217, 146, 0.08);
+    --emerald-line: rgba(0, 217, 146, 0.4);
+    --rose-fade: rgba(251, 86, 91, 0.08);
+    --rose-line: rgba(251, 86, 91, 0.45);
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--abyss);
+    color: var(--snow);
+    font-family: 'Inter', 'Noto Sans SC', system-ui, sans-serif;
+    font-feature-settings: "calt", "rlig";
+    overflow: hidden;
+    min-height: 100vh;
+  }
+
+  /* —————— grid layout —————— */
+  .mc {
+    display: grid;
+    grid-template-rows: 56px 1fr;
+    grid-template-columns: 220px 1fr 320px;
+    grid-template-areas:
+      "topbar topbar topbar"
+      "ctl    main   log";
+    height: 100vh;
+    width: 100vw;
+    gap: 0;
+  }
+
+  /* —————— top status bar —————— */
+  .topbar {
+    grid-area: topbar;
+    border-bottom: 1px solid var(--charcoal);
+    background: var(--carbon);
+    display: flex;
+    align-items: center;
+    padding: 0 22px;
+    gap: 28px;
+    position: relative;
+  }
+  .topbar::before {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: -1px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--emerald-line), transparent);
+    opacity: 0.4;
+  }
+
+  .brand {
+    display: flex; align-items: baseline; gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .brand .logo {
+    color: var(--signal);
+    font-size: 18px;
+    text-shadow: 0 0 8px rgba(0, 217, 146, 0.4);
+  }
+  .brand .name {
+    color: var(--snow);
+    font-size: 14px;
+  }
+  .brand .ver {
+    color: var(--slate);
+    font-size: 11px;
+    font-weight: 400;
+  }
+
+  .lights {
+    display: flex; gap: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+  .light {
+    display: flex; align-items: center; gap: 7px;
+    color: var(--parchment);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .light .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--signal);
+    box-shadow: 0 0 8px var(--signal);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  .light.warn .dot { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+  .light.fail .dot { background: var(--rose); box-shadow: 0 0 8px var(--rose); }
+  .light.idle .dot {
+    background: var(--slate);
+    box-shadow: none;
+    animation: none;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.45; transform: scale(0.85); }
+    50%       { opacity: 1.0;  transform: scale(1.05); }
+  }
+
+  .topspacer { flex: 1; }
+
+  .counters {
+    display: flex; gap: 26px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+  .counters .k { color: var(--slate); text-transform: uppercase; letter-spacing: 0.06em; }
+  .counters .v { color: var(--snow); margin-left: 6px; font-weight: 600; }
+
+  .clock {
+    color: var(--mint);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  /* —————— mission control (left) —————— */
+  .ctl {
+    grid-area: ctl;
+    background: var(--carbon);
+    border-right: 1px solid var(--charcoal);
+    padding: 18px 14px;
+    overflow-y: auto;
+  }
+  .ctl-section {
+    margin-bottom: 20px;
+  }
+  .ctl-h {
+    color: var(--signal);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin: 0 0 10px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--charcoal);
+  }
+
+  .mbtn {
+    display: flex; flex-direction: column;
+    width: 100%;
+    text-align: left;
+    background: var(--carbon-2);
+    border: 1px solid var(--charcoal);
+    border-left: 2px solid var(--charcoal);
+    color: var(--snow);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .mbtn:hover {
+    border-color: var(--signal);
+    border-left-color: var(--signal);
+    box-shadow: 0 0 12px rgba(0, 217, 146, 0.2);
+  }
+  .mbtn .glyph { color: var(--signal); margin-right: 8px; }
+  .mbtn[data-mid="inject"] .glyph { color: var(--rose); }
+  .mbtn[data-mid="drift"]  .glyph { color: var(--amber); }
+  .mbtn[data-mid="pareto"] .glyph { color: var(--mint); }
+  .mbtn .sub {
+    display: block;
+    color: var(--parchment);
+    font-weight: 400;
+    font-size: 10px;
+    text-transform: none;
+    margin-top: 4px;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+  }
+  .mbtn[disabled] { opacity: 0.45; cursor: wait; }
+  .mbtn.active {
+    border-color: var(--signal);
+    border-left-color: var(--signal);
+    background: var(--emerald-fade);
+  }
+
+  .modeline {
+    display: flex; align-items: center;
+    background: var(--carbon-2);
+    border: 1px solid var(--charcoal);
+    padding: 8px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--parchment);
+  }
+  .modeline .lbl { color: var(--slate); margin-right: 8px; }
+  .modeline .val { color: var(--mint); font-weight: 600; }
+
+  .progress {
+    margin-top: 12px;
+    height: 4px;
+    background: var(--charcoal-soft);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress > div {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--signal), var(--mint));
+    transition: width 0.3s ease;
+    box-shadow: 0 0 6px var(--signal);
+  }
+
+  /* —————— main grid —————— */
+  .main {
+    grid-area: main;
+    padding: 18px;
+    overflow-y: auto;
+    background:
+      radial-gradient(ellipse at top, rgba(0, 217, 146, 0.04), transparent 60%),
+      var(--abyss);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 14px;
+    min-height: 540px;
+  }
+
+  .panel {
+    background: var(--carbon);
+    border: 1px solid var(--charcoal);
+    border-radius: 6px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+  .panel-h {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+  }
+  .panel-h .t {
+    color: var(--signal);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .panel-h .meta {
+    color: var(--slate);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+  }
+
+  /* react trace pane */
+  .p-react { grid-row: 1 / span 2; }
+  .react-stream {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.55;
+  }
+  .react-row {
+    display: grid;
+    grid-template-columns: 28px 64px 1fr;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(60, 58, 56, 0.5);
+    animation: rowin 0.35s ease;
+  }
+  @keyframes rowin {
+    from { opacity: 0; transform: translateX(-6px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .react-row .idx { color: var(--slate); }
+  .react-row .kind {
+    text-transform: uppercase;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 1px 6px;
+    border-radius: 2px;
+    height: 16px;
+    line-height: 14px;
+    display: inline-block;
+    text-align: center;
+  }
+  .kind-thought  { color: var(--parchment);     border: 1px solid var(--charcoal); }
+  .kind-tool     { color: var(--mint); border: 1px solid var(--emerald-line); background: var(--emerald-fade); }
+  .kind-observe  { color: var(--amber); border: 1px solid rgba(255, 186, 0, 0.3); }
+  .kind-claim    { color: var(--snow); border: 1px solid var(--charcoal); background: var(--carbon-2); }
+  .kind-verifier { color: var(--snow); border: 1px solid var(--emerald-line); background: var(--emerald-fade); }
+  .kind-evaluate { color: var(--mint); border: 1px solid var(--emerald-line); }
+  .kind-result   { color: var(--snow); border: 1px solid var(--charcoal); }
+
+  .react-row .body {
+    color: var(--parchment);
+    word-break: break-word;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .react-row.tool .body strong { color: var(--mint); }
+  .react-row.observe .body { color: var(--snow); }
+  .react-row.anomaly { background: var(--rose-fade); border-left: 2px solid var(--rose); padding-left: 8px; margin-left: -8px; }
+  .react-row.anomaly .kind { color: var(--rose); border-color: var(--rose-line); background: var(--rose-fade); }
+
+  /* verifier pane */
+  .verdict-box {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .verdict-shield {
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    border: 2px solid var(--charcoal);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--slate);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    transition: all 0.4s ease;
+  }
+  .verdict-shield.scanning {
+    border-color: var(--amber);
+    color: var(--amber);
+    animation: shieldspin 1.6s linear infinite;
+  }
+  .verdict-shield.pass {
+    border-color: var(--signal);
+    color: var(--signal);
+    box-shadow: 0 0 30px rgba(0, 217, 146, 0.55), inset 0 0 18px rgba(0, 217, 146, 0.08);
+  }
+  .verdict-shield.fail {
+    border-color: var(--rose);
+    color: var(--rose);
+    box-shadow: 0 0 30px rgba(251, 86, 91, 0.6), inset 0 0 18px rgba(251, 86, 91, 0.08);
+    animation: shake 0.4s ease;
+  }
+  @keyframes shieldspin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25%  { transform: translateX(-4px); }
+    75%  { transform: translateX(4px); }
+  }
+  .verdict-text {
+    margin-top: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.55;
+    color: var(--parchment);
+    max-width: 280px;
+  }
+  .verdict-text strong { color: var(--snow); display: block; margin-bottom: 4px; }
+
+  /* claim pane */
+  .claim-text {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--abyss);
+    border: 1px solid var(--charcoal);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: var(--snow);
+    min-height: 70px;
+  }
+  .claim-text:empty::before {
+    content: "（等待智能体最终回答……）";
+    color: var(--slate);
+    font-style: italic;
+  }
+  .claim-text.anomaly { border-color: var(--rose-line); color: var(--rose); }
+
+  /* sparkline pane */
+  .spark-wrap {
+    flex: 1;
+    display: flex; flex-direction: column;
+  }
+  .spark-svg { width: 100%; flex: 1; min-height: 80px; }
+  .spark-axis {
+    margin-top: 6px;
+    display: flex; justify-content: space-between;
+    color: var(--slate);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+  }
+
+  /* cost meter pane */
+  .meter-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+  }
+  .meter {
+    background: var(--carbon-2);
+    border: 1px solid var(--charcoal);
+    border-radius: 4px;
+    padding: 10px 12px;
+  }
+  .meter .v {
+    color: var(--snow);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.0;
+  }
+  .meter .l {
+    color: var(--slate);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 6px;
+  }
+
+  /* tool histogram */
+  .hist { flex: 1; display: flex; flex-direction: column; gap: 5px; overflow-y: auto; }
+  .hist-row { display: grid; grid-template-columns: 110px 1fr 30px; gap: 8px; align-items: center; }
+  .hist-row .nm {
+    color: var(--parchment);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hist-row .bar {
+    height: 14px;
+    background: var(--charcoal-soft);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hist-row .bar > span {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, var(--signal), var(--mint));
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 0.5s ease;
+  }
+  .hist-row .ct {
+    color: var(--mint);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-align: right;
+    font-weight: 600;
+  }
+
+  /* —————— event log (right) —————— */
+  .log {
+    grid-area: log;
+    background: var(--carbon);
+    border-left: 1px solid var(--charcoal);
+    padding: 16px 14px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .log-h {
+    color: var(--signal);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--charcoal);
+    display: flex; justify-content: space-between;
+  }
+  .log-stream {
+    flex: 1; overflow-y: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .log-row { display: grid; grid-template-columns: 70px 1fr; gap: 8px;
+             padding: 2px 0; animation: rowin 0.25s ease; }
+  .log-row .ts { color: var(--slate); }
+  .log-row .msg { color: var(--parchment); word-break: break-word; }
+  .log-row.sig .msg   { color: var(--mint); }
+  .log-row.warn .msg  { color: var(--amber); }
+  .log-row.block .msg { color: var(--rose); font-weight: 600; }
+  .log-row.head .msg  { color: var(--signal); font-weight: 700; }
+
+  /* —————— quantum backend rack —————— */
+  .rack {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: 1.6fr 1.1fr 0.9fr;
+    gap: 14px;
+    min-height: 240px;
+  }
+  .qubit-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 36px 1fr 1fr 60px;
+    gap: 5px 10px;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+  .qubit-grid .qhdr {
+    color: var(--slate);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    border-bottom: 1px solid var(--charcoal);
+    padding-bottom: 4px;
+  }
+  .qubit-grid .qhdr.r { text-align: right; }
+  .qubit-grid .qid {
+    color: var(--mint);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .qbar {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .qbar .track {
+    flex: 1;
+    height: 6px;
+    background: var(--charcoal-soft);
+    border-radius: 1px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(60, 58, 56, 0.4);
+  }
+  .qbar .fill {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, var(--signal), var(--mint));
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 0.5s ease;
+    box-shadow: 0 0 4px rgba(0, 217, 146, 0.4);
+  }
+  .qbar.deg .fill {
+    background: linear-gradient(90deg, var(--amber), var(--rose));
+    box-shadow: 0 0 5px rgba(251, 86, 91, 0.5);
+  }
+  .qbar .num {
+    width: 56px;
+    text-align: right;
+    color: var(--parchment);
+    font-size: 10.5px;
+  }
+  .qbar.deg .num { color: var(--amber); }
+  .qerr {
+    text-align: right;
+    color: var(--snow);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .qerr.warn { color: var(--amber); }
+  .qerr.bad  { color: var(--rose); font-weight: 700; }
+
+  /* drift sparkline */
+  .drift-wrap { flex: 1; display: flex; flex-direction: column; }
+  .drift-svg { width: 100%; flex: 1; min-height: 110px; }
+  .drift-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--slate);
+  }
+  .drift-foot .now {
+    color: var(--mint);
+    font-weight: 600;
+    font-size: 11px;
+  }
+  .drift-foot .now.warn { color: var(--amber); }
+  .drift-foot .now.bad  { color: var(--rose); animation: pulse 1.4s ease-in-out infinite; }
+
+  /* status board */
+  .status-grid {
+    flex: 1;
+    display: flex; flex-direction: column;
+    gap: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    justify-content: center;
+  }
+  .status-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed rgba(60, 58, 56, 0.45);
+  }
+  .status-row:last-child { border-bottom: none; }
+  .status-row .k {
+    color: var(--slate);
+    text-transform: uppercase;
+    font-size: 9px;
+    letter-spacing: 0.10em;
+  }
+  .status-row .v {
+    color: var(--snow);
+    font-weight: 600;
+  }
+  .status-row .v.online { color: var(--signal); }
+  .status-row .v.deg    { color: var(--amber); }
+  .status-row .v.off    { color: var(--rose); }
+  .status-row .v .mdot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    margin-right: 6px;
+    background: currentColor;
+    box-shadow: 0 0 6px currentColor;
+    vertical-align: middle;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  /* —————— LIVE prompt modal —————— */
+  .modal-veil {
+    position: fixed; inset: 0;
+    background: rgba(5, 5, 7, 0.78);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 9999;
+    animation: veilin 0.22s ease;
+  }
+  .modal-veil.show { display: flex; }
+  @keyframes veilin { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    background: var(--carbon);
+    border: 1px solid var(--charcoal);
+    border-left: 2px solid var(--rose);
+    width: min(640px, 92vw);
+    max-height: 86vh;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6),
+                0 0 30px rgba(251,86,91,0.10);
+  }
+  .modal-h {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--charcoal);
+  }
+  .modal-h .t {
+    color: var(--rose);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .modal-h .x {
+    cursor: pointer;
+    color: var(--slate);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    background: none; border: none;
+    padding: 4px 8px;
+  }
+  .modal-h .x:hover { color: var(--snow); }
+
+  .modal-body { padding: 14px 16px; overflow-y: auto; }
+  .preset {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--carbon-2);
+    border: 1px solid var(--charcoal);
+    border-left: 2px solid var(--charcoal);
+    color: var(--snow);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all 0.15s ease;
+  }
+  .preset:hover {
+    border-color: var(--rose);
+    border-left-color: var(--rose);
+    box-shadow: 0 0 12px rgba(251, 86, 91, 0.15);
+  }
+  .preset.recommended { border-left-color: var(--mint); }
+  .preset .ttl {
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--snow);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .preset .star { color: var(--mint); font-size: 10px; letter-spacing: 0.08em; }
+  .preset .desc {
+    color: var(--parchment);
+    font-weight: 400;
+    font-size: 10.5px;
+    line-height: 1.5;
+    margin-top: 5px;
+    white-space: pre-wrap;
+  }
+
+  .modal-custom {
+    display: flex; gap: 8px; align-items: stretch;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--charcoal);
+  }
+  .modal-custom textarea {
+    flex: 1;
+    min-height: 56px;
+    background: var(--abyss);
+    border: 1px solid var(--charcoal);
+    color: var(--snow);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 8px 10px;
+    resize: vertical;
+    outline: none;
+  }
+  .modal-custom textarea:focus { border-color: var(--rose); }
+  .modal-custom .run {
+    background: var(--carbon-2);
+    border: 1px solid var(--rose);
+    border-left: 2px solid var(--rose);
+    color: var(--rose);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 8px 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  .modal-custom .run:hover {
+    background: var(--rose);
+    color: var(--snow);
+    box-shadow: 0 0 12px rgba(251,86,91,0.45);
+  }
+
+  .modal-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px;
+    border-top: 1px solid var(--charcoal);
+    color: var(--slate);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+  }
+  .modal-foot .key {
+    background: var(--carbon-2);
+    border: 1px solid var(--charcoal);
+    padding: 1px 6px;
+    border-radius: 2px;
+    color: var(--parchment);
+  }
+
+  /* abort state for the LIVE button */
+  .mbtn.abort {
+    border-color: var(--rose) !important;
+    border-left-color: var(--rose) !important;
+    background: var(--rose-fade) !important;
+    color: var(--rose) !important;
+  }
+  .mbtn.abort .glyph { color: var(--rose) !important; }
+
+  /* AUTO mode ON pulse */
+  .mbtn.auto-on {
+    border-color: var(--mint) !important;
+    border-left-color: var(--mint) !important;
+    background: var(--emerald-fade) !important;
+    box-shadow: 0 0 14px rgba(0, 217, 146, 0.30);
+  }
+  .mbtn.auto-on .glyph {
+    color: var(--mint) !important;
+    animation: spin 4s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* utilities */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--charcoal); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--signal); }
+
+</style>
+</head>
+<body>
+<div class="mc">
+
+  <div class="topbar">
+    <div class="brand">
+      <span class="logo">⚛ QUANTUMGPT</span>
+      <span class="name">量子任务控制台</span>
+      <span class="ver">v0.2 · 研究演示版</span>
+    </div>
+    <div class="lights">
+      <div class="light"  id="light-verifier"><span class="dot"></span><span>Verifier · 正常</span></div>
+      <div class="light"  id="light-backend"><span class="dot"></span><span>后端 · FakeBrisbane</span></div>
+      <div class="light idle" id="light-mission"><span class="dot"></span><span>任务 · 空闲</span></div>
+    </div>
+    <div class="topspacer"></div>
+    <div class="counters">
+      <div><span class="k">今日运行</span><span class="v" id="ct-runs">0</span></div>
+      <div><span class="k">拦截命中</span><span class="v" id="ct-caught">0/0</span></div>
+      <div><span class="k">paired Δ</span><span class="v" id="ct-delta">+0.0197</span></div>
+    </div>
+    <div class="clock" id="clock">--:--:-- UTC</div>
+  </div>
+
+  <aside class="ctl">
+    <div class="ctl-section">
+      <h3 class="ctl-h">任务触发器</h3>
+      <button class="mbtn" data-mid="nominal">
+        <div><span class="glyph">▶</span>标准运行</div>
+        <span class="sub">高保真正常任务，Verifier 应当通过</span>
+      </button>
+      <button class="mbtn" data-mid="inject">
+        <div><span class="glyph">✗</span>注入幻觉</div>
+        <span class="sub">注入虚假结论，Verifier 应当拦截</span>
+      </button>
+      <button class="mbtn" data-mid="drift">
+        <div><span class="glyph">≈</span>漂移事件</div>
+        <span class="sub">后端漂移 → 重新编译 → 恢复</span>
+      </button>
+      <button class="mbtn" data-mid="pareto">
+        <div><span class="glyph">▦</span>帕累托扫描</div>
+        <span class="sub">5 个系统 × 145 个任务的成本/保真度扫描</span>
+      </button>
+      <button class="mbtn" data-mid="live" id="mbtn-live" style="border-left-color: var(--rose);">
+        <div><span class="glyph" style="color: var(--rose);">≡</span>LIVE · 真实大模型</div>
+        <span class="sub">实时调用 DeepSeek API 跑 ReAct，token 计费真实</span>
+      </button>
+    </div>
+
+    <div class="ctl-section">
+      <h3 class="ctl-h">实时 AI 监看</h3>
+      <button class="mbtn" id="auto-toggle" style="border-left-color: var(--mint);">
+        <div><span class="glyph" id="auto-glyph" style="color: var(--mint);">◉</span><span id="auto-label">实时模式 · 关闭</span></div>
+        <span class="sub" id="auto-sub">真实 LLM 持续解读 · drift 触发自动诊断</span>
+      </button>
+      <div class="modeline" id="auto-stats" style="display:none; margin-top:8px; flex-wrap:wrap; gap:6px;">
+        <span class="lbl">解说次数</span><span class="val" id="auto-narr">0</span>
+        <span class="lbl" style="margin-left:14px;">漂移次数</span><span class="val" id="auto-drifts">0</span>
+        <span class="lbl" style="margin-left:14px;">修复次数</span><span class="val" id="auto-repairs">0</span>
+      </div>
+    </div>
+
+    <div class="ctl-section">
+      <h3 class="ctl-h">遥测来源</h3>
+      <div class="modeline">
+        <span class="lbl">模式</span>
+        <span class="val" id="mode-val">回放</span>
+      </div>
+      <div class="progress"><div id="prog"></div></div>
+    </div>
+
+    <div class="ctl-section">
+      <h3 class="ctl-h">系统信息</h3>
+      <div class="modeline" style="display:block;">
+        <div><span class="lbl">模型</span><span class="val">deepseek-v3</span></div>
+        <div style="margin-top:4px;"><span class="lbl">工具数</span><span class="val">18</span></div>
+        <div style="margin-top:4px;"><span class="lbl">预算</span><span class="val">12 次调用 / 6 轮</span></div>
+        <div style="margin-top:4px;"><span class="lbl">后端</span><span class="val">FakeBrisbane + drift</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="grid">
+      <!-- live ReAct trace (tall, spans 2 rows) -->
+      <section class="panel p-react">
+        <div class="panel-h">
+          <span class="t">▣ 实时 ReAct 轨迹</span>
+          <span class="meta" id="react-meta">— 空闲 —</span>
+        </div>
+        <div class="react-stream" id="react-stream"></div>
+      </section>
+
+      <!-- verifier verdict -->
+      <section class="panel">
+        <div class="panel-h">
+          <span class="t">▲ Verifier 判定</span>
+          <span class="meta">结论 ↔ 轨迹</span>
+        </div>
+        <div class="verdict-box">
+          <div class="verdict-shield" id="shield">空闲</div>
+          <div class="verdict-text" id="verdict-text"><strong>等待任务</strong>加载一个任务后开始闭环审计</div>
+        </div>
+      </section>
+
+      <!-- claim text -->
+      <section class="panel">
+        <div class="panel-h">
+          <span class="t">✎ 智能体最终回答</span>
+          <span class="meta" id="claim-meta">—</span>
+        </div>
+        <div class="claim-text" id="claim-text"></div>
+      </section>
+
+      <!-- sparkline -->
+      <section class="panel">
+        <div class="panel-h">
+          <span class="t">≋ 漂移后保真度</span>
+          <span class="meta" id="spark-meta">目标 = 0.95</span>
+        </div>
+        <div class="spark-wrap">
+          <svg class="spark-svg" id="spark" viewBox="0 0 400 100" preserveAspectRatio="none"></svg>
+          <div class="spark-axis"><span>步骤 0</span><span id="spark-now">步骤 —</span></div>
+        </div>
+      </section>
+
+      <!-- cost meters -->
+      <section class="panel">
+        <div class="panel-h">
+          <span class="t">$ 成本 · ⏱ 用时 · ⚙ 工具</span>
+          <span class="meta">本次运行实时统计</span>
+        </div>
+        <div class="meter-grid">
+          <div class="meter"><div class="v" id="m-cost">$0.0000</div><div class="l">成本 · 美元</div></div>
+          <div class="meter"><div class="v" id="m-elapsed">0.0s</div><div class="l">总用时</div></div>
+          <div class="meter"><div class="v" id="m-tools">0</div><div class="l">工具调用</div></div>
+          <div class="meter"><div class="v" id="m-best">—</div><div class="l">最佳保真度</div></div>
+        </div>
+      </section>
+
+      <!-- tool histogram -->
+      <section class="panel">
+        <div class="panel-h">
+          <span class="t">▤ 工具调用分布</span>
+          <span class="meta">单任务统计</span>
+        </div>
+        <div class="hist" id="hist"></div>
+      </section>
+    </div>
+
+    <!-- ═════════════════ QUANTUM BACKEND RACK ═════════════════ -->
+    <div class="rack">
+      <!-- qubit calibration grid -->
+      <section class="panel">
+        <div class="panel-h">
+          <span class="t">⊞ 量子比特校准 · FakeBrisbane</span>
+          <span class="meta" id="qrack-meta">127 选 5 · 实时</span>
+        </div>
+        <div class="qubit-grid" id="qubit-grid">
+          <span class="qhdr">比特</span>
+          <span class="qhdr">T1 (μs)</span>
+          <span class="qhdr">T2 (μs)</span>
+          <span class="qhdr r">单比特误差</span>
+        </div>
+      </section>
+
+      <!-- drift sparkline -->
+      <section class="panel">
+        <div class="panel-h">
+          <span class="t">≈ 漂移幅度 · |Δcal|</span>
+          <span class="meta">60 秒滑窗</span>
+        </div>
+        <div class="drift-wrap">
+          <svg class="drift-svg" id="drift-svg" viewBox="0 0 400 110" preserveAspectRatio="none"></svg>
+          <div class="drift-foot">
+            <span>阈值 0.10</span>
+            <span class="now" id="drift-now">|Δ| 0.000</span>
+            <span id="drift-axis">−60 秒 ▸ 当前</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- backend status board -->
+      <section class="panel">
+        <div class="panel-h">
+          <span class="t">◉ 量子后端状态</span>
+          <span class="meta">FakeBrisbane v2</span>
+        </div>
+        <div class="status-grid">
+          <div class="status-row">
+            <span class="k">状态</span>
+            <span class="v online" id="bk-state"><span class="mdot"></span>在线</span>
+          </div>
+          <div class="status-row">
+            <span class="k">队列</span>
+            <span class="v" id="bk-queue">0 个任务</span>
+          </div>
+          <div class="status-row">
+            <span class="k">上次校准</span>
+            <span class="v" id="bk-cal">12 秒前</span>
+          </div>
+          <div class="status-row">
+            <span class="k">shots / 秒</span>
+            <span class="v" id="bk-shots">1,240</span>
+          </div>
+          <div class="status-row">
+            <span class="k">编译状态</span>
+            <span class="v" id="bk-trans">稳定</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <aside class="log">
+    <div class="log-h"><span>▣ 事件日志</span><span style="color:var(--slate);font-weight:400">流式 ●</span></div>
+    <div class="log-stream" id="log-stream"></div>
+  </aside>
+
+</div>
+
+<!-- LIVE prompt modal -->
+<div class="modal-veil" id="live-modal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-h">
+      <span class="t">≡ 选择 LIVE 演示任务</span>
+      <button class="x" id="live-close" title="取消（Esc）">×</button>
+    </div>
+    <div class="modal-body" id="preset-list">
+      <!-- presets injected by JS -->
+    </div>
+    <div class="modal-body" style="padding-top:0;">
+      <div class="modal-custom">
+        <textarea id="live-custom" placeholder="或自定义提示词……（Cmd/Ctrl + Enter 发送）"></textarea>
+        <button class="run" id="live-run">▶ 运行</button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <span>真实 DeepSeek API · 计费按 token 真实结算</span>
+      <span><span class="key">Esc</span> 取消 · <span class="key">Enter</span> 发送</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────────────
+const PLAY_RATE = 480;   // ms between react-frames during NOMINAL/INJECT/DRIFT
+const PARETO_RATE = 800; // ms between system evals during PARETO
+
+let MISSIONS = null;
+let RUNNING = false;
+let runs_today = 0;
+let caught_total = 0;
+let caught_runs  = 0;
+
+// ─────────────────────────────────────────────────────────────
+// UTIL
+// ─────────────────────────────────────────────────────────────
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+function tsHHMMSS() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  return `${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())}`;
+}
+
+function tickClock() {
+  $("#clock").textContent = `${tsHHMMSS()} UTC`;
+}
+setInterval(tickClock, 1000); tickClock();
+
+function logLine(msg, kind = "") {
+  const stream = $("#log-stream");
+  const row = document.createElement("div");
+  row.className = `log-row ${kind}`;
+  row.innerHTML = `<span class="ts">${tsHHMMSS()}</span><span class="msg">${msg}</span>`;
+  stream.prepend(row);
+  while (stream.children.length > 200) stream.removeChild(stream.lastChild);
+}
+
+function setLight(id, state) { // state ∈ "ok" | "warn" | "fail" | "idle"
+  const el = document.getElementById(id);
+  el.classList.remove("warn", "fail", "idle");
+  if (state !== "ok") el.classList.add(state);
+}
+
+function setMissionLight(state, text) {
+  setLight("light-mission", state);
+  $("#light-mission span:last-child").textContent = `任务 · ${text}`;
+}
+
+function setProgress(pct) { $("#prog").style.width = `${Math.min(100, Math.max(0, pct))}%`; }
+
+// ─────────────────────────────────────────────────────────────
+// PANEL UPDATERS
+// ─────────────────────────────────────────────────────────────
+function clearReact() { $("#react-stream").innerHTML = ""; }
+function pushReact(frame) {
+  const stream = $("#react-stream");
+  const row = document.createElement("div");
+  row.className = `react-row ${frame.kind}` + (frame.anomaly ? " anomaly" : "");
+  let body = frame.text || "";
+  if (frame.kind === "tool") body = `<strong>${escapeHtml(frame.tool || "")}</strong> ${escapeHtml(body.replace(/^[^(]+\(/, "(").slice(0, 200))}`;
+  else body = escapeHtml(body);
+  row.innerHTML = `
+    <span class="idx">${String(frame.i || "").padStart(2, "0")}</span>
+    <span class="kind kind-${frame.kind}">${kindLabel(frame.kind || "")}</span>
+    <span class="body">${body}</span>`;
+  stream.appendChild(row);
+  stream.scrollTop = stream.scrollHeight;
+}
+
+const KIND_LABELS = {
+  thought: "思考",
+  tool: "工具",
+  observe: "观测",
+  claim: "结论",
+  verifier: "审计",
+  evaluate: "评估",
+  result: "结果",
+};
+
+const MISSION_LABELS = {
+  nominal: "标准运行",
+  inject: "注入幻觉",
+  drift: "漂移事件",
+  pareto: "帕累托扫描",
+  live: "LIVE",
+};
+
+function kindLabel(kind) {
+  return KIND_LABELS[kind] || String(kind || "").toUpperCase();
+}
+
+function missionLabel(mid) {
+  return MISSION_LABELS[mid] || String(mid || "").toUpperCase();
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+
+function setShield(state, headline, subline) {
+  const sh = $("#shield");
+  sh.classList.remove("scanning", "pass", "fail");
+  if (state === "scanning") { sh.classList.add("scanning"); sh.textContent = "扫描中"; }
+  else if (state === "pass") { sh.classList.add("pass"); sh.textContent = "通过"; }
+  else if (state === "fail") { sh.classList.add("fail"); sh.textContent = "拦截"; }
+  else                       { sh.textContent = "空闲"; }
+  $("#verdict-text").innerHTML = `<strong>${escapeHtml(headline)}</strong>${escapeHtml(subline)}`;
+}
+
+function setClaim(text, anomaly = false) {
+  const c = $("#claim-text");
+  c.textContent = text;
+  c.classList.toggle("anomaly", !!anomaly);
+}
+
+function setMeters(m) {
+  $("#m-cost").textContent = `$${(m.cost_usd ?? 0).toFixed(4)}`;
+  $("#m-elapsed").textContent = `${(m.elapsed_seconds ?? 0).toFixed(1)}s`;
+  $("#m-tools").textContent = m.tool_calls ?? 0;
+  $("#m-best").textContent = m.best_score != null ? m.best_score.toFixed(4) : "—";
+}
+
+function renderHist(hist) {
+  const root = $("#hist");
+  root.innerHTML = "";
+  const total = Math.max(1, ...Object.values(hist || {}));
+  for (const [k, v] of Object.entries(hist || {})) {
+    const row = document.createElement("div");
+    row.className = "hist-row";
+    row.innerHTML = `
+      <span class="nm">${escapeHtml(k)}</span>
+      <span class="bar"><span style="transform: scaleX(${v/total})"></span></span>
+      <span class="ct">${v}</span>`;
+    root.appendChild(row);
+  }
+}
+
+function renderSparkline(series, target = 0.95) {
+  const svg = $("#spark");
+  svg.innerHTML = "";
+  if (!series || !series.length) return;
+  const W = 400, H = 100, pad = 6;
+  const hi = Math.max(...series, target, 1.0);
+  const lo = Math.min(...series, target, 0.0);
+  const span = Math.max(0.001, hi - lo);
+  const x = (i) => pad + (i / Math.max(1, series.length - 1)) * (W - 2 * pad);
+  const y = (v) => H - pad - ((v - lo) / span) * (H - 2 * pad);
+
+  // grid
+  const ty = y(target);
+  const grid = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  grid.setAttribute("x1", 0); grid.setAttribute("x2", W);
+  grid.setAttribute("y1", ty); grid.setAttribute("y2", ty);
+  grid.setAttribute("stroke", "rgba(139,148,158,0.4)");
+  grid.setAttribute("stroke-dasharray", "3,4");
+  svg.appendChild(grid);
+
+  // area + line
+  let path = `M ${x(0)} ${H - pad}`;
+  for (let i = 0; i < series.length; i++) path += ` L ${x(i)} ${y(series[i])}`;
+  path += ` L ${x(series.length - 1)} ${H - pad} Z`;
+  const area = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  area.setAttribute("d", path);
+  area.setAttribute("fill", "rgba(0, 217, 146, 0.15)");
+  area.setAttribute("stroke", "none");
+  svg.appendChild(area);
+
+  let line = `M ${x(0)} ${y(series[0])}`;
+  for (let i = 1; i < series.length; i++) line += ` L ${x(i)} ${y(series[i])}`;
+  const lp = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  lp.setAttribute("d", line);
+  lp.setAttribute("fill", "none");
+  lp.setAttribute("stroke", "var(--signal)");
+  lp.setAttribute("stroke-width", "1.7");
+  lp.setAttribute("stroke-linejoin", "round");
+  svg.appendChild(lp);
+
+  // dots
+  for (let i = 0; i < series.length; i++) {
+    const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    c.setAttribute("cx", x(i)); c.setAttribute("cy", y(series[i]));
+    c.setAttribute("r", "2.5");
+    c.setAttribute("fill", "var(--signal)");
+    svg.appendChild(c);
+  }
+  $("#spark-now").textContent = `步骤 ${series.length} · 最佳 ${Math.max(...series).toFixed(4)}`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// RESET BETWEEN MISSIONS
+// ─────────────────────────────────────────────────────────────
+function resetPanels() {
+  clearReact();
+  setShield("idle", "等待任务", "加载一个任务后开始闭环审计");
+  setClaim("", false);
+  $("#claim-meta").textContent = "—";
+  setMeters({ cost_usd: 0, elapsed_seconds: 0, tool_calls: 0, best_score: null });
+  renderHist({});
+  renderSparkline([], 0.95);
+  $("#spark-now").textContent = "步骤 —";
+  $("#react-meta").textContent = "— 空闲 —";
+  setProgress(0);
+}
+
+// ─────────────────────────────────────────────────────────────
+// PLAYBACK
+// ─────────────────────────────────────────────────────────────
+async function playMission(mid) {
+  if (RUNNING) return;
+  const m = MISSIONS[mid];
+  if (!m) return;
+
+  RUNNING = true;
+  $$(".mbtn").forEach(b => b.disabled = true);
+  $$(".mbtn").forEach(b => b.classList.remove("active"));
+  document.querySelector(`.mbtn[data-mid="${mid}"]`)?.classList.add("active");
+
+  resetPanels();
+  setMissionLight("warn", `${missionLabel(mid)} · 运行中`);
+  setLight("light-verifier", "warn");
+  $("#light-verifier span:last-child").textContent = "Verifier · 扫描中";
+  setShield("scanning", "正在扫描轨迹", "Verifier 正在读取工具调用证据……");
+  $("#react-meta").textContent = m.subtitle || "";
+  $("#claim-meta").textContent = `${m.system || ""} · ${m.circuit || ""}`;
+  logLine(`>>> 任务 ${missionLabel(mid)} · ${m.title} 已启动`, "head");
+  if (m.narration) logLine(m.narration, "sig");
+
+  // ── rack hooks: backend telemetry mirrors mission semantics
+  if (mid === "drift") {
+    // ride the rising drift spike with the trace; let baseline show first
+    setTimeout(() => { if (RUNNING) rackTriggerDrift(); }, 1400);
+  } else if (mid === "pareto") {
+    rackSetQueue(4);
+    setTimeout(() => rackSetQueue(2), 4000);
+    setTimeout(() => rackSetQueue(0), 9000);
+  }
+
+  const steps = m.steps || [];
+  const series = [];
+  let toolsUsed = 0;
+  let costSoFar = 0;
+  let elapsed = 0;
+  const totalCost = m.metrics?.cost_usd ?? 0;
+  const totalTools = m.metrics?.tool_calls ?? 0;
+  const totalElapsed = m.metrics?.elapsed_seconds ?? 0;
+  const target = m.metrics?.target_fidelity ?? 0.95;
+  const rate = (mid === "pareto") ? PARETO_RATE : PLAY_RATE;
+
+  for (let idx = 0; idx < steps.length; idx++) {
+    const s = steps[idx];
+    setProgress(((idx + 1) / steps.length) * 100);
+
+    if (s.kind === "thought") {
+      pushReact(s);
+      logLine(`思考 · "${truncateLog(s.text)}"`);
+    } else if (s.kind === "tool") {
+      pushReact(s);
+      toolsUsed++;
+      costSoFar += totalCost / Math.max(1, totalTools);
+      elapsed += totalElapsed / Math.max(1, totalTools);
+      setMeters({ cost_usd: costSoFar, elapsed_seconds: elapsed, tool_calls: toolsUsed, best_score: series.length ? Math.max(...series) : null });
+      logLine(`工具 ▸ <span style="color:var(--mint)">${escapeHtml(s.tool)}</span>`, "sig");
+    } else if (s.kind === "observe") {
+      pushReact(s);
+      if (s.fidelity != null) {
+        series.push(s.fidelity);
+        renderSparkline(series, target);
+        setMeters({ cost_usd: costSoFar, elapsed_seconds: elapsed, tool_calls: toolsUsed, best_score: Math.max(...series) });
+        logLine(`观测 · 保真度 = ${s.fidelity.toFixed(4)}`);
+      } else {
+        logLine(`观测 · ${truncateLog(s.text)}`);
+      }
+    } else if (s.kind === "claim") {
+      setClaim(s.text, !!s.anomaly);
+      logLine(`已提交结论 · ${truncateLog(s.text)}`, s.anomaly ? "warn" : "");
+      if (mid === "pareto") {
+        // animate the verifier-pass below
+      }
+    } else if (s.kind === "verifier") {
+      if (s.verdict === "pass") {
+        setShield("pass", "✓ 结论与轨迹一致", s.reason);
+        setLight("light-verifier", "ok");
+        $("#light-verifier span:last-child").textContent = "Verifier · 通过";
+        logLine(`Verifier ✓ 通过 · ${s.reason}`, "sig");
+      } else {
+        setShield("fail", "⌧ 幻觉已拦截", s.reason);
+        setLight("light-verifier", "fail");
+        $("#light-verifier span:last-child").textContent = "Verifier · 拦截";
+        logLine(`Verifier ✗ 拦截 · ${s.reason}`, "block");
+      }
+    } else if (s.kind === "evaluate") {
+      // PARETO sweep
+      pushReact(s);
+      logLine(`评估中 ▸ ${s.system}`, "sig");
+    } else if (s.kind === "result") {
+      pushReact(s);
+      series.push(s.fid);
+      renderSparkline(series, target);
+      const newCost = costSoFar + s.cost;
+      costSoFar = newCost;
+      setMeters({ cost_usd: costSoFar, elapsed_seconds: 0, tool_calls: series.length, best_score: Math.max(...series) });
+      logLine(`结果 · <span style="color:var(--mint)">${escapeHtml(s.system)}</span> · 成本 $${s.cost.toFixed(4)} · 保真度 ${s.fid.toFixed(4)}`);
+    }
+
+    await sleep(rate);
+  }
+
+  // settle
+  const finalSeries = series.length ? series : (m.fidelity_series || []);
+  renderSparkline(finalSeries, target);
+  renderHist(m.tool_histogram || {});
+  setMeters({
+    cost_usd: m.metrics?.cost_usd ?? costSoFar,
+    elapsed_seconds: m.metrics?.elapsed_seconds ?? elapsed,
+    tool_calls: m.metrics?.tool_calls ?? toolsUsed,
+    best_score: m.metrics?.best_score ?? (finalSeries.length ? Math.max(...finalSeries) : null),
+  });
+  setProgress(100);
+
+  runs_today++;
+  $("#ct-runs").textContent = String(runs_today);
+
+  // verdict-side counters
+  const lastVerdict = (m.steps || []).slice().reverse().find(s => s.kind === "verifier");
+  caught_runs++;
+  if (lastVerdict?.verdict === "fail") caught_total++;
+  $("#ct-caught").textContent = `${caught_total}/${caught_runs}`;
+
+  setMissionLight(lastVerdict?.verdict === "fail" ? "fail" : "ok", `${missionLabel(mid)} · 已完成`);
+  logLine(`<<< 任务 ${missionLabel(mid)} 已完成`, "head");
+
+  setTimeout(() => $$(".mbtn").forEach(b => b.disabled = false), 350);
+  rackResetBaseline();
+  RUNNING = false;
+}
+
+function truncateLog(s, n = 90) {
+  s = String(s || ""); return s.length > n ? s.slice(0, n - 1) + "…" : s;
+}
+
+// ─────────────────────────────────────────────────────────────
+// QUANTUM BACKEND RACK
+//   • baseline taken from real qiskit-ibm-runtime FakeBrisbane (Q0..Q4)
+//   • tick loop: small random walk every 800-1200ms (always running)
+//   • drift event: triggered by mission "drift", spikes |Δcal| > 0.10
+//                  for ~6 s, three qubits' T1 collapse, status DEGRADED
+//   • pareto event: queue rises 0→4→2→0, shots/s wobbles
+// ─────────────────────────────────────────────────────────────
+const QUBITS = [
+  { id: "Q0", t1: 344, t2:  76, err: 0.082 },
+  { id: "Q1", t1: 358, t2: 251, err: 0.094 },
+  { id: "Q2", t1: 285, t2: 130, err: 0.071 },
+  { id: "Q3", t1: 283, t2: 381, err: 0.118 },
+  { id: "Q4", t1: 312, t2: 253, err: 0.089 },
+];
+// freeze baseline so the tick walks around it; ledger holds live values
+const QBASE = QUBITS.map(q => ({ ...q }));
+const QLIVE = QUBITS.map(q => ({ ...q, deg: false }));
+
+// drift state machine
+let DRIFT_HIST = [];           // ring buffer, last ~60 samples (each ~1s tick)
+let DRIFT_LEVEL = "ok";         // "ok" | "warn" | "bad"
+let DRIFT_EVENT = null;         // null | { until, peak, t0 }
+let LAST_CAL_AT = Date.now();   // re-cal resets this
+
+// backend state
+let BK = {
+  state: "ONLINE", stateClass: "online",
+  queue: 0, shots: 1240, transpile: "stable",
+};
+let QUEUE_TARGET = 0;           // pareto sweep ramps this up
+
+// build the qubit rows once
+function initQubitGrid() {
+  const root = $("#qubit-grid");
+  for (const q of QLIVE) {
+    const row = document.createDocumentFragment();
+    const id = document.createElement("span");
+    id.className = "qid"; id.textContent = q.id; row.appendChild(id);
+
+    for (const key of ["t1", "t2"]) {
+      const wrap = document.createElement("span");
+      wrap.className = "qbar";
+      wrap.innerHTML = `<span class="track"><span class="fill" data-fill="${q.id}-${key}"></span></span><span class="num" data-num="${q.id}-${key}">${q[key]}</span>`;
+      row.appendChild(wrap);
+    }
+    const err = document.createElement("span");
+    err.className = "qerr";
+    err.id = `qerr-${q.id}`;
+    err.textContent = q.err.toFixed(3) + "%";
+    row.appendChild(err);
+    root.appendChild(row);
+  }
+  // T1/T2 fill scale: 0..400 μs
+  for (const q of QLIVE) updateQubitRow(q);
+}
+
+function updateQubitRow(q) {
+  const t1Fill = document.querySelector(`[data-fill="${q.id}-t1"]`);
+  const t2Fill = document.querySelector(`[data-fill="${q.id}-t2"]`);
+  const t1Num  = document.querySelector(`[data-num="${q.id}-t1"]`);
+  const t2Num  = document.querySelector(`[data-num="${q.id}-t2"]`);
+  const errEl  = document.getElementById(`qerr-${q.id}`);
+  if (!t1Fill) return;
+  t1Fill.style.transform = `scaleX(${Math.min(1, q.t1 / 400)})`;
+  t2Fill.style.transform = `scaleX(${Math.min(1, q.t2 / 400)})`;
+  t1Num.textContent = q.t1.toFixed(0);
+  t2Num.textContent = q.t2.toFixed(0);
+  errEl.textContent = q.err.toFixed(3) + "%";
+
+  // bar coloring
+  t1Fill.parentElement.parentElement.classList.toggle("deg", q.deg);
+  t2Fill.parentElement.parentElement.classList.toggle("deg", q.deg);
+
+  // err coloring: <0.1% green, 0.1-0.15% amber, >0.15% rose
+  errEl.classList.remove("warn", "bad");
+  if (q.err > 0.15) errEl.classList.add("bad");
+  else if (q.err > 0.10) errEl.classList.add("warn");
+}
+
+function renderDriftSpark() {
+  const svg = $("#drift-svg");
+  svg.innerHTML = "";
+  if (!DRIFT_HIST.length) return;
+  const W = 400, H = 110, pad = 4;
+  const series = DRIFT_HIST;
+  const target = 0.10;            // threshold line
+  const hi = Math.max(target * 1.6, ...series, 0.18);
+  const lo = 0;
+  const span = Math.max(0.001, hi - lo);
+  const x = (i) => pad + (i / Math.max(1, series.length - 1)) * (W - 2 * pad);
+  const y = (v) => H - pad - ((v - lo) / span) * (H - 2 * pad);
+
+  // threshold dashed
+  const ty = y(target);
+  const grid = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  grid.setAttribute("x1", 0); grid.setAttribute("x2", W);
+  grid.setAttribute("y1", ty); grid.setAttribute("y2", ty);
+  grid.setAttribute("stroke", "rgba(255,186,0,0.45)");
+  grid.setAttribute("stroke-dasharray", "3,4");
+  svg.appendChild(grid);
+
+  // area
+  let path = `M ${x(0)} ${H - pad}`;
+  for (let i = 0; i < series.length; i++) path += ` L ${x(i)} ${y(series[i])}`;
+  path += ` L ${x(series.length - 1)} ${H - pad} Z`;
+  const area = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  area.setAttribute("d", path);
+  const peak = Math.max(...series);
+  const fillCol = peak > target ? "rgba(251,86,91,0.18)" : "rgba(0,217,146,0.13)";
+  area.setAttribute("fill", fillCol);
+  svg.appendChild(area);
+
+  // line
+  let line = `M ${x(0)} ${y(series[0])}`;
+  for (let i = 1; i < series.length; i++) line += ` L ${x(i)} ${y(series[i])}`;
+  const lp = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  lp.setAttribute("d", line);
+  lp.setAttribute("fill", "none");
+  lp.setAttribute("stroke", peak > target ? "var(--rose)" : "var(--signal)");
+  lp.setAttribute("stroke-width", "1.6");
+  lp.setAttribute("stroke-linejoin", "round");
+  svg.appendChild(lp);
+
+  // current dot
+  const cx = x(series.length - 1), cy = y(series[series.length - 1]);
+  const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  c.setAttribute("cx", cx); c.setAttribute("cy", cy); c.setAttribute("r", "3");
+  c.setAttribute("fill", peak > target ? "var(--rose)" : "var(--signal)");
+  svg.appendChild(c);
+}
+
+function renderStatus() {
+  const stEl = $("#bk-state");
+  stEl.className = `v ${BK.stateClass}`;
+  stEl.innerHTML = `<span class="mdot"></span>${BK.state}`;
+  $("#bk-queue").textContent = `${BK.queue} 个任务`;
+  const ago = Math.max(0, Math.floor((Date.now() - LAST_CAL_AT) / 1000));
+  $("#bk-cal").textContent = `${ago} 秒前`;
+  $("#bk-shots").textContent = BK.shots.toLocaleString();
+  $("#bk-trans").textContent = BK.transpile;
+}
+
+// shape of a drift event: peak ramp 0 → 0.18 over ~1.2 s, hold ~2 s, decay ~3 s
+function driftEnvelope(t) {
+  if (t < 1.2)  return 0.18 * (t / 1.2);
+  if (t < 3.2)  return 0.18;
+  if (t < 6.0)  return 0.18 * Math.max(0, 1 - (t - 3.2) / 2.8);
+  return 0;
+}
+
+function rackTick() {
+  // 1) drift magnitude
+  let dmag;
+  if (DRIFT_EVENT) {
+    const t = (Date.now() - DRIFT_EVENT.t0) / 1000;
+    dmag = driftEnvelope(t) + (Math.random() - 0.5) * 0.012;
+    if (t > 6.0) {
+      // event done → recover, schedule a re-cal stamp
+      DRIFT_EVENT = null;
+      LAST_CAL_AT = Date.now();
+      BK.state = "在线"; BK.stateClass = "online";
+      BK.transpile = "稳定";
+      // restore qubit baseline
+      for (let i = 0; i < QLIVE.length; i++) {
+        QLIVE[i].deg = false;
+      }
+      logLine("后端已恢复 · 编译缓存失效 · 已重打校准时间戳", "sig");
+    }
+  } else {
+    // baseline jitter
+    dmag = 0.025 + Math.random() * 0.020;
+  }
+  dmag = Math.max(0, dmag);
+  DRIFT_HIST.push(dmag);
+  if (DRIFT_HIST.length > 60) DRIFT_HIST.shift();
+
+  // 2) qubit walk
+  for (let i = 0; i < QLIVE.length; i++) {
+    const base = QBASE[i];
+    const q = QLIVE[i];
+    if (DRIFT_EVENT && i < 3 && (Date.now() - DRIFT_EVENT.t0) > 800) {
+      // three qubits collapse during drift
+      const ratio = 0.55 + 0.10 * Math.random();
+      q.t1 = base.t1 * ratio;
+      q.t2 = base.t2 * ratio;
+      q.err = base.err * (1.6 + 0.4 * Math.random());
+      q.deg = true;
+    } else {
+      // small random walk ±2% around baseline
+      q.t1  = base.t1  * (1 + (Math.random() - 0.5) * 0.04);
+      q.t2  = base.t2  * (1 + (Math.random() - 0.5) * 0.04);
+      q.err = base.err * (1 + (Math.random() - 0.5) * 0.06);
+      q.deg = false;
+    }
+    updateQubitRow(q);
+  }
+
+  // 3) drift level + colour for current marker
+  const nowEl = $("#drift-now");
+  nowEl.textContent = `|Δ| ${dmag.toFixed(3)}`;
+  nowEl.classList.remove("warn", "bad");
+  if (dmag > 0.15)      nowEl.classList.add("bad");
+  else if (dmag > 0.10) nowEl.classList.add("warn");
+
+  // 4) backend queue / shots
+  if (BK.queue !== QUEUE_TARGET) {
+    BK.queue += BK.queue < QUEUE_TARGET ? 1 : -1;
+  }
+  // shots wobble
+  const baseShots = DRIFT_EVENT ? 320 : 1240;
+  BK.shots = Math.round(baseShots * (1 + (Math.random() - 0.5) * 0.06));
+
+  renderDriftSpark();
+  renderStatus();
+}
+
+function startRackLoop() {
+  initQubitGrid();
+  // prime DRIFT_HIST with 30 baseline samples so the spark isn't empty
+  for (let i = 0; i < 30; i++) DRIFT_HIST.push(0.025 + Math.random() * 0.020);
+  renderDriftSpark();
+  renderStatus();
+  // jittered tick: 800-1200ms
+  function loop() {
+    rackTick();
+    setTimeout(loop, 800 + Math.random() * 400);
+  }
+  loop();
+}
+
+// public hooks the mission player can call
+function rackTriggerDrift() {
+  DRIFT_EVENT = { t0: Date.now(), peak: 0.18 };
+  BK.state = "退化"; BK.stateClass = "deg";
+  BK.transpile = "重路由";
+  logLine("检测到后端漂移 · |Δcal| > 0.10", "warn");
+}
+function rackSetQueue(n) { QUEUE_TARGET = Math.max(0, n | 0); }
+function rackResetBaseline() {
+  QUEUE_TARGET = 0;
+  if (!DRIFT_EVENT) {
+    BK.state = "在线"; BK.stateClass = "online";
+    BK.transpile = "稳定";
+  }
+}
+// Force recovery — used by AUTO mode after the agent finishes its repair cycle.
+// Cuts any in-flight DRIFT_EVENT short, restores qubit baseline immediately.
+function rackForceRecover(reason) {
+  if (DRIFT_EVENT) {
+    DRIFT_EVENT = null;
+    LAST_CAL_AT = Date.now();
+    for (const q of QLIVE) q.deg = false;
+  }
+  QUEUE_TARGET = 0;
+  BK.state = "在线"; BK.stateClass = "online";
+  BK.transpile = "稳定";
+  if (reason) logLine(`后端强制恢复 · ${reason}`, "sig");
+}
+// Snapshot live rack state for the agent prompt.
+function rackSnapshot() {
+  const dmagNow = DRIFT_HIST.length ? DRIFT_HIST[DRIFT_HIST.length - 1] : 0;
+  const peak = DRIFT_HIST.length ? Math.max(...DRIFT_HIST) : 0;
+  const degraded = QLIVE.filter(q => q.deg).map(q => q.id);
+  return {
+    drift_now: dmagNow,
+    drift_peak_60s: peak,
+    state: BK.state,
+    transpile: BK.transpile,
+    degraded_qubits: degraded,
+    qubits: QLIVE.map(q => ({
+      id: q.id,
+      t1_us: Math.round(q.t1),
+      t2_us: Math.round(q.t2),
+      err_pct: +q.err.toFixed(3),
+      degraded: q.deg,
+    })),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────
+// LIVE: real DeepSeek/OpenAI ReActAgent over SSE
+// ─────────────────────────────────────────────────────────────
+const LIVE_PRESETS = [
+  {
+    title: "GHZ-5 + ZNE 缓解",
+    star: "★ 推荐",
+    desc: "对 ghz_5 进行编译并执行 ZNE；汇报缓解后保真度与未缓解基线",
+    prompt: "transpile and run ghz_5 with ZNE; report mitigated fidelity vs unmitigated baseline",
+    recommended: true,
+  },
+  {
+    title: "QFT-4 编译诊断",
+    desc: "编译 qft_4，汇报深度、双比特门数量和预测保真度",
+    prompt: "transpile qft_4 on this backend, then report transpiled depth, 2-qubit gate count, and predicted fidelity",
+  },
+  {
+    title: "漂移诊断",
+    desc: "设备过夜后发生漂移——判断哪几个量子比特变差以及如何处理",
+    prompt: "the device drifted overnight — figure out which qubit went bad and what to do",
+  },
+  {
+    title: "Q0 校准扫描",
+    desc: "校准量子比特 0——测 T1、T2，再做一次 Rabi 扫描",
+    prompt: "calibrate qubit 0 — measure T1, T2, then a Rabi sweep",
+  },
+];
+
+let LIVE_ES = null;          // current EventSource
+let LIVE_WATCHDOG = null;    // step-arrival timeout
+let LIVE_ABORTED = false;
+const LIVE_FIRST_STEP_TIMEOUT_MS = 30_000;
+const LIVE_OVERALL_TIMEOUT_MS    = 120_000;
+
+function openLiveModal() {
+  if (RUNNING) return;
+  const list = $("#preset-list");
+  list.innerHTML = "";
+  for (const p of LIVE_PRESETS) {
+    const btn = document.createElement("button");
+    btn.className = "preset" + (p.recommended ? " recommended" : "");
+    btn.innerHTML = `
+      <div class="ttl">▸ ${escapeHtml(p.title)}<span class="star">${p.star || ""}</span></div>
+      <div class="desc">${escapeHtml(p.desc)}</div>`;
+    btn.addEventListener("click", () => {
+      closeLiveModal();
+      runLive(p.prompt);
+    });
+    list.appendChild(btn);
+  }
+  $("#live-custom").value = "";
+  $("#live-modal").classList.add("show");
+  setTimeout(() => $("#live-custom").focus(), 100);
+}
+
+function closeLiveModal() {
+  $("#live-modal").classList.remove("show");
+}
+
+function abortLive(reason) {
+  LIVE_ABORTED = true;
+  if (LIVE_ES) {
+    try { LIVE_ES.close(); } catch (_) {}
+    LIVE_ES = null;
+  }
+  if (LIVE_WATCHDOG) { clearTimeout(LIVE_WATCHDOG); LIVE_WATCHDOG = null; }
+  setShield("fail", "LIVE 已中止", reason || "用户取消");
+  setLight("light-verifier", "fail");
+  $("#light-verifier span:last-child").textContent = "Verifier · 已中止";
+  logLine(`LIVE 已中止 · ${reason || "用户取消"}`, "block");
+  finishLive();
+}
+
+function finishLive() {
+  setMissionLight(LIVE_ABORTED ? "fail" : "ok",
+                  LIVE_ABORTED ? "LIVE · 已中止" : "LIVE · 已完成");
+  $("#mode-val").style.color = "";
+  $("#mode-val").textContent = "回放";
+  // restore LIVE button label
+  const liveBtn = document.querySelector('.mbtn[data-mid="live"]');
+  if (liveBtn) {
+    liveBtn.classList.remove("abort");
+    liveBtn.querySelector("div").innerHTML =
+      '<span class="glyph" style="color: var(--rose);">≡</span>LIVE · 真实大模型';
+    const sub = liveBtn.querySelector(".sub");
+    if (sub) sub.textContent = "实时调 DeepSeek API 跑 ReAct，token 计费真实";
+  }
+  setTimeout(() => $$(".mbtn").forEach(b => b.disabled = false), 350);
+  rackResetBaseline();
+  RUNNING = false;
+  // AUTO mode follow-up hook (one-shot)
+  if (typeof FINISH_LIVE_FOLLOWUP === "function") {
+    const fn = FINISH_LIVE_FOLLOWUP;
+    FINISH_LIVE_FOLLOWUP = null;
+    try { fn(); } catch (e) { console.error("auto followup failed", e); }
+  }
+}
+let FINISH_LIVE_FOLLOWUP = null;
+
+function runLive(prompt) {
+  if (RUNNING || !prompt) return;
+  RUNNING = true;
+  LIVE_ABORTED = false;
+
+  // disable the 4 mission buttons; turn LIVE into ABORT
+  $$(".mbtn").forEach(b => {
+    if (b.dataset.mid !== "live") b.disabled = true;
+  });
+  $$(".mbtn").forEach(b => b.classList.remove("active"));
+  const liveBtn = document.querySelector('.mbtn[data-mid="live"]');
+  liveBtn.classList.add("active", "abort");
+  liveBtn.disabled = false;
+  liveBtn.querySelector("div").innerHTML =
+    '<span class="glyph">■</span>中止 LIVE';
+  const sub = liveBtn.querySelector(".sub");
+  if (sub) sub.textContent = "点击中止当前 LIVE 运行";
+
+  resetPanels();
+  $("#mode-val").textContent = "LIVE · DeepSeek";
+  $("#mode-val").style.color = "var(--rose)";
+  setMissionLight("warn", "LIVE · 流式运行中");
+  setLight("light-verifier", "warn");
+  $("#light-verifier span:last-child").textContent = "Verifier · 等待结论";
+  setShield("scanning", "LIVE ReAct 运行中",
+            "agent.run() 通过 SSE 流式输出——真实 token、真实成本");
+  $("#react-meta").textContent = "LIVE · " + (prompt.length > 80 ? prompt.slice(0,77)+"…" : prompt);
+  $("#claim-meta").textContent = "deepseek-chat · FakeBrisbane";
+  logLine(`>>> LIVE 任务 · 提示词 = "${truncateLog(prompt, 80)}"`, "head");
+
+  const fidSeries = [];
+  const histogram = {};
+  let toolsUsed = 0;
+  let elapsed = 0;
+  const target = 0.85;
+  let firstStepSeen = false;
+
+  // overall hard stop
+  const overallTimer = setTimeout(() => {
+    if (RUNNING && !LIVE_ABORTED) abortLive("总超时（120 秒）");
+  }, LIVE_OVERALL_TIMEOUT_MS);
+
+  // first-step watchdog
+  function armFirstStepWatchdog() {
+    if (LIVE_WATCHDOG) clearTimeout(LIVE_WATCHDOG);
+    LIVE_WATCHDOG = setTimeout(() => {
+      if (RUNNING && !LIVE_ABORTED && !firstStepSeen) {
+        abortLive("30 秒内未收到思考/工具步骤——可能是 API 连接错误");
+      }
+    }, LIVE_FIRST_STEP_TIMEOUT_MS);
+  }
+  armFirstStepWatchdog();
+
+  let es;
+  try {
+    es = new EventSource("/live/run?prompt=" + encodeURIComponent(prompt));
+    LIVE_ES = es;
+  } catch (e) {
+    clearTimeout(overallTimer);
+    abortLive(`无法打开 SSE：${e.message}`);
+    return;
+  }
+
+  const t0 = Date.now();
+  function tickElapsed() {
+    if (!RUNNING) return;
+    elapsed = (Date.now() - t0) / 1000;
+    setMeters({ cost_usd: 0, elapsed_seconds: elapsed,
+                tool_calls: toolsUsed,
+                best_score: fidSeries.length ? Math.max(...fidSeries) : null });
+    setProgress(Math.min(95, elapsed * 1.5));
+    setTimeout(tickElapsed, 250);
+  }
+  tickElapsed();
+
+  es.addEventListener("hello", () => logLine("SSE 通道已打开 · 等待第一条思考……", "sig"));
+  es.addEventListener("boot", (ev) => {
+    const d = JSON.parse(ev.data || "{}");
+    logLine(`智能体已启动 · provider=${d.provider} model=${d.model}`, "sig");
+  });
+  es.addEventListener("ping", () => {});
+  es.addEventListener("step", (ev) => {
+    if (LIVE_ABORTED) return;
+    if (!firstStepSeen) {
+      firstStepSeen = true;
+      if (LIVE_WATCHDOG) { clearTimeout(LIVE_WATCHDOG); LIVE_WATCHDOG = null; }
+    }
+    let f;
+    try { f = JSON.parse(ev.data || ""); } catch (_) { return; }
+    pushReact(f);
+    if (f.kind === "tool") {
+      toolsUsed++;
+      histogram[f.tool] = (histogram[f.tool] || 0) + 1;
+      renderHist(histogram);
+      logLine(`工具 ▸ <span style="color:var(--mint)">${escapeHtml(f.tool)}</span>`, "sig");
+    } else if (f.kind === "observe" && f.fidelity != null) {
+      fidSeries.push(f.fidelity);
+      renderSparkline(fidSeries, target);
+      logLine(`观测 · 保真度 = ${f.fidelity.toFixed(4)}`);
+    } else if (f.kind === "thought") {
+      logLine(`思考 · "${truncateLog(f.text)}"`);
+    }
+  });
+  es.addEventListener("claim", (ev) => {
+    if (LIVE_ABORTED) return;
+    let d = {}; try { d = JSON.parse(ev.data || "{}"); } catch (_) {}
+    setClaim(d.text || "（空）", false);
+    logLine(`已提交结论 · ${truncateLog(d.text || "")}`);
+  });
+  es.addEventListener("verifier", (ev) => {
+    if (LIVE_ABORTED) return;
+    let d = {}; try { d = JSON.parse(ev.data || "{}"); } catch (_) {}
+    if (d.verdict === "pass") {
+      setShield("pass", "✓ LIVE 运行达到目标", d.reason || "");
+      setLight("light-verifier", "ok");
+      $("#light-verifier span:last-child").textContent = "Verifier · 通过";
+      logLine(`Verifier ✓ 通过 · ${d.reason || ""}`, "sig");
+    } else {
+      setShield("fail", "⌧ 未达到目标", d.reason || "");
+      setLight("light-verifier", "fail");
+      $("#light-verifier span:last-child").textContent = "Verifier · 未达目标";
+      logLine(`Verifier ✗ ${d.reason || ""}`, "warn");
+    }
+  });
+
+  // Server-pushed errors come through 'error' event with JSON data;
+  // network-level errors (CORS, EOF) come through default 'error' with no data.
+  es.addEventListener("error", (ev) => {
+    let d = null;
+    try { d = ev.data ? JSON.parse(ev.data) : null; } catch (_) { d = null; }
+    if (d && d.message) {
+      // server-issued structured error
+      logLine(`LIVE 错误：${d.message}`, "block");
+      if (d.trace) logLine(truncateLog(d.trace, 200), "warn");
+      abortLive(d.message);
+    } else if (es.readyState === EventSource.CLOSED) {
+      // pipe broken; abort cleanly
+      if (RUNNING && !LIVE_ABORTED) abortLive("SSE 连接已关闭");
+    } else if (es.readyState === EventSource.CONNECTING) {
+      // EventSource is auto-reconnecting; that's the source of "stuck" feeling.
+      // Cap reconnects: if we still have nothing after 30 s overall, abort.
+      logLine("SSE 正在重连……", "warn");
+    }
+  });
+
+  es.addEventListener("done", (ev) => {
+    clearTimeout(overallTimer);
+    if (LIVE_WATCHDOG) { clearTimeout(LIVE_WATCHDOG); LIVE_WATCHDOG = null; }
+    if (LIVE_ABORTED) { try { es.close(); } catch (_) {} return; }
+    let d = {}; try { d = JSON.parse(ev.data || "{}"); } catch (_) {}
+    setMeters({
+      cost_usd: d.cost_usd ?? 0,
+      elapsed_seconds: d.elapsed_s ?? elapsed,
+      tool_calls: d.tool_calls ?? toolsUsed,
+      best_score: d.best_fidelity ?? (fidSeries.length ? Math.max(...fidSeries) : null),
+    });
+    setProgress(100);
+    logLine(
+      `<<< LIVE 完成 · $${(d.cost_usd ?? 0).toFixed(4)} · ${d.tool_calls ?? toolsUsed} 次工具调用 · ` +
+      `${(d.prompt_tokens ?? 0)+(d.completion_tokens ?? 0)} tokens · ${(d.elapsed_s ?? elapsed).toFixed(1)} 秒`,
+      "head"
+    );
+    try { es.close(); } catch (_) {}
+    LIVE_ES = null;
+    finishLive();
+  });
+}
+
+// keyboard + close hookup
+function bindLiveModalControls() {
+  $("#live-close").addEventListener("click", closeLiveModal);
+  $("#live-modal").addEventListener("click", (e) => {
+    if (e.target.id === "live-modal") closeLiveModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && $("#live-modal").classList.contains("show")) {
+      closeLiveModal();
+    }
+  });
+  const ta = $("#live-custom");
+  ta.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      $("#live-run").click();
+    }
+  });
+  $("#live-run").addEventListener("click", () => {
+    const txt = ($("#live-custom").value || "").trim();
+    if (!txt) return;
+    closeLiveModal();
+    runLive(txt);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// AUTO MODE: random drift injection × agent self-repair loop
+// ─────────────────────────────────────────────────────────────
+let AUTO_ON = false;
+let AUTO_NEXT_DRIFT_AT = 0;        // unix ms; when to fire next drift
+let AUTO_DRIFT_CONFIRM_AT = 0;     // when current drift exceeded threshold
+let AUTO_REPAIR_ARMED = false;     // one repair per drift event
+let AUTO_DRIFTS = 0;
+let AUTO_REPAIRS = 0;
+let AUTO_NARRATIONS = 0;
+let AUTO_TIMER = null;
+let AUTO_NEXT_NARRATE_AT = 0;
+let AUTO_NARRATING = false;        // request in flight
+
+const AUTO_INTERVAL_MIN_MS = 25_000;
+const AUTO_INTERVAL_MAX_MS = 50_000;
+const AUTO_THRESHOLD       = 0.10;
+const AUTO_CONFIRM_MS      = 1_500;
+const AUTO_NARRATE_MIN_MS  = 25_000;
+const AUTO_NARRATE_MAX_MS  = 45_000;
+
+function autoNextDriftDelay() {
+  return AUTO_INTERVAL_MIN_MS + Math.random() * (AUTO_INTERVAL_MAX_MS - AUTO_INTERVAL_MIN_MS);
+}
+function autoNextNarrateDelay() {
+  return AUTO_NARRATE_MIN_MS + Math.random() * (AUTO_NARRATE_MAX_MS - AUTO_NARRATE_MIN_MS);
+}
+
+function setAutoBadge(state, label) {
+  const btn = $("#auto-toggle");
+  const lbl = $("#auto-label");
+  const sub = $("#auto-sub");
+  if (state === "on") {
+    btn.classList.add("auto-on");
+    lbl.textContent = label || "实时模式 · 开启";
+    sub.textContent = "真实大模型持续监看 · 漂移触发修复智能体";
+  } else if (state === "dispatching") {
+    btn.classList.add("auto-on");
+    lbl.textContent = label || "实时 · 正在派发";
+    sub.textContent = "漂移已确认 · 正在启动修复智能体";
+  } else if (state === "narrating") {
+    btn.classList.add("auto-on");
+    lbl.textContent = label || "实时 · 正在解说";
+    sub.textContent = "正在请求大模型解读当前后端状态";
+  } else {
+    btn.classList.remove("auto-on");
+    lbl.textContent = "实时模式 · 关闭";
+    sub.textContent = "真实 LLM 持续解读 · drift 触发自动诊断";
+  }
+}
+
+function autoOn() {
+  if (AUTO_ON) return;
+  AUTO_ON = true;
+  AUTO_NEXT_DRIFT_AT = Date.now() + autoNextDriftDelay();
+  AUTO_NEXT_NARRATE_AT = Date.now() + 2_000; // first narration in 2 s for snappy demo
+  AUTO_REPAIR_ARMED = false;
+  setAutoBadge("on");
+  $("#auto-stats").style.display = "";
+  setMissionLight("ok", "实时 · 监控中");
+  // Seed claim panel with a calm idle line so reviewers see something immediately.
+  setClaim("", false);
+  $("#claim-meta").textContent = "实时 AI 监看 · 等待第一条解说……";
+  logLine(`>>> 实时模式已开启 · 大模型约每 30 秒解说 · 漂移约 ${Math.round((AUTO_NEXT_DRIFT_AT - Date.now())/1000)} 秒后触发`, "head");
+  if (!AUTO_TIMER) AUTO_TIMER = setInterval(autoTick, 600);
+}
+
+function autoOff() {
+  AUTO_ON = false;
+  AUTO_REPAIR_ARMED = false;
+  AUTO_NARRATING = false;
+  if (AUTO_TIMER) { clearInterval(AUTO_TIMER); AUTO_TIMER = null; }
+  setAutoBadge("off");
+  if (!RUNNING) setMissionLight("idle", "空闲");
+  $("#claim-meta").textContent = "—";
+  logLine("<<< 实时模式已关闭", "head");
+}
+
+function autoToggle() {
+  if (AUTO_ON) autoOff();
+  else autoOn();
+}
+
+function autoBuildPrompt(snap) {
+  const degList = (snap.degraded_qubits || []).join(", ") || "none";
+  const lines = snap.qubits.map(q =>
+    `  ${q.id}: T1=${q.t1_us}us T2=${q.t2_us}us err=${q.err_pct.toFixed(3)}%${q.degraded ? " [DEGRADED]" : ""}`
+  ).join("\n");
+  return [
+    "Backend drift detected on FakeBrisbane.",
+    `|Δcal| current=${snap.drift_now.toFixed(3)}, peak(60s)=${snap.drift_peak_60s.toFixed(3)} ` +
+      `(threshold ${AUTO_THRESHOLD.toFixed(2)}).`,
+    `Backend state=${snap.state}, transpile=${snap.transpile}.`,
+    `Degraded qubits: ${degList}.`,
+    "",
+    "Live qubit calibration:",
+    lines,
+    "",
+    "Diagnose the drift, recommend a recovery action " +
+      "(re-transpile, re-calibrate, or route around bad qubits), " +
+      "and run a verification benchmark (e.g. ghz_5) to confirm post-repair fidelity.",
+  ].join("\n");
+}
+
+function autoTick() {
+  if (!AUTO_ON) return;
+  const now = Date.now();
+
+  // Pause scheduling while a LIVE/repair run is active.
+  if (RUNNING) return;
+
+  // (0) maybe fire a narration during baseline (drift-free) periods
+  if (!DRIFT_EVENT && !AUTO_NARRATING && now >= AUTO_NEXT_NARRATE_AT) {
+    autoFireNarration();
+    return;
+  }
+
+  // (1) maybe inject drift
+  if (!DRIFT_EVENT && now >= AUTO_NEXT_DRIFT_AT) {
+    AUTO_DRIFTS++;
+    $("#auto-drifts").textContent = String(AUTO_DRIFTS);
+    rackTriggerDrift();
+    AUTO_DRIFT_CONFIRM_AT = 0;
+    AUTO_REPAIR_ARMED = false;
+    setMissionLight("warn", "实时 · 检测到漂移");
+    AUTO_NEXT_DRIFT_AT = now + autoNextDriftDelay();
+    return;
+  }
+
+  // (2) confirm drift breached threshold; arm repair
+  if (DRIFT_EVENT && !AUTO_REPAIR_ARMED) {
+    const dmag = DRIFT_HIST.length ? DRIFT_HIST[DRIFT_HIST.length - 1] : 0;
+    if (dmag > AUTO_THRESHOLD) {
+      if (AUTO_DRIFT_CONFIRM_AT === 0) AUTO_DRIFT_CONFIRM_AT = now;
+      else if (now - AUTO_DRIFT_CONFIRM_AT >= AUTO_CONFIRM_MS) {
+        AUTO_REPAIR_ARMED = true;
+        setAutoBadge("dispatching");
+        setMissionLight("warn", "实时 · 正在派发智能体");
+        logLine(`漂移已确认（|Δ|=${dmag.toFixed(3)} > ${AUTO_THRESHOLD}）· 正在派发修复智能体`, "warn");
+        const snap = rackSnapshot();
+        const prompt = autoBuildPrompt(snap);
+        runLiveAuto(prompt);
+      }
+    } else {
+      AUTO_DRIFT_CONFIRM_AT = 0;
+    }
+  }
+}
+
+// One-shot narration: send rack snapshot to /live/narrate and render result
+// in the claim panel. Cheap (~$0.00003/call). No tools, no SSE.
+async function autoFireNarration() {
+  if (AUTO_NARRATING || !AUTO_ON || RUNNING) return;
+  AUTO_NARRATING = true;
+  setAutoBadge("narrating");
+  const snap = rackSnapshot();
+  const ctxStr = JSON.stringify(snap);
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 18_000);
+  try {
+    const r = await fetch("/live/narrate?ctx=" + encodeURIComponent(ctxStr),
+                          { signal: ctrl.signal, cache: "no-cache" });
+    clearTimeout(t);
+    if (!AUTO_ON) return; // user disengaged while in flight
+    if (!r.ok) {
+      const errBody = await r.text().catch(() => "");
+      logLine(`解说接口 HTTP ${r.status} · ${truncateLog(errBody, 100)}`, "warn");
+    } else {
+      const j = await r.json();
+      if (j && j.text) {
+        AUTO_NARRATIONS++;
+        $("#auto-narr").textContent = String(AUTO_NARRATIONS);
+        setClaim(j.text, false);
+        $("#claim-meta").textContent =
+          `解说 #${AUTO_NARRATIONS} · ${j.elapsed_s.toFixed(1)} 秒 · ` +
+          `${(j.prompt_tokens||0)+(j.completion_tokens||0)} tk · $${(j.cost_usd||0).toFixed(5)}`;
+        logLine(`AI 监看 ▸ ${truncateLog(j.text, 110)}`);
+      }
+    }
+  } catch (e) {
+    clearTimeout(t);
+    if (e && e.name === "AbortError") {
+      logLine("解说超时（18 秒）· 已跳过", "warn");
+    } else {
+      logLine(`解说错误：${e && e.message || e}`, "warn");
+    }
+  } finally {
+    AUTO_NARRATING = false;
+    AUTO_NEXT_NARRATE_AT = Date.now() + autoNextNarrateDelay();
+    if (AUTO_ON && !RUNNING && !DRIFT_EVENT) setAutoBadge("on");
+  }
+}
+
+// Variant of runLive that, on completion (success or abort), force-recovers
+// the rack and re-arms the AUTO scheduler. Uses the FINISH_LIVE_FOLLOWUP hook
+// so we don't have to monkey-patch finishLive itself.
+function runLiveAuto(prompt) {
+  FINISH_LIVE_FOLLOWUP = function () {
+    if (!AUTO_ON) return;
+    AUTO_REPAIRS += LIVE_ABORTED ? 0 : 1;
+    $("#auto-repairs").textContent = String(AUTO_REPAIRS);
+    rackForceRecover(LIVE_ABORTED ? "agent aborted" : "agent re-cal cycle complete");
+    setAutoBadge("on");
+    setMissionLight("ok", "自动 · 监控中");
+    AUTO_REPAIR_ARMED = false;
+    AUTO_DRIFT_CONFIRM_AT = 0;
+    AUTO_NEXT_DRIFT_AT = Date.now() + autoNextDriftDelay();
+    logLine(`自动模式 · 下次漂移约在 ${Math.round((AUTO_NEXT_DRIFT_AT - Date.now())/1000)} 秒后`, "sig");
+  };
+  runLive(prompt);
+}
+
+function bindAutoToggle() {
+  $("#auto-toggle").addEventListener("click", autoToggle);
+}
+
+// ─────────────────────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────────────────────
+async function boot() {
+  try {
+    const data = await fetch("./missions.json", { cache: "no-cache" }).then(r => r.json());
+    MISSIONS = data.missions;
+    logLine(`>>> 任务控制台已上线 · 已加载 ${Object.keys(MISSIONS).length} 个脚本`, "head");
+    logLine("点击左侧任一任务按钮开始演示", "sig");
+  } catch (e) {
+    logLine(`错误：加载 missions.json 失败（${e.message}）`, "block");
+    return;
+  }
+  $$(".mbtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const mid = btn.dataset.mid;
+      if (mid === "live") {
+        // If we're already running LIVE, this button acts as ABORT.
+        if (RUNNING && btn.classList.contains("abort")) {
+          abortLive("用户取消");
+          return;
+        }
+        openLiveModal();
+        return;
+      }
+      playMission(mid);
+    });
+  });
+  bindLiveModalControls();
+  bindAutoToggle();
+  startRackLoop();
+}
+boot();
+</script>
+</body>
+</html>

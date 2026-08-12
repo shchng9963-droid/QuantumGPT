@@ -245,8 +245,12 @@ class TestPropertiesStream:
         import time
         stream = PropertiesStream(replay_backend, interval_seconds=0.1, time_acceleration=3600)
         stream.start()
-        time.sleep(0.5)
-        stream.stop()
+        deadline = time.time() + 1.5
+        try:
+            while stream.buffer_size < 3 and time.time() < deadline:
+                time.sleep(0.02)
+        finally:
+            stream.stop()
         assert stream.buffer_size >= 3  # should have captured several snapshots
         latest = stream.get_latest()
         assert latest is not None

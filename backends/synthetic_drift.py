@@ -100,6 +100,59 @@ DIURNAL_CYCLE = DriftProfile(
 )
 
 
+# v2.5 Sprint A: smoother and more violent drift presets to test agent across
+# a wider range of drift dynamics. MILD_GRADUAL is a slow ramp (closer to
+# real diurnal-style drift), MULTI_SHOCK injects two sudden jumps so the
+# agent has to react to a second event after the first recovery.
+
+MILD_GRADUAL = DriftProfile(
+    t1_drift=lambda t: max(0.6, 1.0 - 0.015 * t),
+    gate_error_drift=lambda t: 1.0 + 0.025 * t,
+    readout_drift=lambda t: 1.0 + 0.01 * t,
+    drift_score_fn=lambda t: min(0.5, 0.015 * t),
+)
+
+
+def _multi_shock_t1(t: float) -> float:
+    if t >= 8:
+        return 0.25  # second, harsher shock
+    if t >= 4:
+        return 0.55
+    return 1.0
+
+
+def _multi_shock_gate(t: float) -> float:
+    if t >= 8:
+        return 6.0
+    if t >= 4:
+        return 2.5
+    return 1.0
+
+
+def _multi_shock_readout(t: float) -> float:
+    if t >= 8:
+        return 4.0
+    if t >= 4:
+        return 1.8
+    return 1.0
+
+
+def _multi_shock_score(t: float) -> float:
+    if t >= 8:
+        return 1.0
+    if t >= 4:
+        return 0.6
+    return 0.0
+
+
+MULTI_SHOCK = DriftProfile(
+    t1_drift=_multi_shock_t1,
+    gate_error_drift=_multi_shock_gate,
+    readout_drift=_multi_shock_readout,
+    drift_score_fn=_multi_shock_score,
+)
+
+
 class SyntheticDriftBackend(ShadowBackend):
     """Shadow backend with parameterized drift injection.
 
@@ -256,7 +309,13 @@ class SyntheticDriftBackend(ShadowBackend):
         snap = self._get_current_snapshot()
         sim = self._build_simulator(snap)
 
-        transpiled = transpile(circuit, backend=sim)
+        transpile_kwargs = {
+            k: v
+            for k, v in kwargs.items()
+            if k in {"optimization_level", "initial_layout", "layout_method", "routing_method", "seed_transpiler"}
+            and v is not None
+        }
+        transpiled = transpile(circuit, backend=sim, **transpile_kwargs)
         job = sim.run(transpiled, shots=shots)
         result = job.result()
         counts = result.get_counts()

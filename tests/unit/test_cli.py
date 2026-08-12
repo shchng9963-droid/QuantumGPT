@@ -3,12 +3,21 @@
 import json
 import pytest
 from click.testing import CliRunner
+
+from agent.run_persistence import load_run
 from cli import main
 
 
 @pytest.fixture
 def runner():
     return CliRunner()
+
+
+@pytest.fixture
+def tmp_runs_dir(tmp_path, monkeypatch):
+    root = tmp_path / "runs"
+    monkeypatch.setenv("QUANTUMGPT_RUNS_DIR", str(root))
+    return root
 
 
 class TestVersion:
@@ -107,3 +116,121 @@ class TestAgent:
         data = json.loads(result.output)
         assert "final_answer" in data
         assert data["model"] == "rule-planner-v1"
+
+
+class TestRunOrchestrator:
+    def test_run_orchestrator_persists_graph_state(self, runner, tmp_runs_dir):
+        result = runner.invoke(
+            main,
+            [
+                "run",
+                "ghz_5",
+                "--system",
+                "QuantumGPT-Orchestrator",
+                "--provider",
+                "mock",
+                "-j",
+            ],
+        )
+
+        assert result.exit_code == 0
+        payload = json.loads(result.output)
+        run = load_run(payload["task_id"])
+
+        assert run["result"]["system"] == "QuantumGPT-Orchestrator"
+        assert "post_state" in run
+        assert run["post_state"]["done"] is True
+        assert "verification" in run["post_state"]
+        assert run["result"]["termination_reason"] == run["post_state"]["termination_reason"]
+
+    def test_run_orch_noverifier_uses_stub_verifier(self, runner, tmp_runs_dir):
+        result = runner.invoke(
+            main,
+            [
+                "run",
+                "ghz_5",
+                "--system",
+                "QuantumGPT-Orch-NoVerifier",
+                "--provider",
+                "mock",
+                "-j",
+            ],
+        )
+
+        assert result.exit_code == 0
+        payload = json.loads(result.output)
+        run = load_run(payload["task_id"])
+
+        assert "post_state" in run
+        assert run["post_state"]["verification"]["reason"] == "stub verifier always accepts"
+        assert run["result"]["plan_revision"] >= 1
+
+    def test_show_displays_orchestrator_verifier_metadata(self, runner, tmp_runs_dir):
+        run_result = runner.invoke(
+            main,
+            [
+                "run",
+                "ghz_5",
+                "--system",
+                "QuantumGPT-Orch-NoVerifier",
+                "--provider",
+                "mock",
+                "-j",
+            ],
+        )
+        assert run_result.exit_code == 0
+        task_id = json.loads(run_result.output)["task_id"]
+
+        show_result = runner.invoke(main, ["show", task_id])
+
+        assert show_result.exit_code == 0
+        assert "termination reason" in show_result.output
+        assert "verifier reason" in show_result.output
+        assert "plan revision" in show_result.output
+        assert "stub verifier always accepts" in show_result.output
+        assert "satisfied" in show_result.output
+
+    def test_show_surfaces_available_b10_artifacts(self, runner, tmp_runs_dir):
+        from agent.run_persistence import TaskSpec, save_task_spec, run_dir
+
+        spec = TaskSpec(circuit="ghz_5", backend="FakeBrisbane", system="QuantumGPT-Orchestrator")
+        task_id, _ = save_task_spec(spec)
+        d = run_dir(task_id)
+        (d / "pre_graph_state.json").write_text(json.dumps({"phase": "pre"}))
+        (d / "post_graph_state.json").write_text(json.dumps({"phase": "post"}))
+        (d / "oracle_row.json").write_text(json.dumps({"profile": "severe_sudden"}))
+
+        show_result = runner.invoke(main, ["show", task_id])
+
+        assert show_result.exit_code == 0
+        assert "available artifacts" in show_result.output
+        assert "pre_state" in show_result.output
+        assert "post_state" in show_result.output
+        assert "oracle_row" in show_result.output
+
+    def test_runs_json_exposes_orchestrator_summary_fields(self, runner, tmp_runs_dir):
+        run_result = runner.invoke(
+            main,
+            [
+                "run",
+                "ghz_5",
+                "--system",
+                "QuantumGPT-Orch-NoVerifier",
+                "--provider",
+                "mock",
+                "-j",
+            ],
+        )
+        assert run_result.exit_code == 0
+        task_id = json.loads(run_result.output)["task_id"]
+
+        runs_result = runner.invoke(main, ["runs", "-j"])
+
+        assert runs_result.exit_code == 0
+        rows = json.loads(runs_result.output)
+        row = next(r for r in rows if r["task_id"] == task_id)
+        summary = row["summary"]
+
+        assert summary["verifier_reason"] == "stub verifier always accepts"
+        assert summary["termination_reason"] == "satisfied"
+        assert summary["plan_revision"] >= 1

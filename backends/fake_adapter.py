@@ -69,6 +69,16 @@ class FakeBackendAdapter(ShadowBackend):
         self._sim = AerSimulator.from_backend(self._fake)
         self._creation_time = time.time()
 
+        # Deterministic-mode hooks for paired tests (Plan v2.5 G2 gate).
+        # When ``deterministic_seed`` is not None, each run() call advances
+        # ``_call_index`` and feeds ``deterministic_seed + _call_index`` to
+        # AerSimulator as ``seed_simulator``. Two backends configured with
+        # the same seed will therefore produce identical noisy results given
+        # an identical sequence of run() invocations. This is required to
+        # prove orchestrator≡flat-ReAct equivalence below ZNE shot noise.
+        self.deterministic_seed: Optional[int] = None
+        self._call_index: int = 0
+
     @property
     def name(self) -> str:
         return self._backend_name
@@ -178,8 +188,20 @@ class FakeBackendAdapter(ShadowBackend):
             initial_layout=initial_layout,
         )
 
+        # Build run options. In deterministic mode, advance the per-backend
+        # call counter so successive run() calls (e.g. ZNE's noise-scale
+        # batch) get distinct but reproducible seeds.
+        run_kwargs: dict[str, Any] = {"shots": shots}
+        # An explicit seed_simulator in kwargs always wins (debug hook).
+        explicit_seed = kwargs.get("seed_simulator")
+        if explicit_seed is not None:
+            run_kwargs["seed_simulator"] = int(explicit_seed)
+        elif self.deterministic_seed is not None:
+            run_kwargs["seed_simulator"] = int(self.deterministic_seed) + self._call_index
+            self._call_index += 1
+
         # Run on noisy simulator
-        job = self._sim.run(transpiled, shots=shots)
+        job = self._sim.run(transpiled, **run_kwargs)
         result = job.result()
         counts = result.get_counts()
 
@@ -194,6 +216,7 @@ class FakeBackendAdapter(ShadowBackend):
                 "backend": self._backend_name,
                 "transpiled_depth": transpiled.depth(),
                 "transpiled_gate_count": transpiled.size(),
+                "seed_simulator": run_kwargs.get("seed_simulator"),
             },
         )
 
