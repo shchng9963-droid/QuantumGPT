@@ -47,8 +47,8 @@ make smoke-test       # offline ReAct loop; no API key required
 ```
 
 All developer commands use `.venv/bin/...`; see [INSTALL.md](INSTALL.md) for environment details.
-For a new contributor, start with [docs/HANDOFF.md](docs/HANDOFF.md) and
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+For a new contributor, follow the [documentation reading order](docs/README.md),
+starting with [docs/HANDOFF.md](docs/HANDOFF.md).
 
 ---
 

@@ -59,3 +59,24 @@ def test_active_python_sources_do_not_hardcode_server_checkout():
         if forbidden_checkout in path.read_text(errors="ignore")
     ]
     assert offenders == []
+
+
+def test_tracked_markdown_is_minimal():
+    git_metadata = ROOT / ".git"
+    if not git_metadata.exists():
+        return
+    import subprocess
+
+    tracked = subprocess.check_output(
+        ["git", "ls-files", "*.md"], cwd=ROOT, text=True
+    ).splitlines()
+    assert set(tracked) == {
+        "BACKENDS.md",
+        "INSTALL.md",
+        "README.md",
+        "docs/ARCHITECTURE.md",
+        "docs/CCF_B_RESEARCH_TASKS_CN.md",
+        "docs/HANDOFF.md",
+        "docs/README.md",
+        "web/README.md",
+    }
