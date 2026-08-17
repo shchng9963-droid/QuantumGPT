@@ -8,13 +8,13 @@ from __future__ import annotations
 
 import hashlib
 import json
-import random
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 from .groups import ExperimentGroup
+from .human_audit import write_blind_review_package
 from .judges import DecisionSubmission, judge_episode
 from .schema import Episode, TaskType
 
@@ -700,51 +700,6 @@ def _group_metrics(traces: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     return result
 
 
-def _human_audit_export(
-    traces: list[dict[str, Any]],
-    seed: int = 20260817,
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    rng = random.Random(seed)
-    by_task: dict[str, dict[str, list[dict[str, Any]]]] = defaultdict(
-        lambda: defaultdict(list)
-    )
-    for trace in traces:
-        evaluator = trace["evaluator"]
-        by_task[evaluator["task_type"]][evaluator["episode_id"]].append(trace)
-    sample: list[dict[str, Any]] = []
-    key: list[dict[str, Any]] = []
-    for task_type in sorted(by_task):
-        episode_ids = rng.sample(sorted(by_task[task_type]), 4)
-        for episode_id in episode_ids:
-            trace = rng.choice(by_task[task_type][episode_id])
-            audit_id = _opaque_id(trace["trace_id"], "human-audit")
-            controller = trace["controller"]
-            sample.append(
-                {
-                    "audit_id": audit_id,
-                    "task_type": task_type,
-                    "public_prompt": controller["controller_visible"][
-                        "actual_prompt"
-                    ],
-                    "tool_calls": controller["tool_calls"],
-                    "final_decision": controller["final_decision"],
-                    "human_correct": None,
-                    "human_error_codes": [],
-                    "human_notes": "",
-                }
-            )
-            key.append(
-                {
-                    "audit_id": audit_id,
-                    "trace_id": trace["trace_id"],
-                    "episode_id": episode_id,
-                    "group": controller["group"],
-                    "program_judge": trace["evaluator"]["program_judge"],
-                }
-            )
-    return sample, key
-
-
 def build_b0_report(traces: list[dict[str, Any]]) -> dict[str, Any]:
     prompts = _prompt_fairness_audit(traces)
     labels = _label_isolation_audit(traces)
@@ -817,7 +772,9 @@ def build_b0_report(traces: list[dict[str, Any]]) -> dict[str, Any]:
         "acceptance_passed": all(acceptance.values()),
         "independent_human_audit": {
             "sample_size": 24,
-            "status": "pending_manual_annotation",
+            "reviewer_count": 2,
+            "status": "blind_package_ready_annotations_pending",
+            "adjudication": "third_person_for_disagreements",
             "required_before_b1": True,
         },
         "b1_readiness": {
@@ -846,7 +803,6 @@ def _write_jsonl(path: Path, values: Iterable[dict[str, Any]]) -> None:
 def write_b0_outputs(episodes: list[Episode], output_dir: Path) -> dict[str, Any]:
     traces = run_b0(episodes)
     report = build_b0_report(traces)
-    sample, key = _human_audit_export(traces)
     component_matrix = {
         "b0_version": B0_VERSION,
         "development_only": True,
@@ -868,8 +824,7 @@ def write_b0_outputs(episodes: list[Episode], output_dir: Path) -> dict[str, Any
         output_dir / "b0_label_isolation_audit.json",
         report["label_isolation_audit"],
     )
-    _write_jsonl(output_dir / "b0_human_audit_sample.jsonl", sample)
-    _write_jsonl(output_dir / "b0_human_audit_key.jsonl", key)
+    write_blind_review_package(traces, output_dir / "blind_review")
     return report
 
 

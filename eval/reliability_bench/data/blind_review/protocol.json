@@ -1,0 +1,98 @@
+{
+  "adjudication": "A third person labels only disagreements emitted by the scorer.",
+  "annotation_fields": [
+    "annotator_id",
+    "change_affects_existing_evidence",
+    "stale_evidence_ids",
+    "stale_evidence_reused",
+    "necessary_revalidation_performed",
+    "final_decision_correct",
+    "unsupported_success_claim",
+    "confidence",
+    "rationale"
+  ],
+  "audit_version": "reliabilitybench-q/human-audit-1.0",
+  "b1_ready": false,
+  "blinding_audit": {
+    "a": {
+      "passed": true,
+      "violation_count": 0,
+      "violations": {}
+    },
+    "b": {
+      "passed": true,
+      "violation_count": 0,
+      "violations": {}
+    }
+  },
+  "distribution": {
+    "by_group": {
+      "full_selective": 4,
+      "global_revalidate": 4,
+      "ledger_only": 4,
+      "monitor_only": 4,
+      "oracle": 4,
+      "react": 4
+    },
+    "by_magnitude_quantile": {
+      "50": 14,
+      "75": 4,
+      "95": 6
+    },
+    "by_relevance": {
+      "related": 12,
+      "unrelated": 12
+    },
+    "by_task_and_relevance": {
+      "backend_selection|related": 2,
+      "backend_selection|unrelated": 2,
+      "fidelity_claim|related": 2,
+      "fidelity_claim|unrelated": 2,
+      "mitigation_decision|related": 2,
+      "mitigation_decision|unrelated": 2,
+      "qubit_mapping|related": 2,
+      "qubit_mapping|unrelated": 2,
+      "transpilation|related": 2,
+      "transpilation|unrelated": 2,
+      "unreachable_target|related": 2,
+      "unreachable_target|unrelated": 2
+    },
+    "by_task_type": {
+      "backend_selection": 4,
+      "fidelity_claim": 4,
+      "mitigation_decision": 4,
+      "qubit_mapping": 4,
+      "transpilation": 4,
+      "unreachable_target": 4
+    },
+    "program_correct": 16,
+    "program_incorrect": 8
+  },
+  "distribution_warning": "Distribute only one reviewer file to each annotator. The study manager key must remain inaccessible until both files are frozen.",
+  "gate_thresholds": {
+    "critical_label_f1": 0.9,
+    "human_cohen_kappa_macro": 0.8,
+    "program_cohen_kappa_macro": 0.8,
+    "program_exact_agreement": 0.9,
+    "sample_count": 24,
+    "stale_evidence_set_f1": 0.9
+  },
+  "reviewer_guide_blinding_audit": {
+    "passed": true,
+    "violation_count": 0,
+    "violations": {}
+  },
+  "reviewer_order_seeds": {
+    "a": 20260818,
+    "b": 20260819
+  },
+  "sample_size": 24,
+  "selection_constraints": {
+    "every_task_has_at_least_one_program_error_case": true,
+    "four_cases_per_hidden_group": true,
+    "two_cases_per_task_and_relevance": true,
+    "unique_episode_per_case": true
+  },
+  "selection_seed": 20260817,
+  "status": "pending_two_independent_annotations"
+}

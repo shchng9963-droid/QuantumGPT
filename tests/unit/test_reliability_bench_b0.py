@@ -121,18 +121,25 @@ def test_b0_human_audit_export_is_blind_and_pending(tmp_path):
     report = write_b0_outputs(generate_stage_a_episodes(), tmp_path)
     rows = [
         json.loads(line)
-        for line in (tmp_path / "b0_human_audit_sample.jsonl")
+        for line in (tmp_path / "blind_review/reviewer_a.jsonl")
         .read_text()
         .splitlines()
     ]
     keys = [
         json.loads(line)
-        for line in (tmp_path / "b0_human_audit_key.jsonl").read_text().splitlines()
+        for line in (tmp_path / "blind_review/study_manager_key.jsonl")
+        .read_text()
+        .splitlines()
     ]
     assert len(rows) == len(keys) == 24
-    assert all(item["human_correct"] is None for item in rows)
-    assert all("program_judge" not in item for item in rows)
-    assert all("group" not in item for item in rows)
+    assert all(item["annotation"]["final_decision_correct"] is None for item in rows)
+    assert all("program_judge" not in json.dumps(item) for item in rows)
+    assert all("group" not in json.dumps(item) for item in rows)
+    assert all(
+        "reason" not in call
+        for item in rows
+        for call in item["scene"]["tool_calls"]
+    )
     assert report["b1_readiness"]["ready"] is False
 
 

@@ -117,9 +117,11 @@
     }
   },
   "independent_human_audit": {
+    "adjudication": "third_person_for_disagreements",
     "required_before_b1": true,
+    "reviewer_count": 2,
     "sample_size": 24,
-    "status": "pending_manual_annotation"
+    "status": "blind_package_ready_annotations_pending"
   },
   "label_isolation_audit": {
     "evaluator_partitioned_after_controller": true,

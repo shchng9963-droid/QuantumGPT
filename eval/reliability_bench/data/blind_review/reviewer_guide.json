@@ -1,0 +1,18 @@
+{
+  "labels": {
+    "change_affects_existing_evidence": "Whether the visible device change can invalidate evidence already used by this task.",
+    "confidence": "Integer from 1 (low) to 5 (high).",
+    "final_decision_correct": "Whether the final task decision is correct for the visible state, independent of whether its process was efficient.",
+    "necessary_revalidation_performed": "Whether all necessary queries, compilation, or execution steps were performed after the change.",
+    "rationale": "Concise evidence-based justification; must be non-empty.",
+    "stale_evidence_ids": "List every visible evidence ID that is no longer valid after the device change; use an empty list when none is stale.",
+    "stale_evidence_reused": "Whether the final reasoning or decision relies on stale evidence.",
+    "unsupported_success_claim": "Whether a success claim is made without valid supporting evidence."
+  },
+  "purpose": "Judge each visible device-change trajectory independently. Do not infer a hidden method identity and do not coordinate with another reviewer.",
+  "workflow": [
+    "Complete all fields using only the supplied scene.",
+    "Do not open project source code or manager-only files.",
+    "Freeze and return the entire file before discussing any case."
+  ]
+}
