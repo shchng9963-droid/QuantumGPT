@@ -1,0 +1,26 @@
+{
+  "counts_by_relevance": {
+    "related": 60,
+    "unrelated": 60
+  },
+  "counts_by_severity": {
+    "mild": 48,
+    "moderate": 36,
+    "severe": 36
+  },
+  "counts_by_task": {
+    "backend_selection": 20,
+    "fidelity_claim": 20,
+    "mitigation_decision": 20,
+    "qubit_mapping": 20,
+    "transpilation": 20,
+    "unreachable_target": 20
+  },
+  "dataset": "stage_a_synthetic_v1.jsonl",
+  "episode_count": 120,
+  "pair_count": 60,
+  "schema_version": "reliabilitybench-q/1.0",
+  "severity_basis": "synthetic placeholder; calibrate from replay before main study",
+  "sha256": "f88f744a916efae5f386b2a9b474139f7bb7f384be74a8d79c978a794b05ec45",
+  "source": "synthetic_stage_a"
+}

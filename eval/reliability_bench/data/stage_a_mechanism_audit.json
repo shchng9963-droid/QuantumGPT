@@ -1,0 +1,111 @@
+{
+  "acceptance": {
+    "full_has_zero_false_invalidation": true,
+    "full_precision_is_one": true,
+    "full_recall_is_one": true,
+    "global_has_more_false_positives": true,
+    "global_invalidates_more_than_full": true,
+    "oracle_matches_ground_truth": true
+  },
+  "acceptance_passed": true,
+  "artifact_count": 240,
+  "episode_count": 120,
+  "groups": {
+    "full_selective": {
+      "automatic_invalidation": true,
+      "classification_accuracy": 1.0,
+      "false_invalidation_rate": 0.0,
+      "false_negative": 0,
+      "false_positive": 0,
+      "invalidated_artifact_count": 60,
+      "precision": 1.0,
+      "recall": 1.0,
+      "true_negative": 180,
+      "true_positive": 60,
+      "valid_evidence_preservation_rate": 1.0
+    },
+    "global_revalidate": {
+      "automatic_invalidation": true,
+      "classification_accuracy": 0.25,
+      "false_invalidation_rate": 1.0,
+      "false_negative": 0,
+      "false_positive": 180,
+      "invalidated_artifact_count": 240,
+      "precision": 0.25,
+      "recall": 1.0,
+      "true_negative": 0,
+      "true_positive": 60,
+      "valid_evidence_preservation_rate": 0.0
+    },
+    "ledger_only": {
+      "automatic_invalidation": false,
+      "classification_accuracy": 0.75,
+      "false_invalidation_rate": 0.0,
+      "false_negative": 60,
+      "false_positive": 0,
+      "invalidated_artifact_count": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "true_negative": 180,
+      "true_positive": 0,
+      "valid_evidence_preservation_rate": 1.0
+    },
+    "monitor_only": {
+      "automatic_invalidation": false,
+      "classification_accuracy": 0.75,
+      "false_invalidation_rate": 0.0,
+      "false_negative": 60,
+      "false_positive": 0,
+      "invalidated_artifact_count": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "true_negative": 180,
+      "true_positive": 0,
+      "valid_evidence_preservation_rate": 1.0
+    },
+    "oracle": {
+      "automatic_invalidation": true,
+      "classification_accuracy": 1.0,
+      "false_invalidation_rate": 0.0,
+      "false_negative": 0,
+      "false_positive": 0,
+      "invalidated_artifact_count": 60,
+      "precision": 1.0,
+      "recall": 1.0,
+      "true_negative": 180,
+      "true_positive": 60,
+      "valid_evidence_preservation_rate": 1.0
+    },
+    "prompt_oracle": {
+      "automatic_invalidation": false,
+      "classification_accuracy": 0.75,
+      "false_invalidation_rate": 0.0,
+      "false_negative": 60,
+      "false_positive": 0,
+      "invalidated_artifact_count": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "true_negative": 180,
+      "true_positive": 0,
+      "valid_evidence_preservation_rate": 1.0
+    },
+    "react": {
+      "automatic_invalidation": false,
+      "classification_accuracy": 0.75,
+      "false_invalidation_rate": 0.0,
+      "false_negative": 60,
+      "false_positive": 0,
+      "invalidated_artifact_count": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "true_negative": 180,
+      "true_positive": 0,
+      "valid_evidence_preservation_rate": 1.0
+    }
+  },
+  "pair_count": 60,
+  "relevance_counts": {
+    "related": 60,
+    "unrelated": 60
+  }
+}
