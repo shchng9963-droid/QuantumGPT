@@ -84,6 +84,42 @@ def test_invalidate_dependents_recursively_marks_derived_artifacts_stale():
     assert unrelated.status is ArtifactStatus.VALID
 
 
+def test_selective_drift_invalidation_preserves_irrelevant_evidence():
+    registry = ArtifactRegistry()
+    snapshot = registry.add_artifact(ArtifactType.BACKEND_SNAPSHOT, created_at_step=1)
+    result = registry.add_artifact(
+        ArtifactType.CIRCUIT_RESULT,
+        created_at_step=2,
+        depends_on=[snapshot.artifact_id],
+        metadata={"drift_features": ["avg_2q_error", "avg_readout_error"]},
+    )
+    coupling = registry.add_artifact(
+        ArtifactType.COUPLING_MAP,
+        created_at_step=2,
+        depends_on=[snapshot.artifact_id],
+        metadata={"drift_features": ["coupling_map"]},
+    )
+    derived = registry.add_artifact(
+        ArtifactType.PREDICTED_FIDELITY,
+        created_at_step=3,
+        depends_on=[result.artifact_id],
+        metadata={"drift_features": ["avg_2q_error"]},
+    )
+
+    invalidated = registry.invalidate_for_drift(
+        snapshot.artifact_id,
+        affected_features=["avg_readout_error"],
+    )
+
+    assert [artifact.artifact_id for artifact in invalidated] == [
+        result.artifact_id,
+        derived.artifact_id,
+    ]
+    assert result.status is ArtifactStatus.STALE
+    assert derived.status is ArtifactStatus.STALE
+    assert coupling.status is ArtifactStatus.VALID
+
+
 def test_agent_state_summary_is_compact_and_counts_artifacts():
     state = AgentState(
         task_id="T1-01",

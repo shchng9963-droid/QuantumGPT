@@ -62,12 +62,20 @@ def test_trace_diagnostics_marks_empty_final_answer():
     diag = TraceDiagnostics(model="deepseek-chat")
     diag.final_answer_length = 0
     diag.no_final_answer = True
+    diag.drift_exposure_count = 2
+    diag.drift_affected_feature_counts = {"avg_2q_error": 2}
+    diag.artifact_invalidation_count = 3
+    diag.artifact_preservation_count = 1
 
     data = diag.to_dict()
 
     assert data["model"] == "deepseek-chat"
     assert data["final_answer_length"] == 0
     assert data["no_final_answer"] is True
+    assert data["drift_exposure_count"] == 2
+    assert data["drift_affected_feature_counts"] == {"avg_2q_error": 2}
+    assert data["artifact_invalidation_count"] == 3
+    assert data["artifact_preservation_count"] == 1
 
 
 def test_react_agent_populates_provider_and_max_turn_diagnostics():

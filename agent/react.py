@@ -382,6 +382,7 @@ class ReActAgent:
 
         state = trace.state
         state.current_step = step.step_num
+        runtime_spec = get_tool_runtime_spec(tool_name)
         artifact_type = self._artifact_type_for_tool(tool_name)
         if artifact_type is None:
             step.state_summary = state.summary_for_prompt()
@@ -397,6 +398,15 @@ class ReActAgent:
             "tool_input": tool_input,
             "result_keys": sorted(parsed_result.keys()) if isinstance(parsed_result, dict) else [],
         }
+        if runtime_spec is not None:
+            metadata["drift_features"] = list(runtime_spec.drift_features)
+        metadata["backend_name"] = state.backend_name
+        metadata["evidence_snapshot_id"] = state.backend_snapshot_id
+        circuit_name = tool_input.get("circuit_name")
+        if circuit_name is None and isinstance(parsed_result, dict):
+            circuit_name = parsed_result.get("circuit")
+        if circuit_name is not None:
+            metadata["circuit_name"] = str(circuit_name)
         tool_error = parsed_result.get("error") if isinstance(parsed_result, dict) else None
         if tool_error:
             metadata["error"] = tool_error
@@ -450,18 +460,42 @@ class ReActAgent:
             state.drift_state = {
                 "is_drifting": bool(getattr(drift_state, "is_drifting", False)),
                 "drift_score": float(getattr(drift_state, "drift_score", 0.0) or 0.0),
+                "affected_features": list(getattr(drift_state, "affected_features", []) or []),
+                "feature_changes": dict(getattr(drift_state, "feature_changes", {}) or {}),
                 "consecutive_drift_checks": int(getattr(drift_state, "consecutive_drift_checks", 0) or 0),
                 "invalidated_results": list(getattr(drift_state, "invalidated_results", []) or []),
                 "recovery_steps": int(getattr(drift_state, "recovery_steps", 0) or 0),
             }
 
-            if state.drift_state["is_drifting"] and state.backend_snapshot_id:
-                invalidated = state.artifacts.invalidate_dependents(
+            if (
+                state.drift_state["is_drifting"]
+                and not was_drifting
+                and state.backend_snapshot_id
+            ):
+                candidates = [
+                    artifact for artifact in state.artifacts.descendants(state.backend_snapshot_id)
+                    if artifact.status is ArtifactStatus.VALID
+                ]
+                invalidated = state.artifacts.invalidate_for_drift(
                     state.backend_snapshot_id,
+                    affected_features=state.drift_state["affected_features"],
                     reason=InvalidationReason.BACKEND_DRIFT,
                     detail=f"drift_score={state.drift_state['drift_score']:.3f}",
                     status=ArtifactStatus.STALE,
                 )
+                invalidated_ids = {artifact.artifact_id for artifact in invalidated}
+                preserved = [
+                    artifact for artifact in candidates
+                    if artifact.artifact_id not in invalidated_ids
+                ]
+                state.drift_state["invalidated_artifact_ids"] = sorted(invalidated_ids)
+                state.drift_state["preserved_artifact_ids"] = sorted(
+                    artifact.artifact_id for artifact in preserved
+                )
+                trace.diagnostics.artifact_invalidation_count += len(invalidated)
+                trace.diagnostics.artifact_preservation_count += len(preserved)
+                if candidates and not invalidated:
+                    trace.diagnostics.drift_without_relevant_artifact_count += 1
                 if invalidated:
                     invalidated_types = sorted({a.artifact_type.value for a in invalidated})
                     state.observations.append(
@@ -473,6 +507,10 @@ class ReActAgent:
         is_drifting = bool(getattr(drift_state, "is_drifting", False))
         if is_drifting and not was_drifting:
             trace.diagnostics.drift_alert_count += 1
+            trace.diagnostics.drift_exposure_count += 1
+            for feature in list(getattr(drift_state, "affected_features", []) or []):
+                counts = trace.diagnostics.drift_affected_feature_counts
+                counts[str(feature)] = counts.get(str(feature), 0) + 1
             trace.diagnostics.replan_triggered = True
             trace.diagnostics.drift_alert_steps.append(int(getattr(step, "step_num", 0)))
             invalidated = list(getattr(drift_state, "invalidated_results", []) or [])

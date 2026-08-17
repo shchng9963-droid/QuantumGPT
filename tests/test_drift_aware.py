@@ -61,6 +61,8 @@ def test_drift_monitor_detects_sudden():
     assert state.is_drifting, f"Expected drifting, got score={state.drift_score}"
     assert state.drift_score > 0.3
     assert len(state.invalidated_results) > 0
+    assert state.affected_features
+    assert set(state.affected_features).issubset(state.feature_changes)
     print(f"  ✓ Detected: drift_score={state.drift_score:.4f}, invalidated={state.invalidated_results}")
 
 

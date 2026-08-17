@@ -43,6 +43,8 @@ class DriftState:
     last_stable_time: float = 0.0
     consecutive_drift_checks: int = 0
     invalidated_results: list[str] = field(default_factory=list)
+    affected_features: list[str] = field(default_factory=list)
+    feature_changes: dict[str, float] = field(default_factory=dict)
     recovery_steps: int = 0
 
     @property
@@ -106,13 +108,18 @@ class DriftMonitor:
         self._snapshots_history.append(current_snap)
         self.state.last_check_time = time.time()
 
-        # Compute drift score between baseline and current
-        drift_score = self._compute_drift_score(
+        # Compute per-feature changes so evidence invalidation can be selective.
+        feature_changes = self._compute_feature_changes(
             self._baseline_snapshot, current_snap
         )
-        self.state.drift_score = drift_score
+        self.state.feature_changes = feature_changes
+        self.state.drift_score = max(feature_changes.values(), default=0.0)
 
-        if drift_score > self.drift_threshold:
+        if self.state.drift_score > self.drift_threshold:
+            self.state.affected_features = sorted(
+                feature for feature, change in feature_changes.items()
+                if change > self.drift_threshold
+            )
             if not self.state.is_drifting:
                 # Transition: stable → drifting
                 self.state.is_drifting = True
@@ -130,6 +137,7 @@ class DriftMonitor:
             self.state.is_drifting = False
             self.state.consecutive_drift_checks = 0
             self.state.invalidated_results = []
+            self.state.affected_features = []
             self.state.last_stable_time = time.time()
             # Update baseline to current (we're stable now)
             self._baseline_snapshot = current_snap
@@ -152,6 +160,10 @@ class DriftMonitor:
             f"  Drift score: {self.state.drift_score:.3f} (threshold: {self.drift_threshold})",
             f"  Consecutive drift checks: {self.state.consecutive_drift_checks}",
         ]
+        if self.state.affected_features:
+            lines.append(
+                "  Affected features: " + ", ".join(self.state.affected_features)
+            )
         if self.state.invalidated_results:
             lines.append(
                 f"  Invalidated results: {', '.join(self.state.invalidated_results)}"
@@ -176,18 +188,17 @@ class DriftMonitor:
                 "avg_2q_error": h.avg_2q_error,
             }
 
-    def _compute_drift_score(self, baseline: dict, current: dict) -> float:
-        """Compute drift score between two snapshots.
-
-        Uses normalized L2 distance across key parameters.
-        """
+    def _compute_feature_changes(
+        self, baseline: dict, current: dict
+    ) -> dict[str, float]:
+        """Return normalized changes for each observable backend feature."""
         if baseline is None:
-            return 0.0
+            return {}
 
         keys = ["avg_t1_us", "avg_t2_us", "avg_readout_error",
                 "avg_1q_error", "avg_2q_error"]
 
-        diffs = []
+        changes: dict[str, float] = {}
         for key in keys:
             b = baseline.get(key, 0)
             c = current.get(key, 0)
@@ -195,13 +206,15 @@ class DriftMonitor:
                 continue
             # Relative change
             rel_change = abs(c - b) / max(abs(b), 1e-10)
-            diffs.append(rel_change)
+            changes[key] = float(min(1.0, rel_change))
+        return changes
 
-        if not diffs:
-            return 0.0
-
-        # Drift score: max relative change, clipped to [0, 1]
-        return float(min(1.0, max(diffs)))
+    def _compute_drift_score(self, baseline: dict, current: dict) -> float:
+        """Compatibility helper returning the largest feature change."""
+        return max(
+            self._compute_feature_changes(baseline, current).values(),
+            default=0.0,
+        )
 
 
 # ═══════════════════════════════════════════════════════

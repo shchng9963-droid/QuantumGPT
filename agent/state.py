@@ -134,6 +134,75 @@ class ArtifactRegistry:
         artifact.invalidation_detail = detail
         return artifact
 
+    def descendants(self, artifact_id: str) -> list[Artifact]:
+        """Return direct and transitive dependents in creation order."""
+        descendants: list[Artifact] = []
+        seen: set[str] = set()
+        pending = [artifact_id]
+        while pending:
+            parent_id = pending.pop(0)
+            children = [
+                artifact
+                for artifact in self.artifacts.values()
+                if parent_id in artifact.depends_on
+                and artifact.artifact_id not in seen
+            ]
+            children.sort(key=lambda artifact: artifact.created_at_step)
+            for child in children:
+                seen.add(child.artifact_id)
+                descendants.append(child)
+                pending.append(child.artifact_id)
+        return descendants
+
+    def invalidate_for_drift(
+        self,
+        artifact_id: str,
+        affected_features: list[str] | tuple[str, ...] | set[str],
+        reason: InvalidationReason = InvalidationReason.BACKEND_DRIFT,
+        detail: str | None = None,
+        status: ArtifactStatus = ArtifactStatus.STALE,
+    ) -> list[Artifact]:
+        """Invalidate only evidence whose declared drift sensitivity overlaps.
+
+        Empty ``affected_features`` preserves the previous conservative behavior
+        and invalidates every dependent. Artifacts without sensitivity metadata
+        are also treated conservatively so old traces remain safe.
+        """
+        affected = {str(feature) for feature in affected_features if feature}
+        if not affected:
+            return self.invalidate_dependents(
+                artifact_id,
+                reason=reason,
+                detail=detail,
+                status=status,
+            )
+
+        invalidated: list[Artifact] = []
+        invalidated_ids: set[str] = set()
+        for artifact in self.descendants(artifact_id):
+            if artifact.status is not ArtifactStatus.VALID:
+                continue
+            sensitivity = {
+                str(feature)
+                for feature in artifact.metadata.get("drift_features", [])
+                if feature
+            }
+            parent_invalid = any(
+                parent_id in invalidated_ids for parent_id in artifact.depends_on
+            )
+            relevant = parent_invalid or not sensitivity or bool(sensitivity & affected)
+            if not relevant:
+                continue
+            self.invalidate_artifact(
+                artifact.artifact_id,
+                reason=reason,
+                detail=detail,
+                status=status,
+            )
+            invalidated_ids.add(artifact.artifact_id)
+            invalidated.append(artifact)
+        return invalidated
+
     def invalidate_dependents(
         self,
         artifact_id: str,

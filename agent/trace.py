@@ -63,6 +63,11 @@ class TraceDiagnostics:
     drift_alert_count: int = 0
     replan_triggered: bool = False
     drift_alert_steps: list[int] = field(default_factory=list)
+    drift_exposure_count: int = 0
+    drift_affected_feature_counts: dict[str, int] = field(default_factory=dict)
+    artifact_invalidation_count: int = 0
+    artifact_preservation_count: int = 0
+    drift_without_relevant_artifact_count: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -81,6 +86,11 @@ class TraceDiagnostics:
             "drift_alert_count": self.drift_alert_count,
             "replan_triggered": self.replan_triggered,
             "drift_alert_steps": list(self.drift_alert_steps),
+            "drift_exposure_count": self.drift_exposure_count,
+            "drift_affected_feature_counts": dict(self.drift_affected_feature_counts),
+            "artifact_invalidation_count": self.artifact_invalidation_count,
+            "artifact_preservation_count": self.artifact_preservation_count,
+            "drift_without_relevant_artifact_count": self.drift_without_relevant_artifact_count,
         }
 
 
