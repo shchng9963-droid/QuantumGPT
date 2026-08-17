@@ -1,0 +1,140 @@
+{
+  "acceptance": {
+    "all_runs_programmatically_judged": true,
+    "all_runs_within_shared_budget": true,
+    "all_traces_complete": true,
+    "exactly_720_runs": true,
+    "full_changes_decision_after_related_invalidation": true,
+    "global_cost_exceeds_full_cost": true,
+    "global_false_invalidations_trigger_tools": true,
+    "global_tool_calls_exceed_full_tool_calls": true,
+    "label_isolation_passed": true,
+    "ledger_can_reuse_stale_evidence": true,
+    "prompt_fairness_passed": true
+  },
+  "acceptance_passed": true,
+  "b0_version": "reliabilitybench-q/b0-1.0",
+  "b1_readiness": {
+    "blocker": "complete the independent human audit and compare labels",
+    "ready": false
+  },
+  "development_only": true,
+  "episode_count": 120,
+  "group_count": 6,
+  "group_metrics": {
+    "full_selective": {
+      "cost_units": 160,
+      "false_invalidated_artifacts": 0,
+      "program_judge_correct": 120,
+      "program_judge_wrong": 0,
+      "runs": 120,
+      "stale_evidence_reuse": 0,
+      "tool_calls": 80,
+      "tool_calls_by_name": {
+        "apply_mitigation": 10,
+        "compare_backends": 10,
+        "get_backend_health": 20,
+        "get_coupling_map": 10,
+        "get_qubit_properties": 10,
+        "run_circuit": 10,
+        "transpile_circuit": 10
+      }
+    },
+    "global_revalidate": {
+      "cost_units": 440,
+      "false_invalidated_artifacts": 180,
+      "program_judge_correct": 120,
+      "program_judge_wrong": 0,
+      "runs": 120,
+      "stale_evidence_reuse": 0,
+      "tool_calls": 280,
+      "tool_calls_by_name": {
+        "apply_mitigation": 20,
+        "compare_backends": 20,
+        "get_backend_health": 40,
+        "get_coupling_map": 20,
+        "get_qubit_properties": 20,
+        "refresh_task_context": 120,
+        "run_circuit": 20,
+        "transpile_circuit": 20
+      }
+    },
+    "ledger_only": {
+      "cost_units": 0,
+      "false_invalidated_artifacts": 0,
+      "program_judge_correct": 60,
+      "program_judge_wrong": 60,
+      "runs": 120,
+      "stale_evidence_reuse": 60,
+      "tool_calls": 0,
+      "tool_calls_by_name": {}
+    },
+    "monitor_only": {
+      "cost_units": 320,
+      "false_invalidated_artifacts": 0,
+      "program_judge_correct": 120,
+      "program_judge_wrong": 0,
+      "runs": 120,
+      "stale_evidence_reuse": 0,
+      "tool_calls": 160,
+      "tool_calls_by_name": {
+        "apply_mitigation": 20,
+        "compare_backends": 20,
+        "get_backend_health": 40,
+        "get_coupling_map": 20,
+        "get_qubit_properties": 20,
+        "run_circuit": 20,
+        "transpile_circuit": 20
+      }
+    },
+    "oracle": {
+      "cost_units": 160,
+      "false_invalidated_artifacts": 0,
+      "program_judge_correct": 120,
+      "program_judge_wrong": 0,
+      "runs": 120,
+      "stale_evidence_reuse": 0,
+      "tool_calls": 80,
+      "tool_calls_by_name": {
+        "apply_mitigation": 10,
+        "compare_backends": 10,
+        "get_backend_health": 20,
+        "get_coupling_map": 10,
+        "get_qubit_properties": 10,
+        "run_circuit": 10,
+        "transpile_circuit": 10
+      }
+    },
+    "react": {
+      "cost_units": 0,
+      "false_invalidated_artifacts": 0,
+      "program_judge_correct": 60,
+      "program_judge_wrong": 60,
+      "runs": 120,
+      "stale_evidence_reuse": 60,
+      "tool_calls": 0,
+      "tool_calls_by_name": {}
+    }
+  },
+  "independent_human_audit": {
+    "required_before_b1": true,
+    "sample_size": 24,
+    "status": "pending_manual_annotation"
+  },
+  "label_isolation_audit": {
+    "evaluator_partitioned_after_controller": true,
+    "full_oracle_channel_used": false,
+    "ordinary_controller_visible_context_violations": [],
+    "passed": true
+  },
+  "performance_claim_allowed": false,
+  "prompt_fairness_audit": {
+    "all_six_groups_share_exact_prompt": true,
+    "episode_count": 120,
+    "passed": true,
+    "prompt_leakage_trace_ids": [],
+    "shared_budget": true,
+    "shared_tool_catalog": true
+  },
+  "run_count": 720
+}

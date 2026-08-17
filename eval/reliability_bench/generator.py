@@ -180,8 +180,11 @@ def _build_episode(
         payload = dict(spec["payload_unrelated"])
         reason = None
 
+    event_digest = hashlib.sha256(
+        f"{pair_id}|{relevance.value}|event".encode("utf-8")
+    ).hexdigest()[:16]
     event = DriftEvent(
-        event_id=f"{pair_id}-{relevance.value}-event",
+        event_id=f"evt-{event_digest}",
         phase=phase,
         severity=severity,
         relevance=relevance,

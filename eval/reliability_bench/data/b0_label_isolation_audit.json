@@ -1,0 +1,6 @@
+{
+  "evaluator_partitioned_after_controller": true,
+  "full_oracle_channel_used": false,
+  "ordinary_controller_visible_context_violations": [],
+  "passed": true
+}

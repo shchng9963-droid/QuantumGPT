@@ -21,6 +21,6 @@
   "pair_count": 60,
   "schema_version": "reliabilitybench-q/1.0",
   "severity_basis": "synthetic placeholder; calibrate from replay before main study",
-  "sha256": "f88f744a916efae5f386b2a9b474139f7bb7f384be74a8d79c978a794b05ec45",
+  "sha256": "4529a107203934ef08c7523c92e112e550376e76330a8d29e1aa19176219f312",
   "source": "synthetic_stage_a"
 }

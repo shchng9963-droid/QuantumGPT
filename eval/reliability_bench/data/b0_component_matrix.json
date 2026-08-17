@@ -1,0 +1,95 @@
+{
+  "b0_version": "reliabilitybench-q/b0-1.0",
+  "development_only": true,
+  "groups": {
+    "full_selective": {
+      "drift_monitor": true,
+      "evidence_ledger": true,
+      "invalidation": "dependency_scoped",
+      "oracle_label_channel": false,
+      "raw_event_available": true,
+      "revalidation": "invalidated_evidence_only"
+    },
+    "global_revalidate": {
+      "drift_monitor": true,
+      "evidence_ledger": true,
+      "invalidation": "global",
+      "oracle_label_channel": false,
+      "raw_event_available": true,
+      "revalidation": "all_invalidated_evidence"
+    },
+    "ledger_only": {
+      "drift_monitor": true,
+      "evidence_ledger": true,
+      "invalidation": "none",
+      "oracle_label_channel": false,
+      "raw_event_available": true,
+      "revalidation": "scripted_reuse"
+    },
+    "monitor_only": {
+      "drift_monitor": true,
+      "evidence_ledger": false,
+      "invalidation": "none",
+      "oracle_label_channel": false,
+      "raw_event_available": true,
+      "revalidation": "conservative_task_refresh"
+    },
+    "oracle": {
+      "drift_monitor": true,
+      "evidence_ledger": true,
+      "invalidation": "oracle",
+      "oracle_label_channel": true,
+      "raw_event_available": true,
+      "revalidation": "oracle_invalidated_evidence"
+    },
+    "react": {
+      "drift_monitor": false,
+      "evidence_ledger": false,
+      "invalidation": "none",
+      "oracle_label_channel": false,
+      "raw_event_available": true,
+      "revalidation": "scripted_reuse"
+    }
+  },
+  "shared_budget": {
+    "max_cost_units": 10,
+    "max_tokens": 4096,
+    "max_tool_calls": 10,
+    "max_turns": 12
+  },
+  "shared_public_event": true,
+  "shared_tools": [
+    {
+      "cost_units": 1,
+      "name": "get_backend_health"
+    },
+    {
+      "cost_units": 1,
+      "name": "compare_backends"
+    },
+    {
+      "cost_units": 1,
+      "name": "get_qubit_properties"
+    },
+    {
+      "cost_units": 1,
+      "name": "get_coupling_map"
+    },
+    {
+      "cost_units": 3,
+      "name": "transpile_circuit"
+    },
+    {
+      "cost_units": 5,
+      "name": "run_circuit"
+    },
+    {
+      "cost_units": 3,
+      "name": "apply_mitigation"
+    },
+    {
+      "cost_units": 1,
+      "name": "refresh_task_context"
+    }
+  ]
+}

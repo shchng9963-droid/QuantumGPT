@@ -1,6 +1,7 @@
 """ReliabilityBench-Q: dynamic evidence-reliability evaluation."""
 
 from .generator import generate_stage_a_episodes
+from .b0 import B0_GROUPS, build_b0_report, run_b0
 from .judges import DecisionSubmission, JudgeResult, judge_episode
 from .mechanisms import build_stage_a_mechanism_audit
 from .schema import (
@@ -18,6 +19,7 @@ from .schema import (
 
 __all__ = [
     "DecisionSubmission",
+    "B0_GROUPS",
     "DriftEvent",
     "DriftPhase",
     "DriftRelevance",
@@ -28,8 +30,10 @@ __all__ = [
     "JudgeResult",
     "TaskType",
     "build_stage_a_mechanism_audit",
+    "build_b0_report",
     "generate_stage_a_episodes",
     "judge_episode",
+    "run_b0",
     "validate_counterfactual_pairs",
     "validate_episode",
 ]

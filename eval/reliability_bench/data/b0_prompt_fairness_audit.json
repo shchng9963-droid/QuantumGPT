@@ -1,0 +1,8 @@
+{
+  "all_six_groups_share_exact_prompt": true,
+  "episode_count": 120,
+  "passed": true,
+  "prompt_leakage_trace_ids": [],
+  "shared_budget": true,
+  "shared_tool_catalog": true
+}
