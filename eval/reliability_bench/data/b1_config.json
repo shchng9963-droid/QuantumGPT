@@ -1,0 +1,68 @@
+{
+  "protocol_version": "reliabilitybench-q/b1-smoke-1.0",
+  "development_only": true,
+  "formal_significance_claims_allowed": false,
+  "provider": "deepseek",
+  "base_url": "https://api.deepseek.com",
+  "requested_model": "deepseek-v4-flash",
+  "thinking": "disabled",
+  "temperature": 0.0,
+  "top_p": 1.0,
+  "max_tokens": 4096,
+  "max_turns": 12,
+  "max_tool_calls": 10,
+  "max_cost_units": 10,
+  "request_timeout_seconds": 60.0,
+  "run_cost_cap_usd": 5.0,
+  "retry": {
+    "max_attempts": 2,
+    "fixed_backoff_seconds": 2.0
+  },
+  "schedule_seed": 20260818,
+  "preflight_schedule_seed": 20260819,
+  "groups": [
+    "react",
+    "monitor_only",
+    "ledger_only",
+    "global_revalidate",
+    "full_selective",
+    "oracle"
+  ],
+  "episode_ids": [
+    "RBQ-backend_selection-06-related",
+    "RBQ-backend_selection-07-related",
+    "RBQ-backend_selection-08-unrelated",
+    "RBQ-backend_selection-06-unrelated",
+    "RBQ-fidelity_claim-02-related",
+    "RBQ-fidelity_claim-00-related",
+    "RBQ-fidelity_claim-08-unrelated",
+    "RBQ-fidelity_claim-02-unrelated",
+    "RBQ-mitigation_decision-06-related",
+    "RBQ-mitigation_decision-04-related",
+    "RBQ-mitigation_decision-06-unrelated",
+    "RBQ-mitigation_decision-00-unrelated",
+    "RBQ-qubit_mapping-05-related",
+    "RBQ-qubit_mapping-06-related",
+    "RBQ-qubit_mapping-03-unrelated",
+    "RBQ-qubit_mapping-06-unrelated",
+    "RBQ-transpilation-07-related",
+    "RBQ-transpilation-02-related",
+    "RBQ-transpilation-06-unrelated",
+    "RBQ-transpilation-00-unrelated",
+    "RBQ-unreachable_target-00-related",
+    "RBQ-unreachable_target-01-related",
+    "RBQ-unreachable_target-06-unrelated",
+    "RBQ-unreachable_target-00-unrelated"
+  ],
+  "preflight_episode_id": "RBQ-backend_selection-06-related",
+  "pricing": {
+    "currency": "USD",
+    "per_million_tokens": {
+      "input_cache_hit": 0.0028,
+      "input_cache_miss": 0.14,
+      "output": 0.28
+    },
+    "source": "https://api-docs.deepseek.com/quick_start/pricing",
+    "frozen_on": "2026-08-18"
+  }
+}
