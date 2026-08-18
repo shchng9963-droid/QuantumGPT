@@ -15,7 +15,7 @@ from eval.reliability_bench.b1 import (
     run_b1_trace,
     select_frozen_episodes,
 )
-from eval.reliability_bench.b0 import B0_GROUPS, _public_input
+from eval.reliability_bench.b0 import B0_GROUPS, _public_input, _tool_output
 from eval.reliability_bench.generator import generate_stage_a_episodes
 from eval.reliability_bench.groups import ExperimentGroup
 
@@ -300,6 +300,21 @@ def test_preflight_report_accepts_six_complete_offline_traces():
     assert report["prompt_and_label_audit"]["passed"] is True
     assert report["acceptance"]["single_returned_model_id"] is True
     assert report["acceptance"]["returned_model_matches_request"] is True
+
+
+def test_shared_qubit_tool_handles_task_without_mapping_evidence():
+    episode = next(
+        item
+        for item in generate_stage_a_episodes()
+        if item.episode_id == "RBQ-unreachable_target-00-related"
+    )
+
+    result = _tool_output("get_qubit_properties", episode, task_changed=True)
+
+    assert result == {
+        "available_qubits": [0, 1, 2, 3, 4],
+        "degraded_qubits": [0],
+    }
 
 
 def test_deepseek_v4_flash_cost_uses_frozen_cache_rates():

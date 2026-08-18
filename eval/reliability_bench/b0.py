@@ -132,9 +132,7 @@ TASK_RELEVANT_FEATURE: Mapping[TaskType, str] = {
 
 
 def _canonical_json(value: Any) -> str:
-    return json.dumps(
-        value, sort_keys=True, separators=(",", ":"), ensure_ascii=False
-    )
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
 def _opaque_id(value: str, prefix: str) -> str:
@@ -246,11 +244,19 @@ def _task_changed(episode: Episode) -> bool:
 
 
 def _degraded_qubit(episode: Episode) -> int:
-    primary = next(
-        item for item in episode.evidence if item.evidence_type == "qubit_mapping"
+    mapping = next(
+        (item for item in episode.evidence if item.evidence_type == "qubit_mapping"),
+        None,
     )
-    resource = primary.depends_on_resources[0]
-    return int(resource.split(".")[1])
+    if mapping is not None:
+        resource = mapping.depends_on_resources[0]
+        return int(resource.split(".")[1])
+
+    # The public tool catalog is shared across task types, so an agent may query
+    # qubit properties even when the task has no qubit-mapping evidence. Return a
+    # deterministic task-valid qubit instead of crashing the experiment runner.
+    candidates = episode.task_constraints.get("candidate_qubits", [])
+    return int(candidates[0]) if candidates else 0
 
 
 def _tool_output(
@@ -265,8 +271,7 @@ def _tool_output(
             ),
             "available_capacity": (
                 4
-                if task_changed
-                and episode.task_type is TaskType.UNREACHABLE_TARGET
+                if task_changed and episode.task_type is TaskType.UNREACHABLE_TARGET
                 else 10
             ),
             "snapshot": "observed-after-event",
@@ -289,9 +294,7 @@ def _tool_output(
         return {"edge_1_2_available": not task_changed}
     if tool_name == "transpile_circuit":
         return {
-            "compilation_snapshot_id": (
-                "post-drift" if task_changed else "pre-drift"
-            )
+            "compilation_snapshot_id": ("post-drift" if task_changed else "pre-drift")
         }
     if tool_name == "run_circuit":
         return {
@@ -364,32 +367,22 @@ def _observed_changed(
     task: TaskType,
     calls: list[dict[str, Any]],
 ) -> bool:
-    responses = {
-        item["tool_name"]: item["response"]
-        for item in calls
-    }
+    responses = {item["tool_name"]: item["response"] for item in calls}
     if task is TaskType.BACKEND_SELECTION:
         ranking = responses.get("compare_backends", {}).get("ranked_backends", [])
         return bool(ranking and ranking[0] != "FakeBrisbane")
     if task is TaskType.QUBIT_MAPPING:
-        return bool(
-            responses.get("get_qubit_properties", {}).get("degraded_qubits")
-        )
+        return bool(responses.get("get_qubit_properties", {}).get("degraded_qubits"))
     if task is TaskType.TRANSPILATION:
         return (
-            responses.get("transpile_circuit", {}).get(
-                "compilation_snapshot_id"
-            )
+            responses.get("transpile_circuit", {}).get("compilation_snapshot_id")
             == "post-drift"
         )
     if task is TaskType.FIDELITY_CLAIM:
         result = responses.get("run_circuit")
         return bool(result) and result["measured_success"] is False
     if task is TaskType.MITIGATION_DECISION:
-        return (
-            responses.get("apply_mitigation", {}).get("estimated_gain", 0.0)
-            >= 0.10
-        )
+        return responses.get("apply_mitigation", {}).get("estimated_gain", 0.0) >= 0.10
     health = responses.get("get_backend_health")
     return bool(health) and health["available_capacity"] < 5
 
@@ -430,11 +423,7 @@ def _decision(
         )
     if episode.task_type is TaskType.QUBIT_MAPPING:
         property_call = next(
-            (
-                item
-                for item in calls
-                if item["tool_name"] == "get_qubit_properties"
-            ),
+            (item for item in calls if item["tool_name"] == "get_qubit_properties"),
             None,
         )
         degraded = set(
@@ -519,14 +508,10 @@ def run_b0_controller(episode: Episode, group: ExperimentGroup) -> dict[str, Any
 def _score_trace(episode: Episode, controller: dict[str, Any]) -> dict[str, Any]:
     decision = DecisionSubmission(**controller["final_decision"])
     result = judge_episode(episode, decision)
-    predicted = set(
-        controller["internal_state"]["computed_invalidated_artifact_ids"]
-    )
+    predicted = set(controller["internal_state"]["computed_invalidated_artifact_ids"])
     expected = set(episode.ground_truth.invalidated_artifact_ids)
     false_invalidated = sorted(predicted - expected)
-    triggered = {
-        item["trigger_evidence_id"] for item in controller["tool_calls"]
-    }
+    triggered = {item["trigger_evidence_id"] for item in controller["tool_calls"]}
     return {
         "episode_id": episode.episode_id,
         "pair_id": episode.pair_id,
@@ -665,9 +650,7 @@ def _group_metrics(traces: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     result: dict[str, dict[str, Any]] = {}
     for group in B0_GROUPS:
         selected = [
-            item
-            for item in traces
-            if item["controller"]["group"] == group.value
+            item for item in traces if item["controller"]["group"] == group.value
         ]
         correct = sum(
             item["evaluator"]["program_judge"]["correct"] for item in selected
@@ -676,11 +659,7 @@ def _group_metrics(traces: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
             item["evaluator"]["program_judge"]["stale_evidence_reuse"]
             for item in selected
         )
-        calls = [
-            call
-            for item in selected
-            for call in item["controller"]["tool_calls"]
-        ]
+        calls = [call for item in selected for call in item["controller"]["tool_calls"]]
         false_invalidated = sum(
             len(item["evaluator"]["false_invalidated_artifact_ids"])
             for item in selected
@@ -721,8 +700,7 @@ def build_b0_report(traces: list[dict[str, Any]]) -> dict[str, Any]:
     global_coverage = all(
         item["evaluator"]["false_invalidation_trigger_coverage"] == 1.0
         for item in traces
-        if item["controller"]["group"]
-        == ExperimentGroup.GLOBAL_REVALIDATE.value
+        if item["controller"]["group"] == ExperimentGroup.GLOBAL_REVALIDATE.value
     )
     acceptance = {
         "exactly_720_runs": len(traces) == 720,
@@ -736,9 +714,7 @@ def build_b0_report(traces: list[dict[str, Any]]) -> dict[str, Any]:
         "prompt_fairness_passed": prompts["passed"],
         "label_isolation_passed": labels["passed"],
         "full_changes_decision_after_related_invalidation": full_changes,
-        "ledger_can_reuse_stale_evidence": (
-            ledger_metrics["stale_evidence_reuse"] > 0
-        ),
+        "ledger_can_reuse_stale_evidence": (ledger_metrics["stale_evidence_reuse"] > 0),
         "global_false_invalidations_trigger_tools": global_coverage,
         "global_cost_exceeds_full_cost": (
             global_metrics["cost_units"] > full_metrics["cost_units"]
@@ -751,8 +727,7 @@ def build_b0_report(traces: list[dict[str, Any]]) -> dict[str, Any]:
             <= SHARED_BUDGET.max_tool_calls
             and item["controller"]["budget_usage"]["cost_units"]
             <= SHARED_BUDGET.max_cost_units
-            and item["controller"]["budget_usage"]["turns"]
-            <= SHARED_BUDGET.max_turns
+            and item["controller"]["budget_usage"]["turns"] <= SHARED_BUDGET.max_turns
             for item in traces
         ),
     }
@@ -761,9 +736,7 @@ def build_b0_report(traces: list[dict[str, Any]]) -> dict[str, Any]:
         "development_only": True,
         "performance_claim_allowed": False,
         "run_count": len(traces),
-        "episode_count": len(
-            {item["evaluator"]["episode_id"] for item in traces}
-        ),
+        "episode_count": len({item["evaluator"]["episode_id"] for item in traces}),
         "group_count": len(B0_GROUPS),
         "group_metrics": metrics,
         "prompt_fairness_audit": prompts,
@@ -809,9 +782,7 @@ def write_b0_outputs(episodes: list[Episode], output_dir: Path) -> dict[str, Any
         "shared_public_event": True,
         "shared_tools": [asdict(item) for item in TOOL_SPECS],
         "shared_budget": asdict(SHARED_BUDGET),
-        "groups": {
-            group.value: dict(COMPONENT_MATRIX[group]) for group in B0_GROUPS
-        },
+        "groups": {group.value: dict(COMPONENT_MATRIX[group]) for group in B0_GROUPS},
     }
     _write_json(output_dir / "b0_component_matrix.json", component_matrix)
     _write_jsonl(output_dir / "b0_traces.jsonl", traces)
