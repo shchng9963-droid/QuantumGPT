@@ -480,7 +480,9 @@ def _updated_private_state(
         if required and required.issubset(
             completed_by_evidence.get(evidence_id, set())
         ):
-            item["validity"] = "revalidated_after_event"
+            item["revalidation_status"] = "completed_with_current_tool_observation"
+        else:
+            item["revalidation_status"] = "not_completed"
     return state
 
 
@@ -528,6 +530,7 @@ def run_b1_trace(
     completion_results: list[CompletionResult] = []
     parser_errors: list[dict[str, Any]] = []
     api_errors: list[dict[str, Any]] = []
+    controller_validation_errors: list[dict[str, Any]] = []
     final_decision: DecisionSubmission | None = None
     normalization: dict[str, Any] = {}
     cost_units = 0
@@ -659,11 +662,33 @@ def run_b1_trace(
             )
             continue
         if action_type == "final" and isinstance(action.get("decision"), dict):
+            decision_payload = action["decision"]
+            referenced = set(decision_payload.get("used_artifact_ids") or ()) | set(
+                decision_payload.get("supporting_artifact_ids") or ()
+            )
+            invalid_references = sorted(referenced.intersection(controller_invalidated))
+            if invalid_references:
+                validation_error = {
+                    "turn": turns,
+                    "error": "invalid_pre_event_evidence_reference",
+                    "invalid_evidence_ids": invalid_references,
+                    "instruction": (
+                        "These IDs identify invalid pre-event artifacts. Current "
+                        "tool observations are already recorded by the controller; "
+                        "remove the invalid IDs from used_artifact_ids and "
+                        "supporting_artifact_ids, and do not invent replacement IDs."
+                    ),
+                }
+                controller_validation_errors.append(validation_error)
+                messages.append(
+                    {"role": "user", "content": _canonical_json(validation_error)}
+                )
+                continue
             actual_actions = tuple(
                 dict.fromkeys(item["tool_name"] for item in tool_calls)
             )
             final_decision, normalization = _decision_from_dict(
-                action["decision"], actual_actions
+                decision_payload, actual_actions
             )
             break
         messages.append(
@@ -756,6 +781,7 @@ def run_b1_trace(
             "cost": cost,
             "api_errors": api_errors,
             "parser_errors": parser_errors,
+            "controller_validation_errors": controller_validation_errors,
         },
         "budget_usage": {
             "turns": turns,
@@ -924,6 +950,27 @@ def build_b1_report(
         "returned_model_matches_request": audit["returned_model_ids"]
         == [manifest["config"]["requested_model"]],
     }
+    if preflight:
+        full_traces = [
+            item
+            for item in traces
+            if item["controller"]["group"] == ExperimentGroup.FULL_SELECTIVE.value
+            and item["controller"]["computed_invalidated_artifact_ids"]
+        ]
+        acceptance["full_responded_to_invalid_state"] = bool(full_traces) and all(
+            item["program_judge"] is not None
+            and item["program_judge"]["correct"]
+            and not (
+                set(item["model_final_decision"]["used_artifact_ids"])
+                | set(item["model_final_decision"]["supporting_artifact_ids"])
+            ).intersection(item["controller"]["computed_invalidated_artifact_ids"])
+            and bool(
+                {
+                    call["trigger_evidence_id"] for call in item["tool_calls"]
+                }.intersection(item["controller"]["computed_invalidated_artifact_ids"])
+            )
+            for item in full_traces
+        )
     return {
         "b1_version": B1_VERSION,
         "mode": "preflight" if preflight else "formal",
