@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
-AUDIT_VERSION = "reliabilitybench-q/b1.1-failure-audit-0.1"
+AUDIT_VERSION = "reliabilitybench-q/b1.1-failure-audit-0.2-calibration"
 CALIBRATION_SIZE = 24
 CALIBRATION_SEED = 20260821
 REVIEWER_ORDER_SEEDS = {"a": 20260822, "b": 20260823}
@@ -72,6 +72,7 @@ FORBIDDEN_REVIEW_VALUES = set(GROUPS) | {"related", "unrelated"}
 
 CODEBOOK_ZH = {
     "audit_version": AUDIT_VERSION,
+    "codebook_version": "0.2-draft",
     "status": "draft_for_calibration_not_frozen",
     "language": "zh-CN",
     "purpose": (
@@ -121,6 +122,20 @@ CODEBOOK_ZH = {
         "Evaluator仅用于规范或判定条件疑似有误，不用于普通模型错误。",
         "必须引用具体动作、工具观察或最终字段作为理由。",
     ],
+    "confidence": "使用0.0到1.0之间的概率表示主观置信度；1.0表示完全确信。",
+    "revision_history": [
+        {
+            "from": "0.1",
+            "to": "0.2-draft",
+            "change_type": "normative_clarification",
+            "scope": "confidence_scale_only",
+            "change": "明确confidence采用0.0到1.0概率量表。",
+            "annotation_effect": (
+                "不得因本次规范澄清自动修改trajectory_outcome、primary_failure_stage、"
+                "secondary_error_tags、confidence或rationale中的任何原始标注。"
+            ),
+        }
+    ],
     "calibration_notice": (
         "本版仅用于24条校准样本。校准讨论结束后必须冻结新版本及SHA-256，"
         "才能生成144条正式盲审包和新验证集。"
@@ -129,7 +144,9 @@ CODEBOOK_ZH = {
 
 
 def _canonical_json(value: Any) -> str:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    )
 
 
 def _opaque_id(value: str, prefix: str) -> str:
@@ -181,9 +198,9 @@ def validate_annotation(annotation: dict[str, Any], *, complete: bool) -> list[s
         errors.append("secondary_error_tags")
     confidence = annotation.get("confidence")
     if (
-        not isinstance(confidence, int)
+        not isinstance(confidence, (int, float))
         or isinstance(confidence, bool)
-        or not 1 <= confidence <= 5
+        or not 0.0 <= confidence <= 1.0
     ):
         errors.append("confidence")
     if not str(annotation.get("rationale", "")).strip():
@@ -297,7 +314,9 @@ def _select_calibration_cases(
     rng = random.Random(seed)
     for _ in range(200_000):
         selected = [
-            trace for cell in sorted(cells) for trace in rng.sample(cells[cell], 2)
+            trace
+            for cell in sorted(cells)
+            for trace in rng.sample(cells[cell], 2)
         ]
         group_counts = Counter(trace["controller"]["group"] for trace in selected)
         correct_count = sum(trace["program_judge"]["correct"] for trace in selected)
@@ -339,7 +358,8 @@ def build_calibration_package(
     for trace in selected:
         case_id = _opaque_id(trace["trace_id"], "case")
         reviewer_ids = {
-            slot: _opaque_id(f"{case_id}|reviewer-{slot}", "item") for slot in reviewers
+            slot: _opaque_id(f"{case_id}|reviewer-{slot}", "item")
+            for slot in reviewers
         }
         scene = _review_scene(trace)
         for slot in reviewers:
@@ -361,12 +381,8 @@ def build_calibration_package(
         raise ValueError(f"review package failed blinding audit: {blinding}")
 
     distribution = {
-        "by_task_type": dict(
-            sorted(Counter(row["task_type"] for row in manager_key).items())
-        ),
-        "by_relevance": dict(
-            sorted(Counter(row["relevance"] for row in manager_key).items())
-        ),
+        "by_task_type": dict(sorted(Counter(row["task_type"] for row in manager_key).items())),
+        "by_relevance": dict(sorted(Counter(row["relevance"] for row in manager_key).items())),
         "by_group": dict(sorted(Counter(row["group"] for row in manager_key).items())),
         "program_correct": sum(row["program_correct"] for row in manager_key),
         "program_incorrect": sum(not row["program_correct"] for row in manager_key),
@@ -446,10 +462,290 @@ def write_calibration_package(
     manifest = {
         "audit_version": AUDIT_VERSION,
         "status": "draft_calibration_package",
-        "generated_at": generated_at or datetime.now(timezone.utc).isoformat(),
+        "generated_at": generated_at
+        or datetime.now(timezone.utc).isoformat(),
         "files_sha256": hashes,
         "codebook_frozen": False,
         "validation_set_generation_allowed": False,
     }
     _write_json(output_dir / "package_manifest.json", manifest)
     return manifest
+
+
+def _nominal_kappa(left: list[Any], right: list[Any]) -> float | None:
+    if len(left) != len(right) or not left:
+        return None
+    observed = sum(a == b for a, b in zip(left, right)) / len(left)
+    labels = set(left) | set(right)
+    expected = sum(
+        (left.count(label) / len(left)) * (right.count(label) / len(right))
+        for label in labels
+    )
+    if expected == 1.0:
+        return None
+    return round((observed - expected) / (1 - expected), 6)
+
+
+def _review_file_validation(
+    original: list[dict[str, Any]], completed: list[dict[str, Any]]
+) -> dict[str, Any]:
+    original_by_id = {row["item_id"]: row for row in original}
+    completed_ids = [row.get("item_id") for row in completed]
+    errors: dict[str, list[str]] = {}
+    if len(completed) != len(original):
+        errors["$file"] = [f"row_count:{len(completed)}!=expected:{len(original)}"]
+    if len(completed_ids) != len(set(completed_ids)):
+        errors.setdefault("$file", []).append("duplicate_item_id")
+    if set(completed_ids) != set(original_by_id):
+        errors.setdefault("$file", []).append("item_id_set_mismatch")
+    unchanged_scene_count = 0
+    unchanged_trace_count = 0
+    unchanged_blinded_public_count = 0
+    trace_fields = {
+        "accepted_tool_calls",
+        "agent_interaction",
+        "api_errors",
+        "budget_usage",
+        "final_decision",
+        "parser_errors",
+        "trace_complete",
+        "unscorable",
+    }
+    blinded_public_fields = {"public_task_and_event", "task_type"}
+    for row in completed:
+        item_id = row.get("item_id", "unknown")
+        row_errors: list[str] = []
+        source = original_by_id.get(item_id)
+        if source is not None:
+            source_scene = source["scene"]
+            completed_scene = row.get("scene")
+            if completed_scene == source_scene:
+                unchanged_scene_count += 1
+            else:
+                row_errors.append("scene_modified")
+            if isinstance(completed_scene, dict):
+                if all(
+                    completed_scene.get(field) == source_scene.get(field)
+                    for field in trace_fields
+                ):
+                    unchanged_trace_count += 1
+                if all(
+                    completed_scene.get(field) == source_scene.get(field)
+                    for field in blinded_public_fields
+                ):
+                    unchanged_blinded_public_count += 1
+        row_errors.extend(
+            validate_annotation(row.get("annotation", {}), complete=True)
+        )
+        if row_errors:
+            errors[item_id] = sorted(set(row_errors))
+    item_ids_unique = len(completed_ids) == len(set(completed_ids))
+    item_id_set_equal = set(completed_ids) == set(original_by_id)
+    blinding = validate_reviewer_blinding(completed)
+    return {
+        "passed": not errors and blinding["passed"],
+        "error_count": len(errors),
+        "errors": errors,
+        "integrity": {
+            "expected_row_count": len(original),
+            "actual_row_count": len(completed),
+            "row_count_equal": len(completed) == len(original),
+            "item_ids_unique": item_ids_unique,
+            "item_id_set_equal": item_id_set_equal,
+            "scene_rows_unchanged": unchanged_scene_count,
+            "scene_all_unchanged": unchanged_scene_count == len(original),
+            "trace_rows_unchanged": unchanged_trace_count,
+            "trace_all_unchanged": unchanged_trace_count == len(original),
+            "blinded_public_rows_unchanged": unchanged_blinded_public_count,
+            "blinded_public_all_unchanged": (
+                unchanged_blinded_public_count == len(original)
+            ),
+            "blinding_scan_passed": blinding["passed"],
+            "blinding_violation_count": blinding["violation_count"],
+        },
+    }
+
+
+def _annotation_labels(annotation: dict[str, Any]) -> tuple[Any, Any, frozenset[str]]:
+    return (
+        annotation["trajectory_outcome"],
+        annotation["primary_failure_stage"],
+        frozenset(annotation["secondary_error_tags"]),
+    )
+
+
+def score_calibration_reviews(
+    reviewer_a: list[dict[str, Any]],
+    reviewer_b: list[dict[str, Any]],
+    original_a: list[dict[str, Any]],
+    original_b: list[dict[str, Any]],
+    manager_key: list[dict[str, Any]],
+) -> dict[str, Any]:
+    validation = {
+        "reviewer_a": _review_file_validation(original_a, reviewer_a),
+        "reviewer_b": _review_file_validation(original_b, reviewer_b),
+    }
+    if not all(result["passed"] for result in validation.values()):
+        return {
+            "audit_version": AUDIT_VERSION,
+            "status": "invalid_returned_annotations",
+            "validation": validation,
+            "codebook_freeze_allowed": False,
+            "validation_set_generation_allowed": False,
+        }
+
+    by_a = {row["item_id"]: row for row in reviewer_a}
+    by_b = {row["item_id"]: row for row in reviewer_b}
+    original_a_by_id = {row["item_id"]: row for row in original_a}
+    pairs: list[dict[str, Any]] = []
+    reconciliation: list[dict[str, Any]] = []
+    for manager in manager_key:
+        row_a = by_a[manager["reviewer_a_item_id"]]
+        row_b = by_b[manager["reviewer_b_item_id"]]
+        annotation_a = row_a["annotation"]
+        annotation_b = row_b["annotation"]
+        labels_a = _annotation_labels(annotation_a)
+        labels_b = _annotation_labels(annotation_b)
+        exact = labels_a == labels_b
+        pair = {
+            "case_id": manager["case_id"],
+            "reviewer_a_item_id": manager["reviewer_a_item_id"],
+            "reviewer_b_item_id": manager["reviewer_b_item_id"],
+            "outcome_agreement": labels_a[0] == labels_b[0],
+            "primary_stage_agreement": labels_a[1] == labels_b[1],
+            "secondary_tags_agreement": labels_a[2] == labels_b[2],
+            "exact_agreement": exact,
+        }
+        pairs.append(pair)
+        if not exact:
+            reconciliation.append(
+                {
+                    "discussion_id": _opaque_id(manager["case_id"], "discussion"),
+                    "scene": original_a_by_id[manager["reviewer_a_item_id"]]["scene"],
+                    "reviewer_a_annotation": annotation_a,
+                    "reviewer_b_annotation": annotation_b,
+                    "resolution": {
+                        "resolver_ids": [],
+                        "taxonomy_change_needed": None,
+                        "agreed_outcome": None,
+                        "agreed_primary_failure_stage": None,
+                        "agreed_secondary_error_tags": [],
+                        "codebook_change_notes": "",
+                        "rationale": "",
+                    },
+                }
+            )
+
+    annotations_a = [
+        by_a[manager["reviewer_a_item_id"]]["annotation"] for manager in manager_key
+    ]
+    annotations_b = [
+        by_b[manager["reviewer_b_item_id"]]["annotation"] for manager in manager_key
+    ]
+    outcomes_a = [annotation["trajectory_outcome"] for annotation in annotations_a]
+    outcomes_b = [annotation["trajectory_outcome"] for annotation in annotations_b]
+    stages_a = [annotation["primary_failure_stage"] for annotation in annotations_a]
+    stages_b = [annotation["primary_failure_stage"] for annotation in annotations_b]
+    tag_sets_a = [set(annotation["secondary_error_tags"]) for annotation in annotations_a]
+    tag_sets_b = [set(annotation["secondary_error_tags"]) for annotation in annotations_b]
+    tag_jaccards = [
+        len(left & right) / len(left | right) if left | right else 1.0
+        for left, right in zip(tag_sets_a, tag_sets_b)
+    ]
+    tag_kappas = {
+        tag: _nominal_kappa(
+            [tag in tag_set for tag_set in tag_sets_a],
+            [tag in tag_set for tag_set in tag_sets_b],
+        )
+        for tag in SECONDARY_ERROR_TAGS
+    }
+    estimable_tag_kappas = [
+        value for value in tag_kappas.values() if value is not None
+    ]
+    program_outcomes = [
+        "correct" if manager["program_correct"] else "incorrect"
+        for manager in manager_key
+    ]
+    manager_analysis = {
+        "program_vs_reviewer_a_outcome_agreement": round(
+            sum(a == b for a, b in zip(program_outcomes, outcomes_a))
+            / len(manager_key),
+            6,
+        ),
+        "program_vs_reviewer_b_outcome_agreement": round(
+            sum(a == b for a, b in zip(program_outcomes, outcomes_b))
+            / len(manager_key),
+            6,
+        ),
+        "program_outcome_distribution": dict(sorted(Counter(program_outcomes).items())),
+    }
+    agreement = {
+        "case_count": len(pairs),
+        "full_exact_agreement": round(
+            sum(pair["exact_agreement"] for pair in pairs) / len(pairs), 6
+        ),
+        "outcome_exact_agreement": round(
+            sum(pair["outcome_agreement"] for pair in pairs) / len(pairs), 6
+        ),
+        "primary_stage_exact_agreement": round(
+            sum(pair["primary_stage_agreement"] for pair in pairs) / len(pairs), 6
+        ),
+        "secondary_tags_exact_agreement": round(
+            sum(pair["secondary_tags_agreement"] for pair in pairs) / len(pairs), 6
+        ),
+        "secondary_tags_mean_jaccard": round(sum(tag_jaccards) / len(tag_jaccards), 6),
+        "secondary_tags_cohen_kappa_by_label": tag_kappas,
+        "secondary_tags_macro_cohen_kappa": (
+            round(sum(estimable_tag_kappas) / len(estimable_tag_kappas), 6)
+            if estimable_tag_kappas
+            else None
+        ),
+        "secondary_tags_estimable_kappa_label_count": len(estimable_tag_kappas),
+        "outcome_cohen_kappa": _nominal_kappa(outcomes_a, outcomes_b),
+        "primary_stage_cohen_kappa": _nominal_kappa(stages_a, stages_b),
+        "reviewer_a_outcomes": dict(sorted(Counter(outcomes_a).items())),
+        "reviewer_b_outcomes": dict(sorted(Counter(outcomes_b).items())),
+        "reviewer_a_primary_stages": dict(
+            sorted(Counter(str(value) for value in stages_a).items())
+        ),
+        "reviewer_b_primary_stages": dict(
+            sorted(Counter(str(value) for value in stages_b).items())
+        ),
+    }
+    return {
+        "audit_version": AUDIT_VERSION,
+        "status": "reconciliation_required" if reconciliation else "ready_to_freeze",
+        "validation": validation,
+        "agreement": agreement,
+        "disagreement_count": len(reconciliation),
+        "pair_results": pairs,
+        "manager_only_analysis": manager_analysis,
+        "reconciliation_rows": reconciliation,
+        "reconciliation_blinding": validate_reviewer_blinding(reconciliation),
+        "codebook_freeze_allowed": not reconciliation,
+        "validation_set_generation_allowed": False,
+    }
+
+
+def write_calibration_score(report: dict[str, Any], output_dir: Path) -> None:
+    output_dir.mkdir(parents=True, exist_ok=False)
+    manager_report = dict(report)
+    reconciliation = manager_report.pop("reconciliation_rows", [])
+    _write_json(output_dir / "calibration_manager_report.json", manager_report)
+    _write_jsonl(output_dir / "blind_reconciliation.jsonl", reconciliation)
+    _write_json(output_dir / "proposed_codebook_v0.2_zh.json", CODEBOOK_ZH)
+    hashes = {
+        path.name: _sha256_bytes(path.read_bytes())
+        for path in sorted(output_dir.iterdir())
+        if path.is_file()
+    }
+    _write_json(
+        output_dir / "score_manifest.json",
+        {
+            "audit_version": AUDIT_VERSION,
+            "status": report["status"],
+            "files_sha256": hashes,
+            "codebook_frozen": False,
+            "validation_set_generation_allowed": False,
+        },
+    )

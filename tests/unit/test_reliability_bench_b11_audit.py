@@ -10,6 +10,7 @@ from eval.reliability_bench.b11_audit import (
     SECONDARY_ERROR_TAGS,
     build_calibration_package,
     empty_annotation,
+    score_calibration_reviews,
     validate_annotation,
     validate_reviewer_blinding,
     write_calibration_package,
@@ -75,10 +76,7 @@ def _fake_traces():
                                 {
                                     "role": "assistant",
                                     "content": json.dumps(
-                                        {
-                                            "type": "final",
-                                            "decision": {"action": "stop"},
-                                        }
+                                        {"type": "final", "decision": {"action": "stop"}}
                                     ),
                                 },
                             ],
@@ -109,7 +107,9 @@ def test_calibration_selection_is_balanced_and_contains_controls():
     }
     assert Counter(row["group"] for row in key) == {group: 4 for group in GROUPS}
     assert 6 <= sum(row["program_correct"] for row in key) <= 10
-    assert {row["task_type"] for row in key if not row["program_correct"]} == set(TASKS)
+    assert {
+        row["task_type"] for row in key if not row["program_correct"]
+    } == set(TASKS)
 
 
 def test_reviewer_rows_are_blinded_and_independently_shuffled():
@@ -131,7 +131,7 @@ def test_annotation_contract_enforces_one_primary_failure_stage():
         "trajectory_outcome": "correct",
         "primary_failure_stage": None,
         "secondary_error_tags": ["irrelevant_tool_call"],
-        "confidence": 4,
+        "confidence": 0.9,
         "rationale": "最终动作正确，但存在无关查询。",
     }
     assert validate_annotation(correct, complete=True) == []
@@ -148,6 +148,76 @@ def test_annotation_contract_enforces_one_primary_failure_stage():
 
     invalid = {**incorrect, "primary_failure_stage": None}
     assert "primary_failure_stage" in validate_annotation(invalid, complete=True)
+
+
+def _completed_rows(rows, manager_key, slot):
+    key_name = f"reviewer_{slot}_item_id"
+    by_item = {row[key_name]: row for row in manager_key}
+    completed = []
+    for row in rows:
+        manager = by_item[row["item_id"]]
+        correct = manager["program_correct"]
+        annotation = {
+            "annotator_id": f"reviewer-{slot}",
+            "trajectory_outcome": "correct" if correct else "incorrect",
+            "primary_failure_stage": None if correct else "Evidence",
+            "secondary_error_tags": [] if correct else ["stale_evidence_reuse"],
+            "confidence": 0.9,
+            "rationale": "依据可见轨迹独立判断。",
+        }
+        completed.append({**row, "annotation": annotation})
+    return completed
+
+
+def test_calibration_score_emits_blind_reconciliation_for_disagreement():
+    package = build_calibration_package(_fake_traces())
+    reviewer_a = _completed_rows(
+        package["reviewer_a"], package["study_manager_key"], "a"
+    )
+    reviewer_b = _completed_rows(
+        package["reviewer_b"], package["study_manager_key"], "b"
+    )
+    target = reviewer_b[0]["annotation"]
+    target["trajectory_outcome"] = (
+        "incorrect" if target["trajectory_outcome"] == "correct" else "correct"
+    )
+    target["primary_failure_stage"] = (
+        "Planning" if target["trajectory_outcome"] == "incorrect" else None
+    )
+    target["secondary_error_tags"] = []
+
+    report = score_calibration_reviews(
+        reviewer_a,
+        reviewer_b,
+        package["reviewer_a"],
+        package["reviewer_b"],
+        package["study_manager_key"],
+    )
+
+    assert report["status"] == "reconciliation_required"
+    assert report["disagreement_count"] == 1
+    assert report["agreement"]["outcome_exact_agreement"] == round(23 / 24, 6)
+    assert "secondary_tags_cohen_kappa_by_label" in report["agreement"]
+    assert report["agreement"]["secondary_tags_estimable_kappa_label_count"] >= 1
+    assert report["validation"]["reviewer_a"]["integrity"] == {
+        "expected_row_count": 24,
+        "actual_row_count": 24,
+        "row_count_equal": True,
+        "item_ids_unique": True,
+        "item_id_set_equal": True,
+        "scene_rows_unchanged": 24,
+        "scene_all_unchanged": True,
+        "trace_rows_unchanged": 24,
+        "trace_all_unchanged": True,
+        "blinded_public_rows_unchanged": 24,
+        "blinded_public_all_unchanged": True,
+        "blinding_scan_passed": True,
+        "blinding_violation_count": 0,
+    }
+    assert report["codebook_freeze_allowed"] is False
+    assert report["validation_set_generation_allowed"] is False
+    assert validate_reviewer_blinding(report["reconciliation_rows"])["passed"] is True
+    assert report["reconciliation_blinding"]["passed"] is True
 
 
 def test_written_manifest_hashes_every_draft_file(tmp_path):
