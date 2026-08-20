@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import copy
 import json
 from dataclasses import asdict
 from pathlib import Path
@@ -11,6 +12,7 @@ from eval.reliability_bench.generator import generate_stage_a_episodes
 from eval.reliability_bench.judge_audit_package_v2 import (
     PREDICTION_MAGIC,
     build_blinded_review_package,
+    build_stage1_coordination_package,
     seal_judge_predictions,
 )
 from eval.reliability_bench.judge_audit_v2 import (
@@ -268,3 +270,74 @@ def test_predictions_are_sealed_before_blind_packages_and_never_written_plaintex
         assert "controller_group" not in serialized
         assert "program_judge" not in serialized
         assert "judge_predictions" not in serialized
+
+
+def test_stage1_coordination_hides_a_b_opinions_and_selects_exact_disagreements(tmp_path):
+    episodes = generate_judge_audit_episodes()
+    traces = [_trace(episode, index) for index, episode in enumerate(episodes)]
+    blind_root = tmp_path / "blind_source"
+    build_blinded_review_package(
+        traces=traces,
+        output_dir=blind_root,
+        frozen_codebook={"codebook_version": "0.2", "language": "zh-CN"},
+        prediction_commitment={
+            "status": "judge_predictions_sealed_before_human_annotation",
+            "encrypted_predictions_sha256": "encrypted-test",
+            "plaintext_predictions_sha256": "plaintext-test",
+        },
+        audit_config_sha256="config-test",
+        generated_at="2026-08-20T00:00:00+00:00",
+    )
+    def load_jsonl(path):
+        return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+
+    original_a = load_jsonl(blind_root / "给标注者A/标注者A_待标注.jsonl")
+    original_b = load_jsonl(blind_root / "给标注者B/标注者B_待标注.jsonl")
+    manager_key = load_jsonl(blind_root / "study_manager_only/audit_manager_key.jsonl")
+    returned_a = copy.deepcopy(original_a)
+    returned_b = copy.deepcopy(original_b)
+    by_a = {row["item_id"]: row for row in returned_a}
+    by_b = {row["item_id"]: row for row in returned_b}
+    for manager in manager_key:
+        for row in (by_a[manager["reviewer_a_item_id"]], by_b[manager["reviewer_b_item_id"]]):
+            row["annotation"] = {
+                "annotator_id": "test",
+                "trajectory_outcome": "correct",
+                "primary_failure_stage": None,
+                "secondary_error_tags": [],
+                "rationale": "independent test annotation",
+                "confidence": 0.9,
+            }
+    for index, manager in enumerate(manager_key[:17]):
+        annotation_a = by_a[manager["reviewer_a_item_id"]]["annotation"]
+        annotation_a["secondary_error_tags"] = ["stale_reference_after_revalidation"]
+        if index < 2:
+            annotation_a["trajectory_outcome"] = "incorrect"
+            annotation_a["primary_failure_stage"] = "Evidence"
+
+    output = tmp_path / "coordination"
+    manifest = build_stage1_coordination_package(
+        reviewer_a=returned_a,
+        reviewer_b=returned_b,
+        original_a=original_a,
+        original_b=original_b,
+        manager_key=manager_key,
+        output_dir=output,
+        frozen_codebook={"codebook_version": "0.2", "language": "zh-CN"},
+        reviewer_a_source_sha256="a-source",
+        reviewer_b_source_sha256="b-source",
+        generated_at="2026-08-20T00:01:00+00:00",
+    )
+    rows = load_jsonl(
+        output / "stage1_for_third_annotator/第三标注者_阶段1独立标注_待填写.jsonl"
+    )
+    serialized = json.dumps(rows, ensure_ascii=False).lower()
+    assert len(rows) == 17
+    assert len({row["coordination_item_id"] for row in rows}) == 17
+    assert all(row["independent_annotation"]["trajectory_outcome"] is None for row in rows)
+    assert "reviewer_a" not in serialized
+    assert "reviewer_b" not in serialized
+    assert "judge_predictions" not in serialized
+    assert manifest["outcome_disagreement_count"] == 2
+    assert manifest["secondary_tags_disagreement_count"] == 17
+    assert manifest["stage2_generated"] is False

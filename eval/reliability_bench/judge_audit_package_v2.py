@@ -26,6 +26,8 @@ PREDICTION_SEAL_VERSION = "reliabilitybench-q/judge-v2-prediction-seal-1.0"
 PREDICTION_MAGIC = b"RBQ-JUDGE-PRED-AES256-GCM-V1\x00"
 PREDICTION_AAD = PREDICTION_SEAL_VERSION.encode("utf-8")
 REVIEW_ORDER_SEEDS = {"a": 2026082004, "b": 2026082005}
+COORDINATION_VERSION = "reliabilitybench-q/judge-v2-coordination-stage1-1.0"
+COORDINATION_ORDER_SEED = 2026082021
 
 
 def _canonical_json(value: Any) -> str:
@@ -165,6 +167,198 @@ def _guide_zh() -> dict[str, Any]:
     }
 
 
+def _coordination_guide_zh() -> dict[str, Any]:
+    return {
+        "title": "第三标注者阶段1：独立盲标说明",
+        "language": "zh-CN",
+        "phase": "stage1_independent",
+        "instructions": [
+            "请只依据场景、轨迹和冻结codebook独立标注，不向研究管理员索取A/B意见。",
+            "本阶段看不到A/B标签、judge预测、控制器组名、Oracle字段或程序标签。",
+            "填写最终correct/incorrect、唯一首要失败阶段、次级标签、理由和置信度。",
+            "若结果为correct但轨迹出现疑似实质错误标签，请独立判断是否存在冲突并说明。",
+            "若定义无法区分中间过期引用与最终依赖过期引用，请标记codebook系统性歧义。",
+            "提交前不要修改coordination_item_id、phase、scene或文件顺序。",
+        ],
+        "stage2_release_condition": (
+            "研究管理员收到并冻结本阶段返回文件及SHA-256后，才会提供A/B意见用于最终裁决。"
+        ),
+    }
+
+
+def _empty_stage1_coordination_annotation() -> dict[str, Any]:
+    return {
+        "annotator_id": "C",
+        "trajectory_outcome": None,
+        "primary_failure_stage": None,
+        "secondary_error_tags": [],
+        "correct_with_substantive_error_tag_conflict": None,
+        "conflict_assessment": "",
+        "rationale": "",
+        "confidence": None,
+        "codebook_systematic_ambiguity": None,
+        "codebook_ambiguity_description": "",
+    }
+
+
+def _annotation_signature(annotation: Mapping[str, Any]) -> tuple[Any, Any, frozenset[str]]:
+    return (
+        annotation["trajectory_outcome"],
+        annotation["primary_failure_stage"],
+        frozenset(annotation["secondary_error_tags"]),
+    )
+
+
+def build_stage1_coordination_package(
+    *,
+    reviewer_a: list[dict[str, Any]],
+    reviewer_b: list[dict[str, Any]],
+    original_a: list[dict[str, Any]],
+    original_b: list[dict[str, Any]],
+    manager_key: list[dict[str, Any]],
+    output_dir: Path,
+    frozen_codebook: Mapping[str, Any],
+    reviewer_a_source_sha256: str,
+    reviewer_b_source_sha256: str,
+    generated_at: str | None = None,
+) -> dict[str, Any]:
+    """Build only the independent first stage; A/B opinions remain manager-only."""
+    by_a = {row["item_id"]: row for row in reviewer_a}
+    by_b = {row["item_id"]: row for row in reviewer_b}
+    original_a_by_id = {row["item_id"]: row for row in original_a}
+    original_b_by_id = {row["item_id"]: row for row in original_b}
+    if set(by_a) != set(original_a_by_id) or set(by_b) != set(original_b_by_id):
+        raise ValueError("returned reviewer item IDs do not match frozen blind packages")
+    for item_id, row in by_a.items():
+        if row.get("scene") != original_a_by_id[item_id].get("scene"):
+            raise ValueError("reviewer A scene differs from the frozen blind package")
+    for item_id, row in by_b.items():
+        if row.get("scene") != original_b_by_id[item_id].get("scene"):
+            raise ValueError("reviewer B scene differs from the frozen blind package")
+
+    stage1_rows: list[dict[str, Any]] = []
+    manager_rows: list[dict[str, Any]] = []
+    for manager in manager_key:
+        item_a = manager["reviewer_a_item_id"]
+        item_b = manager["reviewer_b_item_id"]
+        annotation_a = by_a[item_a]["annotation"]
+        annotation_b = by_b[item_b]["annotation"]
+        if _annotation_signature(annotation_a) == _annotation_signature(annotation_b):
+            continue
+        coordination_item_id = _opaque_id(
+            f"{COORDINATION_ORDER_SEED}|{manager['case_id']}|stage1",
+            "coord-item",
+        )
+        stage1_rows.append(
+            {
+                "coordination_item_id": coordination_item_id,
+                "phase": "stage1_independent",
+                "scene": original_a_by_id[item_a]["scene"],
+                "independent_annotation": _empty_stage1_coordination_annotation(),
+            }
+        )
+        manager_rows.append(
+            {
+                "coordination_item_id": coordination_item_id,
+                "case_id": manager["case_id"],
+                "reviewer_a_item_id": item_a,
+                "reviewer_b_item_id": item_b,
+                "outcome_disagreement": (
+                    annotation_a["trajectory_outcome"]
+                    != annotation_b["trajectory_outcome"]
+                ),
+                "primary_stage_disagreement": (
+                    annotation_a["primary_failure_stage"]
+                    != annotation_b["primary_failure_stage"]
+                ),
+                "secondary_tags_disagreement": (
+                    set(annotation_a["secondary_error_tags"])
+                    != set(annotation_b["secondary_error_tags"])
+                ),
+            }
+        )
+    if len(stage1_rows) != 17:
+        raise ValueError(f"expected 17 preregistered disagreements, got {len(stage1_rows)}")
+    random.Random(COORDINATION_ORDER_SEED).shuffle(stage1_rows)
+
+    serialized = _canonical_json(stage1_rows).lower()
+    forbidden = (
+        "controller_group",
+        "hidden_group_id",
+        "program_judge",
+        "judge_predictions",
+        "ground_truth",
+        "reviewer_a_annotation",
+        "reviewer_b_annotation",
+        "full_selective",
+        "oracle_invalidation",
+    )
+    violations = [token for token in forbidden if token in serialized]
+    if violations:
+        raise ValueError(f"stage1 coordination blinding failed: {violations}")
+
+    output_dir.mkdir(parents=True, exist_ok=False, mode=0o700)
+    stage1_dir = output_dir / "stage1_for_third_annotator"
+    manager_dir = output_dir / "study_manager_only"
+    stage1_dir.mkdir(mode=0o700)
+    manager_dir.mkdir(mode=0o700)
+    stage1_path = stage1_dir / "第三标注者_阶段1独立标注_待填写.jsonl"
+    guide_path = stage1_dir / "第三标注者_阶段1说明.json"
+    codebook_path = stage1_dir / "冻结标注规范_v0.2.json"
+    _write_jsonl(stage1_path, stage1_rows)
+    _write_json(guide_path, _coordination_guide_zh())
+    _write_json(codebook_path, frozen_codebook)
+    for path in (stage1_path, guide_path, codebook_path):
+        os.chmod(path, 0o600)
+    stage1_file_hashes = {
+        path.name: _sha256_file(path)
+        for path in (stage1_path, guide_path, codebook_path)
+    }
+    stage1_manifest = {
+        "coordination_version": COORDINATION_VERSION,
+        "status": "stage1_independent_annotation_pending",
+        "item_count": len(stage1_rows),
+        "order_seed": COORDINATION_ORDER_SEED,
+        "files_sha256": stage1_file_hashes,
+        "a_b_opinions_in_stage1": False,
+        "judge_predictions_accessed": False,
+        "method_identity_fields_present": False,
+        "stage2_release_condition": "freeze returned stage1 file and SHA-256 first",
+    }
+    stage1_manifest_path = stage1_dir / "阶段1文件校验_SHA256.json"
+    _write_json(stage1_manifest_path, stage1_manifest)
+    os.chmod(stage1_manifest_path, 0o600)
+
+    manager_key_path = manager_dir / "coordination_manager_key.jsonl"
+    _write_jsonl(manager_key_path, manager_rows)
+    os.chmod(manager_key_path, 0o600)
+    manager_manifest = {
+        "coordination_version": COORDINATION_VERSION,
+        "status": "stage1_generated_stage2_not_generated",
+        "generated_at": generated_at or datetime.now(timezone.utc).isoformat(),
+        "disagreement_count": len(stage1_rows),
+        "outcome_disagreement_count": sum(
+            row["outcome_disagreement"] for row in manager_rows
+        ),
+        "primary_stage_disagreement_count": sum(
+            row["primary_stage_disagreement"] for row in manager_rows
+        ),
+        "secondary_tags_disagreement_count": sum(
+            row["secondary_tags_disagreement"] for row in manager_rows
+        ),
+        "reviewer_a_source_sha256": reviewer_a_source_sha256,
+        "reviewer_b_source_sha256": reviewer_b_source_sha256,
+        "stage1_manifest_sha256": _sha256_file(stage1_manifest_path),
+        "manager_key_sha256": _sha256_file(manager_key_path),
+        "judge_predictions_accessed": False,
+        "stage2_generated": False,
+    }
+    manager_manifest_path = manager_dir / "coordination_protocol_manifest.json"
+    _write_json(manager_manifest_path, manager_manifest)
+    os.chmod(manager_manifest_path, 0o600)
+    return manager_manifest
+
+
 def build_blinded_review_package(
     *,
     traces: list[dict[str, Any]],
@@ -263,9 +457,12 @@ def build_blinded_review_package(
 
 
 __all__ = [
+    "COORDINATION_ORDER_SEED",
+    "COORDINATION_VERSION",
     "PREDICTION_SEAL_VERSION",
     "REVIEW_ORDER_SEEDS",
     "build_blinded_review_package",
     "build_prediction_rows",
+    "build_stage1_coordination_package",
     "seal_judge_predictions",
 ]
