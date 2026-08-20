@@ -1,0 +1,33 @@
+{
+  "freeze_version": "reliabilitybench-q/action-guard-freeze-1.0",
+  "frozen_on": "2026-08-20",
+  "status": "frozen_for_independent_method-validation-pilot",
+  "candidate_commit": "7b4264f5c6c904208dc3427f6ed0161fbef1d910",
+  "measurement_v2_dependency": {
+    "evaluator_candidate_commit": "40e1a619b0613453246aa8d9c689d237a942486d",
+    "public_runtime_audit_head": "144a57ca07cc371d4506b60af753ede42e76c901",
+    "heldout_gold_exact_agreement": "1197/1197"
+  },
+  "frozen_source_sha256": {
+    "eval/reliability_bench/action_guard_contract_v1.py": "ac9ec030f29b7a8b38298d68b86d6244dbbf9b59d387aad35a6fb377a3ab7c48",
+    "eval/reliability_bench/action_guard_v1.py": "caada9bbdf9b87a129f92f95e77aa823701443a6b131f2e6222929acddbc6ddb",
+    "eval/reliability_bench/action_guard_runtime_v1.py": "5e125e28683c764a9a3bb5e7677f3b13fd1a94f2fceb99dd921a264ae2776d14",
+    "eval/reliability_bench/temporal_evidence_v1.py": "93487d4b296066a17b5f18d600c114c0752b0ec779e26b571df699827a0f5cb7",
+    "eval/reliability_bench/recovery_planner_v1.py": "66c70ae9514bffcfc00a4a1d90b6409b3bb150616cc0252e61444fd1c3ba28cf",
+    "eval/reliability_bench/data/action_guard_component_boundary_matrix.json": "4514c4d15240f9133cf6288d2325d21ec0888cf5198c50bd79d70c08fbccea2f",
+    "eval/reliability_bench/protocols/action_guard_formal_spec_v1.md": "1502bf8a0015a6f174465f638674176d6cb9c38a9927b1e6cd937a4590e2be69",
+    "eval/reliability_bench/protocols/action_guard_statistics_preregistration_v1.md": "ae05832401ed1aad5a9be8255e038d25502003a34030730ca42e4a09ff0af7e4",
+    "scripts/run_action_guard_development_audit_v1.py": "5b3158ca9004dbb721bcba0c844d2d94e0f1781a78c3d3bcbd6368d8c6de5bf4",
+    "tests/unit/test_reliability_bench_action_guard_v1.py": "72c30110628448dec1cb1d680616079abd6e9740b8025f0ec88b43ecd849af88"
+  },
+  "gate_results": {
+    "synthetic_invariant_and_counterfactual_tests": "120/120",
+    "non_interference_and_dependency_unit_tests": "37/37",
+    "reliability_bench_regression_tests": "139/139",
+    "forbidden_runtime_dependency_hits": 0,
+    "measurement_v2_frozen_hash_mismatches": 0
+  },
+  "change_policy": "Any source or semantic change to the frozen ActionGuard, boundary contract, repair protocol, or statistics plan requires a new version and a renewed gate before method-validation use.",
+  "method_validation_v2_1_unseal_allowed": false,
+  "formal_six_arm_run_allowed": false
+}

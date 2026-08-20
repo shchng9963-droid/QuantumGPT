@@ -1,0 +1,32 @@
+{
+  "version": "reliabilitybench-q/action-guard-development-summary-1.0",
+  "status": "development-only",
+  "paper_performance_claims_allowed": false,
+  "candidate_commit": "7b4264f5c6c904208dc3427f6ed0161fbef1d910",
+  "full_audit_report": {
+    "server_path": "/home/wangshuchang/quantumgpt-runs/action_guard_v1/development/audit.json",
+    "sha256": "d23e96a0b8644d677dc8c83379c3ad20901f43a67613d4437766d9ee05ef5b47"
+  },
+  "fresh_smoke": {
+    "source": "action_guard_development_smoke_v1",
+    "random_seed": 20260901,
+    "episode_count": 24,
+    "counterfactual_case_count": 120,
+    "passed": 120,
+    "failed": 0,
+    "invariant_conformance": 1.0
+  },
+  "legacy_24_offline_replay": {
+    "status": "development-only / offline counterfactual guard replay",
+    "episodes": 24,
+    "traces": 48,
+    "ledger_only": {"parseable": 24, "allow": 0, "block": 13, "repair_request": 11},
+    "full_selective": {"parseable": 24, "allow": 7, "block": 7, "repair_request": 10},
+    "selective_risk": null,
+    "warning": "These are structural replay counts, not method performance. The traces predate Measurement v2 and judge v1 remains invalidated."
+  },
+  "tests": {
+    "action_guard_unit_tests": {"passed": 37, "failed": 0},
+    "reliability_bench_regression_suite": {"passed": 139, "failed": 0}
+  }
+}
