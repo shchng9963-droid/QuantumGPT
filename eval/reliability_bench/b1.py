@@ -705,7 +705,14 @@ def run_b1_trace(
 
     if final_decision is None and fatal_error is None:
         fatal_error = "max_turns_without_final_decision"
-    judge = judge_episode(episode, final_decision) if final_decision else None
+    legacy_program_judge_enabled = bool(
+        config.get("legacy_program_judge_enabled", True)
+    )
+    judge = (
+        judge_episode(episode, final_decision)
+        if final_decision and legacy_program_judge_enabled
+        else None
+    )
     usage = _merge_usage(completion_results)
     pricing_usage = dict(usage)
     pricing_usage["prompt_cache_hit_tokens"] = usage.get("prompt_cache_hit_tokens", 0)
@@ -753,6 +760,7 @@ def run_b1_trace(
             "max_tool_calls": config["max_tool_calls"],
             "max_cost_units": config["max_cost_units"],
             "retry": config["retry"],
+            "legacy_program_judge_enabled": legacy_program_judge_enabled,
         },
         "public_prompt": public_prompt,
         "messages": messages,

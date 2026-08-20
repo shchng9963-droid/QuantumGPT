@@ -25,11 +25,11 @@ from .schema import (
 )
 
 
-AUDIT_VERSION = "reliabilitybench-q/judge-v2-independent-audit-1.0"
-AUDIT_GENERATOR_VERSION = "reliabilitybench-q/judge-audit-generator-1.0"
+AUDIT_VERSION = "reliabilitybench-q/judge-v2-independent-audit-1.1"
+AUDIT_GENERATOR_VERSION = "reliabilitybench-q/judge-audit-generator-1.1"
 AUDIT_EPISODE_COUNT = 24
 
-AUDIT_CIRCUITS = (
+RETIRED_AUDIT_CIRCUITS_V1 = (
     "AuditBackendA-4",
     "AuditBackendB-5",
     "AuditMapA-4",
@@ -43,21 +43,44 @@ AUDIT_CIRCUITS = (
     "AuditReachabilityA-5",
     "AuditReachabilityB-5",
 )
+AUDIT_CIRCUITS = (
+    "IndependentBackendC-5",
+    "IndependentBackendD-4",
+    "IndependentMapC-5",
+    "IndependentMapD-4",
+    "IndependentTranspileC-5",
+    "IndependentTranspileD-4",
+    "IndependentFidelityC-5",
+    "IndependentFidelityD-4",
+    "IndependentMitigationC-5",
+    "IndependentMitigationD-4",
+    "IndependentReachabilityC-4",
+    "IndependentReachabilityD-5",
+)
 BACKENDS = ("FakeKyiv", "FakeSherbrooke", "FakeBrisbane")
 
 
 @dataclass(frozen=True)
 class JudgeAuditGeneratorConfig:
-    random_seed: int = 2026082001
-    schedule_seed: int = 2026082002
+    random_seed: int = 2026082011
+    schedule_seed: int = 2026082012
     pairs_per_task: int = 2
     candidate_qubit_slack: int = 2
     target_fidelity: float = 0.85
     cost_budget: int = 10
-    source: str = "independent_judge_audit_v2"
+    episode_namespace: str = "RBQJA2"
+    dataset_revision: int = 2
+    source: str = "independent_judge_audit_v2_1"
 
 
 FROZEN_AUDIT_CONFIG = JudgeAuditGeneratorConfig()
+RETIRED_AUDIT_CONFIG_V1 = JudgeAuditGeneratorConfig(
+    random_seed=2026082001,
+    schedule_seed=2026082002,
+    episode_namespace="RBQJA",
+    dataset_revision=1,
+    source="independent_judge_audit_v2",
+)
 
 
 def _canonical_json(value: Any) -> str:
@@ -73,6 +96,14 @@ def _width(circuit: str) -> int:
     if width <= 0:
         raise ValueError("circuit width must be positive")
     return width
+
+
+def _circuits(config: JudgeAuditGeneratorConfig) -> tuple[str, ...]:
+    if config.dataset_revision == 1:
+        return RETIRED_AUDIT_CIRCUITS_V1
+    if config.dataset_revision == 2:
+        return AUDIT_CIRCUITS
+    raise ValueError("unsupported judge-audit dataset revision")
 
 
 def _resources(task: TaskType, degraded: int) -> tuple[str, tuple[str, ...], str]:
@@ -173,11 +204,11 @@ def _build_episode(
     config: JudgeAuditGeneratorConfig,
 ) -> Episode:
     task_index = list(TaskType).index(task)
-    circuit = AUDIT_CIRCUITS[task_index * config.pairs_per_task + pair_index]
+    circuit = _circuits(config)[task_index * config.pairs_per_task + pair_index]
     width = _width(circuit)
     candidates = list(range(width + config.candidate_qubit_slack))
     degraded = candidates[(task_index * 2 + pair_index + 1) % len(candidates)]
-    pair_id = f"RBQJA-{task.value}-{pair_index:02d}"
+    pair_id = f"{config.episode_namespace}-{task.value}-{pair_index:02d}"
     backend = BACKENDS[(task_index + pair_index) % len(BACKENDS)]
     feature, dependencies, evidence_type = _resources(task, degraded)
     pre_snapshot = f"snapshot-{pair_id}-pre"
@@ -346,18 +377,25 @@ def audit_deduplication(
     audit = list(audit_episodes)
     old = list(old_development_episodes)
     method_reference = generate_method_validation_candidates(DEVELOPMENT_CONFIG)
+    retired_reference = generate_judge_audit_episodes(RETIRED_AUDIT_CONFIG_V1)
     audit_ids = {item.episode_id for item in audit}
     old_ids = {item.episode_id for item in old}
     method_ids = {item.episode_id for item in method_reference}
+    retired_ids = {item.episode_id for item in retired_reference}
     audit_semantic = {semantic_fingerprint(item) for item in audit}
     old_semantic = {semantic_fingerprint(item) for item in old}
     method_semantic = {semantic_fingerprint(item) for item in method_reference}
+    retired_semantic = {semantic_fingerprint(item) for item in retired_reference}
     report = {
         "audit_episode_count": len(audit),
         "old_development_id_overlap": sorted(audit_ids.intersection(old_ids)),
         "method_namespace_id_overlap": sorted(audit_ids.intersection(method_ids)),
+        "retired_audit_id_overlap": sorted(audit_ids.intersection(retired_ids)),
         "old_development_semantic_hash_overlap": sorted(audit_semantic.intersection(old_semantic)),
         "method_generator_semantic_hash_overlap": sorted(audit_semantic.intersection(method_semantic)),
+        "retired_audit_semantic_hash_overlap": sorted(
+            audit_semantic.intersection(retired_semantic)
+        ),
         "audit_episode_ids_sha256": _sha256(sorted(audit_ids)),
         "audit_semantic_hashes_sha256": _sha256(sorted(audit_semantic)),
         "method_validation_archive_accessed": False,
@@ -371,8 +409,10 @@ def audit_deduplication(
         for key in (
             "old_development_id_overlap",
             "method_namespace_id_overlap",
+            "retired_audit_id_overlap",
             "old_development_semantic_hash_overlap",
             "method_generator_semantic_hash_overlap",
+            "retired_audit_semantic_hash_overlap",
         )
     )
     return report
@@ -423,6 +463,8 @@ def validate_audit_config(config: Mapping[str, Any]) -> None:
         raise ValueError("judge candidate commit is not frozen")
     if int(config.get("episode_count", 0)) != AUDIT_EPISODE_COUNT:
         raise ValueError("audit requires exactly 24 traces")
+    if config.get("legacy_program_judge_enabled") is not False:
+        raise ValueError("independent audit must disable development-only judge v1")
     if config.get("sampling", {}).get("post_result_selection_allowed") is not False:
         raise ValueError("post-result selection must be prohibited")
     thresholds = config.get("thresholds") or {}

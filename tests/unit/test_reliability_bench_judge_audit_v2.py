@@ -5,6 +5,7 @@ import json
 from dataclasses import asdict
 from pathlib import Path
 
+from eval.reliability_bench.b1 import CompletionResult, run_b1_trace
 from eval.reliability_bench.b0 import _public_input, _tool_output
 from eval.reliability_bench.generator import generate_stage_a_episodes
 from eval.reliability_bench.judge_audit_package_v2 import (
@@ -22,11 +23,43 @@ from eval.reliability_bench.judge_audit_v2 import (
     semantic_fingerprint,
     validate_audit_config,
 )
+from eval.reliability_bench.groups import ExperimentGroup
 from eval.reliability_bench.schema import DriftRelevance, TaskType
 
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "eval/reliability_bench/data/judge_audit_v2_config.json"
+
+
+class _FinalAuditClient:
+    def __init__(self, episode):
+        self.episode = episode
+
+    def complete(self, messages, max_tokens):
+        payload = {"type": "final", "decision": _decision(self.episode)}
+        content = json.dumps(payload)
+        return CompletionResult(
+            content=content,
+            response_id="audit-fake-response",
+            returned_model="deepseek-v4-flash",
+            system_fingerprint="audit-fake-fingerprint",
+            finish_reason="stop",
+            usage={
+                "prompt_tokens": 100,
+                "completion_tokens": 40,
+                "total_tokens": 140,
+                "prompt_cache_hit_tokens": 0,
+                "prompt_cache_miss_tokens": 100,
+            },
+            latency_seconds=0.01,
+            request_started_at="2026-08-20T00:00:00+00:00",
+            request_finished_at="2026-08-20T00:00:00.010000+00:00",
+            raw_response={
+                "id": "audit-fake-response",
+                "model": "deepseek-v4-flash",
+                "choices": [{"message": {"content": content}}],
+            },
+        )
 
 
 def _decision(episode):
@@ -127,6 +160,8 @@ def test_audit_semantics_do_not_overlap_old_or_method_generator_structure():
     report = audit_deduplication(episodes, generate_stage_a_episodes())
     assert report["passed"] is True
     assert report["method_validation_archive_accessed"] is False
+    assert report["retired_audit_id_overlap"] == []
+    assert report["retired_audit_semantic_hash_overlap"] == []
     assert len({semantic_fingerprint(item) for item in episodes}) == 24
 
 
@@ -146,8 +181,39 @@ def test_frozen_config_contains_three_layer_gates_and_failure_policy():
     assert config["protocol_version"] == AUDIT_VERSION
     assert config["thresholds"]["outcome"]["minimum_agreements_out_of_24"] == 22
     assert config["thresholds"]["critical_labels"]["f1_min"] == 0.9
+    assert config["legacy_program_judge_enabled"] is False
     assert config["class_balance"]["post_hoc_resampling_allowed"] is False
     assert config["failure_policy"]["replacement_requires_new_episodes"] is True
+
+
+def test_b1_trace_disables_incompatible_development_judge_v1():
+    config = json.loads(CONFIG.read_text(encoding="utf-8"))
+    episode = next(
+        item
+        for item in generate_judge_audit_episodes()
+        if item.task_type is TaskType.UNREACHABLE_TARGET
+    )
+    schedule_item = next(
+        row for row in build_audit_schedule([*generate_judge_audit_episodes()])
+        if row["episode_id"] == episode.episode_id
+    )
+    group = ExperimentGroup(schedule_item["controller_group"])
+    trace = run_b1_trace(
+        episode,
+        group,
+        _FinalAuditClient(episode),
+        config,
+        schedule_item,
+        {
+            "mode": "independent_judge_audit",
+            "config_sha256": "audit-config-test",
+            "benchmark_sha256": "audit-benchmark-test",
+            "git": {"commit": "audit-commit-test"},
+        },
+    )
+    assert trace["trace_complete"] is True
+    assert trace["program_judge"] is None
+    assert trace["frozen_context"]["legacy_program_judge_enabled"] is False
 
 
 def test_tool_trace_uses_episode_candidate_qubits_not_legacy_fixed_five():

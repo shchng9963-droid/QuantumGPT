@@ -1,9 +1,10 @@
 {
-  "protocol_version": "reliabilitybench-q/judge-v2-independent-audit-1.0",
+  "protocol_version": "reliabilitybench-q/judge-v2-independent-audit-1.1",
   "status": "preregistered_before_api_calls",
   "judge_candidate_commit": "e2ceb18a610436f01b5f572a3dc75a36816b6c3b",
   "judge_source_sha256": "ad61edbc54b3ac12d2cc8962b990e105f385630771e57c36cca4e7a84d2a1089",
   "episode_count": 24,
+  "legacy_program_judge_enabled": false,
   "provider": "deepseek",
   "base_url": "https://api.deepseek.com",
   "requested_model": "deepseek-v4-flash",
@@ -24,10 +25,11 @@
     "failed_runs_retained": true
   },
   "generator": {
-    "version": "reliabilitybench-q/judge-audit-generator-1.0",
-    "random_seed": 2026082001,
-    "schedule_seed": 2026082002,
-    "episode_id_namespace": "RBQJA-",
+    "version": "reliabilitybench-q/judge-audit-generator-1.1",
+    "random_seed": 2026082011,
+    "schedule_seed": 2026082012,
+    "episode_id_namespace": "RBQJA2-",
+    "dataset_revision": 2,
     "pairs_per_task": 2,
     "candidate_qubit_slack": 2
   },
@@ -49,7 +51,9 @@
     "old_24_semantic_hash_overlap_allowed": false,
     "method_id_namespace_overlap_allowed": false,
     "method_generator_semantic_hash_overlap_allowed": false,
-    "method_validation_archive_access_allowed": false
+    "method_validation_archive_access_allowed": false,
+    "retired_audit_id_overlap_allowed": false,
+    "retired_audit_semantic_hash_overlap_allowed": false
   },
   "prediction_commitment": {
     "judge_runs_before_human_annotation": true,
@@ -113,7 +117,15 @@
     "failed_audit_status": "development-only / invalidated independent audit",
     "judge_modification_after_results_allowed": false,
     "replacement_requires_new_episodes": true,
-    "threshold_change_after_results_allowed": false
+    "threshold_change_after_results_allowed": false,
+    "retired_predecessor": {
+      "status": "technical_failure_before_trace_persistence / development-only",
+      "protocol_version": "reliabilitybench-q/judge-v2-independent-audit-1.0",
+      "output_manifest_sha256": "d415f72cb4335979c22b41f1b8eee8d9278a58766edf43a9c957078037374185",
+      "failure_reason": "legacy judge v1 compatibility payload missing expected_unreachable",
+      "maximum_api_requests_completed": 1,
+      "resume_or_reuse_allowed": false
+    }
   },
   "pricing": {
     "currency": "USD",
