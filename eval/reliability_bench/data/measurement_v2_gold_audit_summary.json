@@ -15,15 +15,19 @@
     "audit_file_sha256": "e686b5d5cdc8c87da3476902fcd48a86d8c1b7adface5a03bc6f6116e4ea66c9"
   },
   "held_out": {
+    "version": "v2.1-complete-aggregate-gate",
+    "supersedes": "v2.0-per-trace-only package retained for provenance",
     "case_count": 41,
-    "field_count": 22,
-    "exact_field_comparisons": 902,
+    "field_count": 29,
+    "exact_per_trace_comparisons": 1189,
+    "aggregate_metric_comparisons": 8,
+    "total_exact_comparisons": 1197,
     "mismatch_count": 0,
     "all_unique_truth_gates_passed": true,
-    "prediction_sha256_before_gold_unseal": "c5508df1f64948ff9db3a8409bf304ddfe25816d06c7cc05ac2231275c145b72",
-    "manifest_sha256": "dfc199b5c25444fb25f87d0ea9672eb5f92b06c2ea25829cb3a092a962f54f58",
-    "prediction_freeze_manifest_sha256": "c7b502b57cfc3fc654e3a15a821b211765ce6e33ad4a99ba78bac39f1655720f",
-    "gate_result_sha256": "bca7ec93155f98f700378e1daef2c7540b39b2c1ca154876c39cc11dc99e8d75"
+    "prediction_sha256_before_gold_unseal": "41a070a1098d0f54237df9b89617167dc1f7cbad73f781d79338232bbe4152d94",
+    "manifest_sha256": "f64df0049ff99041168a9824c7ca5ce72bd96416799044eecd855be74a7431a8",
+    "prediction_freeze_manifest_sha256": "104c72e2fc5b66c7d0cd9949ad7eed9dff33c0533db4e2b4da4c05dc3398a1da",
+    "gate_result_sha256": "0ae47450aba511221ec57128654a93e95826a20e282ed6ca667841e7111fd86c"
   },
   "held_out_coverage": {
     "task_type": {

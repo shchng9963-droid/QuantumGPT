@@ -2,7 +2,7 @@
 
 ## 结论
 
-本阶段门禁通过。公共运行时已以同一 Schema、prompt、工具、预算、解析与失败规则接入六个预注册接口；ActionGuard 相关组仍为无行为占位。独立 development Gold 最终 39/39，通过后冻结评价器候选 commit `40e1a619b0613453246aa8d9c689d237a942486d`。随后一次性 held-out Gold 共 41 条、22 个唯一真值字段、902 次精确比较全部一致。
+本阶段门禁通过。公共运行时已以同一 Schema、prompt、工具、预算、解析与失败规则接入六个预注册接口；ActionGuard 相关组仍为无行为占位。独立 development Gold 最终 39/39，通过后冻结评价器候选 commit `40e1a619b0613453246aa8d9c689d237a942486d`。完整 held-out v2.1 共41条，29个逐轨迹唯一真值字段产生1189次比较，另有8个集合级覆盖/风险/效用指标，总计1197次精确比较全部一致。
 
 这证明当前主要测量在受控轨迹上的可识别性和实现正确性，不构成六组方法性能结论，也不授权解封方法验证集。
 
@@ -52,7 +52,7 @@
 
 development Gold 39条，允许发现与修复。首次9条不一致被分类为：8个Gold规范/ID错误、1个延迟浮点规范化实现Bug、0个构念不可识别。修复后39/39。
 
-held-out使用新随机命名空间重写case、证据、资源和snapshot标识，与development、Judge v2审计及未来ActionGuard数据隔离。它不导入任何旧审计数据，也未读取密封v2.1。Gold标签使用AES-256-GCM加密；预测文件SHA-256 `c5508df1...c145b72`先冻结，之后才解密比对。held-out失败时不得在同一集合上修复的规则已编码为一次性预测拒绝。
+held-out使用新随机命名空间重写case、证据、资源和snapshot标识，与development、Judge v2审计及未来ActionGuard数据隔离。它不导入任何旧审计数据，也未读取密封v2.1。Gold标签使用AES-256-GCM加密；完整v2.1预测文件SHA-256 `41a070a1...4152d94`先冻结，之后才解密比对。早先v2.0包只覆盖逐轨迹字段，永久保留作研究溯源，但不作为完整冻结门禁。held-out失败时不得在同一集合上修复的规则已编码为一次性预测拒绝。
 
 ## 5. 测量可识别性
 
@@ -72,9 +72,9 @@ unknown与unsafe始终分开；`unsafe_or_unknown`仅为保守风险指标。失
 
 ## 6. 冻结门禁结果
 
-held-out 41条中，下列22个字段均为41/41：Task Predicate、三值状态、stale dependence、support adequacy、必要/有效重验证、四阶段干预、snapshot谱系、证据闭包、调用/失败/重复/无关计数、成本、延迟和运行时ID绑定。
+held-out 41条中，下列29个字段均为41/41：Task Predicate、answered/feasible/错误决策/正确拒绝/不必要拒答、三值状态、stale dependence、support adequacy、必要/有效重验证、四阶段干预、snapshot谱系、证据闭包、调用/失败/重复/无关计数、成本、延迟和运行时ID绑定。
 
-总计902/902精确一致，0 mismatch。没有需要进入“实现Bug / Gold错误 / 构念不可识别”复核的held-out项。
+集合级`episode_count`、`answered_count`、coverage、selective risk、feasible completion、correct rejection、unnecessary abstain和overall utility也全部精确一致。总计1197/1197，0 mismatch。没有需要进入“实现Bug / Gold错误 / 构念不可识别”复核的held-out项。
 
 ## 7. v2.1兼容性
 

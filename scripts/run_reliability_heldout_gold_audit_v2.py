@@ -21,7 +21,10 @@ from eval.reliability_bench.public_runtime_v2 import (
     parse_terminal_runtime_output,
 )
 from eval.reliability_bench.schema import episode_from_dict
-from eval.reliability_bench.task_predicate_evaluator_v2 import evaluate_task_decision
+from eval.reliability_bench.task_predicate_evaluator_v2 import (
+    aggregate_selective_metrics,
+    evaluate_task_decision,
+)
 from eval.reliability_bench.trace_evidence_evaluator_v2 import evaluate_trace_evidence
 
 
@@ -35,6 +38,12 @@ FROZEN_SOURCE_SHA256 = {
     "eval/reliability_bench/gold_trace_spec_v2.py": "2331bc26eb3654d3b1ff18dc778898a7cf9ec04812219feff6cfb7cbf856289d",
 }
 AUDIT_AAD = b"ReliabilityBench-Q held-out Gold v2"
+UTILITY_WEIGHTS = {
+    "correct": 1.0,
+    "wrong": 1.0,
+    "unnecessary_abstain": 0.5,
+    "cost": 0.01,
+}
 
 
 def canonical_bytes(value: Any) -> bytes:
@@ -107,6 +116,7 @@ def build_heldout_cases(namespace: str) -> list[dict[str, Any]]:
             ]
         item["expected"]["runtime_accepted"] = True
         item["expected"]["runtime_identifier_failures"] = []
+        _attach_task_gold(item)
         heldout.append(item)
 
     # Counterfactual pair changing only whether a declaration binds to a real call.
@@ -136,8 +146,70 @@ def build_heldout_cases(namespace: str) -> list[dict[str, Any]]:
         item["expected"]["runtime_identifier_failures"] = (
             [] if accepted else ["unbound_tool_call_id:call:999"]
         )
+        _attach_task_gold(item)
         heldout.append(item)
     return heldout
+
+
+def _attach_task_gold(item: dict[str, Any]) -> None:
+    status = item["terminal"]["status"]
+    answered = status != "abstain"
+    task_type = item["episode"]["task_type"]
+    predicate = item["episode"]["ground_truth"]["acceptable_payload"]["task_predicate"]
+    feasible = not (
+        task_type == "unreachable_target"
+        and bool(predicate["expected_unreachable"])
+    )
+    correct = bool(item["expected"]["task_terminal_correct"])
+    item["expected"].update(
+        {
+            "predicate_satisfied": None if not answered else correct,
+            "wrong_decision": None if not answered else not correct,
+            "answered": answered,
+            "feasible": feasible,
+            "feasible_completion": feasible and correct,
+            "correct_rejection": (not feasible) and correct,
+            "unnecessary_abstain": feasible and not answered,
+        }
+    )
+
+
+def _aggregate_gold(cases: list[dict[str, Any]]) -> dict[str, Any]:
+    count = len(cases)
+    expected = [item["expected"] for item in cases]
+    answered = [item for item in expected if item["answered"]]
+    feasible = [item for item in expected if item["feasible"]]
+    infeasible = [item for item in expected if not item["feasible"]]
+    total_utility = 0.0
+    for item in expected:
+        total_utility += (
+            UTILITY_WEIGHTS["correct"] * int(item["task_terminal_correct"])
+            - UTILITY_WEIGHTS["wrong"] * int(item["wrong_decision"] is True)
+            - UTILITY_WEIGHTS["unnecessary_abstain"] * int(item["unnecessary_abstain"])
+            - UTILITY_WEIGHTS["cost"] * float(item["actual_cost_units"])
+        )
+    return {
+        "episode_count": count,
+        "answered_count": len(answered),
+        "coverage": len(answered) / count,
+        "selective_risk": (
+            sum(item["wrong_decision"] is True for item in answered) / len(answered)
+            if answered else None
+        ),
+        "feasible_completion_rate": (
+            sum(item["feasible_completion"] for item in feasible) / len(feasible)
+            if feasible else None
+        ),
+        "correct_rejection_rate": (
+            sum(item["correct_rejection"] for item in infeasible) / len(infeasible)
+            if infeasible else None
+        ),
+        "unnecessary_abstain_rate": (
+            sum(item["unnecessary_abstain"] for item in feasible) / len(feasible)
+            if feasible else None
+        ),
+        "overall_utility": total_utility / count,
+    }
 
 
 def generate(root: Path, package_dir: Path, key_dir: Path) -> None:
@@ -153,6 +225,8 @@ def generate(root: Path, package_dir: Path, key_dir: Path) -> None:
     labels = {
         "audit_version": "reliabilitybench-q/heldout-gold-2.0",
         "labels": {case["case_id"]: case["expected"] for case in cases},
+        "aggregate_expected": _aggregate_gold(cases),
+        "utility_weights": UTILITY_WEIGHTS,
     }
     public_path = package_dir / "heldout_public_traces.json"
     public_path.write_bytes(canonical_bytes(public_cases))
@@ -206,6 +280,8 @@ def predict(root: Path, package_dir: Path) -> None:
         raise RuntimeError("predictions already exist; one-time held-out run refused")
     cases = json.loads(public_path.read_text(encoding="utf-8"))
     predictions = {}
+    task_evaluations = []
+    trace_costs = []
     for case in cases:
         case_id = case["case_id"]
         bound_calls = [
@@ -224,16 +300,24 @@ def predict(root: Path, package_dir: Path) -> None:
             raise RuntimeError(f"held-out terminal unexpectedly unparseable: {case_id}")
         episode = episode_from_dict(case["episode"])
         task = evaluate_task_decision(episode, runtime.decision)
-        trace = asdict(
-            evaluate_trace_evidence(
+        trace_evaluation = evaluate_trace_evidence(
                 episode=episode,
                 decision=runtime.decision,
                 trace_id=case_id,
                 accepted_tool_calls=case["accepted_tool_calls"],
             )
-        )
+        trace = asdict(trace_evaluation)
+        task_evaluations.append(task)
+        trace_costs.append(float(trace_evaluation.actual_cost_units))
         predictions[case_id] = {
             "task_terminal_correct": task.terminal_correct,
+            "predicate_satisfied": task.predicate_satisfied,
+            "wrong_decision": task.wrong_decision,
+            "answered": task.answered,
+            "feasible": task.feasible,
+            "feasible_completion": task.feasible_completion,
+            "correct_rejection": task.correct_rejection,
+            "unnecessary_abstain": task.unnecessary_abstain,
             "evidence_state": trace["evidence_state"],
             "definite_stale_dependence": trace["definite_stale_dependence"],
             "unsupported_decision": trace["unsupported_decision"],
@@ -261,6 +345,11 @@ def predict(root: Path, package_dir: Path) -> None:
         "frozen_source_sha256": source_hashes,
         "predicted_at": utc_now(),
         "predictions": predictions,
+        "aggregate_metrics": aggregate_selective_metrics(
+            task_evaluations,
+            costs=trace_costs,
+            utility_weights=UTILITY_WEIGHTS,
+        ),
     }
     prediction_path = package_dir / "heldout_predictions.json"
     prediction_path.write_bytes(canonical_bytes(payload))
@@ -292,8 +381,10 @@ def adjudicate(package_dir: Path, key_dir: Path) -> None:
     plaintext = AESGCM(key).decrypt(encrypted[:12], encrypted[12:], AUDIT_AAD)
     if sha256_bytes(plaintext) != manifest["gold_plaintext_sha256"]:
         raise RuntimeError("Gold plaintext hash mismatch")
-    gold = json.loads(plaintext)["labels"]
-    predictions = json.loads(prediction_path.read_text(encoding="utf-8"))["predictions"]
+    gold_document = json.loads(plaintext)
+    gold = gold_document["labels"]
+    prediction_document = json.loads(prediction_path.read_text(encoding="utf-8"))
+    predictions = prediction_document["predictions"]
     mismatches = []
     field_totals: dict[str, dict[str, int]] = {}
     for case_id, expected in gold.items():
@@ -313,12 +404,34 @@ def adjudicate(package_dir: Path, key_dir: Path) -> None:
                         "classification": "requires_manual_bug_gold_or_identifiability_review",
                     }
                 )
+    aggregate_mismatches = []
+    for field, expected_value in gold_document["aggregate_expected"].items():
+        actual_value = prediction_document["aggregate_metrics"][field]
+        if actual_value != expected_value:
+            aggregate_mismatches.append(
+                {"field": field, "expected": expected_value, "actual": actual_value}
+            )
+            mismatches.append(
+                {
+                    "case_id": "__aggregate__",
+                    "field": field,
+                    "expected": expected_value,
+                    "actual": actual_value,
+                    "classification": "requires_manual_bug_gold_or_identifiability_review",
+                }
+            )
     result = {
         "audit_version": "reliabilitybench-q/heldout-gold-gate-2.0",
         "adjudicated_at": utc_now(),
         "prediction_sha256_before_unseal": freeze["prediction_sha256"],
         "case_count": len(gold),
         "field_gate_results": field_totals,
+        "aggregate_gate_result": {
+            "expected": gold_document["aggregate_expected"],
+            "actual": prediction_document["aggregate_metrics"],
+            "mismatches": aggregate_mismatches,
+            "passed": not aggregate_mismatches,
+        },
         "mismatch_count": len(mismatches),
         "all_unique_truth_gates_passed": not mismatches,
         "mismatches": mismatches,
