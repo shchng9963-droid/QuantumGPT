@@ -28,6 +28,8 @@ PREDICTION_AAD = PREDICTION_SEAL_VERSION.encode("utf-8")
 REVIEW_ORDER_SEEDS = {"a": 2026082004, "b": 2026082005}
 COORDINATION_VERSION = "reliabilitybench-q/judge-v2-coordination-stage1-1.0"
 COORDINATION_ORDER_SEED = 2026082021
+ADJUDICATION_VERSION = "reliabilitybench-q/judge-v2-coordination-stage2-1.0"
+ADJUDICATION_ORDER_SEED = 2026082022
 
 
 def _canonical_json(value: Any) -> str:
@@ -359,6 +361,266 @@ def build_stage1_coordination_package(
     return manager_manifest
 
 
+def validate_stage1_coordination_return(
+    *,
+    original_rows: list[dict[str, Any]],
+    returned_rows: list[dict[str, Any]],
+    frozen_codebook: Mapping[str, Any],
+) -> dict[str, Any]:
+    original_by_id = {row["coordination_item_id"]: row for row in original_rows}
+    returned_by_id = {row.get("coordination_item_id"): row for row in returned_rows}
+    errors: list[dict[str, Any]] = []
+    expected_annotation_fields = {
+        "annotator_id",
+        "trajectory_outcome",
+        "primary_failure_stage",
+        "secondary_error_tags",
+        "correct_with_substantive_error_tag_conflict",
+        "conflict_assessment",
+        "rationale",
+        "confidence",
+        "codebook_systematic_ambiguity",
+        "codebook_ambiguity_description",
+    }
+    allowed_outcomes = set(frozen_codebook["outcomes"])
+    allowed_stages = set(frozen_codebook["primary_failure_stages"])
+    allowed_tags = set(frozen_codebook["secondary_error_tags"])
+    if len(returned_rows) != 17 or len(returned_by_id) != 17:
+        errors.append({"error": "stage1 return must contain 17 unique rows"})
+    if set(original_by_id) != set(returned_by_id):
+        errors.append({"error": "stage1 returned item IDs differ from frozen package"})
+    if [row["coordination_item_id"] for row in original_rows] != [
+        row.get("coordination_item_id") for row in returned_rows
+    ]:
+        errors.append({"error": "stage1 returned order differs from frozen package"})
+    for index, row in enumerate(returned_rows, start=1):
+        item_id = row.get("coordination_item_id")
+        original = original_by_id.get(item_id)
+        if original is None:
+            continue
+        if set(row) != {
+            "coordination_item_id",
+            "phase",
+            "scene",
+            "independent_annotation",
+        }:
+            errors.append({"row": index, "error": "unexpected top-level fields"})
+        if row.get("phase") != original.get("phase"):
+            errors.append({"row": index, "error": "phase changed"})
+        if row.get("scene") != original.get("scene"):
+            errors.append({"row": index, "error": "scene changed"})
+        annotation = row.get("independent_annotation") or {}
+        if set(annotation) != expected_annotation_fields:
+            errors.append({"row": index, "error": "annotation field set changed"})
+            continue
+        outcome = annotation["trajectory_outcome"]
+        stage = annotation["primary_failure_stage"]
+        tags = annotation["secondary_error_tags"]
+        confidence = annotation["confidence"]
+        conflict = annotation["correct_with_substantive_error_tag_conflict"]
+        ambiguity = annotation["codebook_systematic_ambiguity"]
+        if annotation["annotator_id"] != "C":
+            errors.append({"row": index, "error": "annotator_id must be C"})
+        if outcome not in allowed_outcomes:
+            errors.append({"row": index, "error": "invalid outcome"})
+        if outcome == "correct" and stage is not None:
+            errors.append({"row": index, "error": "correct outcome requires null stage"})
+        if outcome == "incorrect" and stage not in allowed_stages:
+            errors.append({"row": index, "error": "incorrect outcome requires one stage"})
+        if (
+            not isinstance(tags, list)
+            or len(tags) != len(set(tags))
+            or not set(tags).issubset(allowed_tags)
+        ):
+            errors.append({"row": index, "error": "invalid secondary tags"})
+        if (
+            not isinstance(confidence, (int, float))
+            or isinstance(confidence, bool)
+            or not 0 <= confidence <= 1
+        ):
+            errors.append({"row": index, "error": "invalid confidence"})
+        if not isinstance(conflict, bool):
+            errors.append({"row": index, "error": "conflict flag must be boolean"})
+        elif conflict and not str(annotation["conflict_assessment"]).strip():
+            errors.append({"row": index, "error": "conflict requires assessment"})
+        if not isinstance(ambiguity, bool):
+            errors.append({"row": index, "error": "ambiguity flag must be boolean"})
+        elif ambiguity and not str(annotation["codebook_ambiguity_description"]).strip():
+            errors.append({"row": index, "error": "ambiguity requires description"})
+        if not str(annotation["rationale"]).strip():
+            errors.append({"row": index, "error": "rationale is required"})
+    return {
+        "status": "passed" if not errors else "failed",
+        "passed": not errors,
+        "row_count": len(returned_rows),
+        "error_count": len(errors),
+        "errors": errors,
+    }
+
+
+def _empty_final_adjudication() -> dict[str, Any]:
+    return {
+        "annotator_id": "C",
+        "trajectory_outcome": None,
+        "primary_failure_stage": None,
+        "secondary_error_tags": [],
+        "correct_with_substantive_error_tag_conflict": None,
+        "conflict_assessment": "",
+        "adjudication_rationale": "",
+        "confidence": None,
+        "codebook_systematic_ambiguity": None,
+        "codebook_ambiguity_description": "",
+    }
+
+
+def _stage2_guide_zh() -> dict[str, Any]:
+    return {
+        "title": "第三标注者阶段2：匿名意见协调与最终裁决",
+        "language": "zh-CN",
+        "phase": "stage2_final_adjudication",
+        "instructions": [
+            "阶段1独立意见已经冻结；现在可比较自己的独立意见与两份匿名先前意见。",
+            "review_1和review_2每条均重新匿名排序，不代表固定标注者身份。",
+            "请形成最终标签、唯一首要失败阶段、次级标签、冲突判断、理由和置信度。",
+            "若发现系统性codebook歧义，必须明确标记并说明，不能靠逐条裁决掩盖。",
+            "不得修改adjudication_item_id、phase、scene、stage1_independent_annotation或prior_reviews。",
+        ],
+        "post_submission_condition": (
+            "研究管理员冻结最终共识文件及SHA-256后，才可解封预先密封的judge预测。"
+        ),
+    }
+
+
+def build_stage2_adjudication_package(
+    *,
+    stage1_original: list[dict[str, Any]],
+    stage1_returned: list[dict[str, Any]],
+    coordination_manager_key: list[dict[str, Any]],
+    reviewer_a: list[dict[str, Any]],
+    reviewer_b: list[dict[str, Any]],
+    output_dir: Path,
+    frozen_codebook: Mapping[str, Any],
+    frozen_stage1_return_sha256: str,
+    generated_at: str | None = None,
+) -> dict[str, Any]:
+    validation = validate_stage1_coordination_return(
+        original_rows=stage1_original,
+        returned_rows=stage1_returned,
+        frozen_codebook=frozen_codebook,
+    )
+    if not validation["passed"]:
+        raise ValueError(f"stage1 return failed validation: {validation}")
+    returned_by_coord = {
+        row["coordination_item_id"]: row for row in stage1_returned
+    }
+    reviewer_a_by_id = {row["item_id"]: row for row in reviewer_a}
+    reviewer_b_by_id = {row["item_id"]: row for row in reviewer_b}
+    stage2_rows: list[dict[str, Any]] = []
+    manager_rows: list[dict[str, Any]] = []
+    for manager in coordination_manager_key:
+        coord_id = manager["coordination_item_id"]
+        stage1_row = returned_by_coord[coord_id]
+        reviews = [
+            dict(reviewer_a_by_id[manager["reviewer_a_item_id"]]["annotation"]),
+            dict(reviewer_b_by_id[manager["reviewer_b_item_id"]]["annotation"]),
+        ]
+        for review in reviews:
+            review.pop("annotator_id", None)
+        random.Random(
+            int(hashlib.sha256(f"{ADJUDICATION_ORDER_SEED}|{coord_id}".encode()).hexdigest()[:16], 16)
+        ).shuffle(reviews)
+        anonymized_reviews = [
+            {"review_id": f"review_{index}", "annotation": review}
+            for index, review in enumerate(reviews, start=1)
+        ]
+        adjudication_item_id = _opaque_id(
+            f"{ADJUDICATION_ORDER_SEED}|{coord_id}|stage2", "adjud-item"
+        )
+        stage2_rows.append(
+            {
+                "adjudication_item_id": adjudication_item_id,
+                "phase": "stage2_final_adjudication",
+                "scene": stage1_row["scene"],
+                "stage1_independent_annotation": stage1_row[
+                    "independent_annotation"
+                ],
+                "prior_reviews": anonymized_reviews,
+                "final_adjudication": _empty_final_adjudication(),
+            }
+        )
+        manager_rows.append(
+            {
+                "adjudication_item_id": adjudication_item_id,
+                "coordination_item_id": coord_id,
+                "case_id": manager["case_id"],
+            }
+        )
+    random.Random(ADJUDICATION_ORDER_SEED).shuffle(stage2_rows)
+    serialized = _canonical_json(stage2_rows).lower()
+    forbidden = (
+        "controller_group",
+        "hidden_group_id",
+        "program_judge",
+        "judge_predictions",
+        "ground_truth",
+        "reviewer_a_item_id",
+        "reviewer_b_item_id",
+        "full_selective",
+        "oracle_invalidation",
+    )
+    violations = [token for token in forbidden if token in serialized]
+    if violations:
+        raise ValueError(f"stage2 adjudication blinding failed: {violations}")
+
+    output_dir.mkdir(parents=True, exist_ok=False, mode=0o700)
+    public_dir = output_dir / "stage2_for_third_annotator"
+    manager_dir = output_dir / "study_manager_only"
+    public_dir.mkdir(mode=0o700)
+    manager_dir.mkdir(mode=0o700)
+    rows_path = public_dir / "第三标注者_阶段2最终裁决_待填写.jsonl"
+    guide_path = public_dir / "第三标注者_阶段2说明.json"
+    codebook_path = public_dir / "冻结标注规范_v0.2.json"
+    _write_jsonl(rows_path, stage2_rows)
+    _write_json(guide_path, _stage2_guide_zh())
+    _write_json(codebook_path, frozen_codebook)
+    for path in (rows_path, guide_path, codebook_path):
+        os.chmod(path, 0o600)
+    public_manifest = {
+        "adjudication_version": ADJUDICATION_VERSION,
+        "status": "stage2_final_adjudication_pending",
+        "item_count": len(stage2_rows),
+        "order_seed": ADJUDICATION_ORDER_SEED,
+        "frozen_stage1_return_sha256": frozen_stage1_return_sha256,
+        "files_sha256": {
+            path.name: _sha256_file(path)
+            for path in (rows_path, guide_path, codebook_path)
+        },
+        "judge_predictions_accessed": False,
+        "reviewer_identity_exposed": False,
+    }
+    public_manifest_path = public_dir / "阶段2文件校验_SHA256.json"
+    _write_json(public_manifest_path, public_manifest)
+    os.chmod(public_manifest_path, 0o600)
+    manager_key_path = manager_dir / "adjudication_manager_key.jsonl"
+    _write_jsonl(manager_key_path, manager_rows)
+    os.chmod(manager_key_path, 0o600)
+    manager_manifest = {
+        "adjudication_version": ADJUDICATION_VERSION,
+        "status": "stage2_generated_final_consensus_pending",
+        "generated_at": generated_at or datetime.now(timezone.utc).isoformat(),
+        "item_count": len(stage2_rows),
+        "frozen_stage1_return_sha256": frozen_stage1_return_sha256,
+        "public_manifest_sha256": _sha256_file(public_manifest_path),
+        "manager_key_sha256": _sha256_file(manager_key_path),
+        "judge_predictions_accessed": False,
+        "judge_unseal_allowed": False,
+    }
+    manager_manifest_path = manager_dir / "adjudication_protocol_manifest.json"
+    _write_json(manager_manifest_path, manager_manifest)
+    os.chmod(manager_manifest_path, 0o600)
+    return manager_manifest
+
+
 def build_blinded_review_package(
     *,
     traces: list[dict[str, Any]],
@@ -457,6 +719,8 @@ def build_blinded_review_package(
 
 
 __all__ = [
+    "ADJUDICATION_ORDER_SEED",
+    "ADJUDICATION_VERSION",
     "COORDINATION_ORDER_SEED",
     "COORDINATION_VERSION",
     "PREDICTION_SEAL_VERSION",
@@ -464,5 +728,7 @@ __all__ = [
     "build_blinded_review_package",
     "build_prediction_rows",
     "build_stage1_coordination_package",
+    "build_stage2_adjudication_package",
     "seal_judge_predictions",
+    "validate_stage1_coordination_return",
 ]

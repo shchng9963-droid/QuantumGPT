@@ -13,7 +13,9 @@ from eval.reliability_bench.judge_audit_package_v2 import (
     PREDICTION_MAGIC,
     build_blinded_review_package,
     build_stage1_coordination_package,
+    build_stage2_adjudication_package,
     seal_judge_predictions,
+    validate_stage1_coordination_return,
 )
 from eval.reliability_bench.judge_audit_v2 import (
     AUDIT_EPISODE_COUNT,
@@ -341,3 +343,63 @@ def test_stage1_coordination_hides_a_b_opinions_and_selects_exact_disagreements(
     assert manifest["outcome_disagreement_count"] == 2
     assert manifest["secondary_tags_disagreement_count"] == 17
     assert manifest["stage2_generated"] is False
+
+    returned_stage1 = copy.deepcopy(rows)
+    for row in returned_stage1:
+        annotation = row["independent_annotation"]
+        annotation.update(
+            {
+                "trajectory_outcome": "correct",
+                "primary_failure_stage": None,
+                "secondary_error_tags": [],
+                "correct_with_substantive_error_tag_conflict": False,
+                "conflict_assessment": "",
+                "rationale": "independent stage1 decision",
+                "confidence": 0.95,
+                "codebook_systematic_ambiguity": False,
+                "codebook_ambiguity_description": "",
+            }
+        )
+    validation = validate_stage1_coordination_return(
+        original_rows=rows,
+        returned_rows=returned_stage1,
+        frozen_codebook={
+            "outcomes": {"correct": "", "incorrect": "", "uncertain": ""},
+            "primary_failure_stages": {"Evidence": ""},
+            "secondary_error_tags": {"stale_reference_after_revalidation": ""},
+        },
+    )
+    assert validation["passed"] is True
+    stage2_output = tmp_path / "stage2"
+    stage2_manifest = build_stage2_adjudication_package(
+        stage1_original=rows,
+        stage1_returned=returned_stage1,
+        coordination_manager_key=load_jsonl(
+            output / "study_manager_only/coordination_manager_key.jsonl"
+        ),
+        reviewer_a=returned_a,
+        reviewer_b=returned_b,
+        output_dir=stage2_output,
+        frozen_codebook={
+            "outcomes": {"correct": "", "incorrect": "", "uncertain": ""},
+            "primary_failure_stages": {"Evidence": ""},
+            "secondary_error_tags": {"stale_reference_after_revalidation": ""},
+        },
+        frozen_stage1_return_sha256="stage1-return-hash",
+        generated_at="2026-08-20T00:02:00+00:00",
+    )
+    stage2_rows = load_jsonl(
+        stage2_output / "stage2_for_third_annotator/第三标注者_阶段2最终裁决_待填写.jsonl"
+    )
+    stage2_serialized = json.dumps(stage2_rows, ensure_ascii=False).lower()
+    assert len(stage2_rows) == 17
+    assert all(len(row["prior_reviews"]) == 2 for row in stage2_rows)
+    assert all(
+        row["final_adjudication"]["trajectory_outcome"] is None
+        for row in stage2_rows
+    )
+    assert '"annotator_id":"a"' not in stage2_serialized.replace(" ", "")
+    assert '"annotator_id":"b"' not in stage2_serialized.replace(" ", "")
+    assert "controller_group" not in stage2_serialized
+    assert "judge_predictions" not in stage2_serialized
+    assert stage2_manifest["judge_unseal_allowed"] is False
