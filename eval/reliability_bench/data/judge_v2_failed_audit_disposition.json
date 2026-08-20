@@ -1,0 +1,45 @@
+{
+  "record_version": "reliabilitybench-q/judge-v2-audit-disposition-1.0",
+  "recorded_at": "2026-08-20T13:24:22Z",
+  "status": "development-only / failed independent audit",
+  "judge_candidate": {
+    "commit": "e2ceb18a610436f01b5f572a3dc75a36816b6c3b",
+    "name": "trace-aware judge v2",
+    "freeze_allowed": false,
+    "future_role": "must not be used as the primary paper-result adjudicator"
+  },
+  "formal_audit": {
+    "finalization_commit": "3a5d2ee29a92109b47cad672d009ee1c1e515817",
+    "aggregate_report_sha256": "c2e329007a90818fe3e6a0bc13360d4bdc2d60b2ff52fc5b0ff9a47681d75b50c",
+    "human_consensus_sha256": "e8dbce83ea67641f6edac71451dc062c560a54a9a0f6f84edbdd4680b68b4fcd",
+    "agreement_count": 21,
+    "episode_count": 24,
+    "agreement": 0.875,
+    "cohen_kappa": 0.7428571428571429,
+    "outcome_gate_passed": false,
+    "critical_label_gate_passed": false
+  },
+  "preregistered_thresholds": {
+    "minimum_agreements_out_of_24": 22,
+    "agreement_min": 0.9,
+    "cohen_kappa_min": 0.8,
+    "critical_label_f1_min": 0.9,
+    "thresholds_lowered_after_results": false
+  },
+  "method_validation_v2_1": {
+    "status": "generated_sealed_not_unsealed",
+    "encrypted_archive_sha256": "4bcdfe4a810d580d24268ec44ece47cc7f3b0d41b87d6282f526aa208f968e132",
+    "archive_accessed_for_this_disposition": false,
+    "unseal_allowed": false
+  },
+  "binding_prohibitions": [
+    "Do not lower or reinterpret the preregistered judge-v2 thresholds.",
+    "Do not fit judge v3 to the 24 independent-audit traces.",
+    "Do not rerun the same independent audit and claim a new pass.",
+    "Do not use judge v2 to adjudicate primary paper outcomes.",
+    "Do not decrypt or otherwise reconstruct method-validation-v2.1 before an approved protocol amendment and all replacement technical gates are frozen.",
+    "Do not modify ActionGuard or generate a replacement validation set before study-owner approval of the construct-redesign proposal."
+  ],
+  "next_phase": "construct redesign: executable task predicates, explicit evidence provenance, and authoritative real-tool traces",
+  "append_only": true
+}
