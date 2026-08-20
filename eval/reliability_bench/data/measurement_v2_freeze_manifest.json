@@ -1,0 +1,25 @@
+{
+  "freeze_version": "reliabilitybench-q/measurement-v2-freeze-1.0",
+  "frozen_on": "2026-08-20",
+  "status": "formally_frozen",
+  "evaluator_candidate_commit": "40e1a619b0613453246aa8d9c689d237a942486d",
+  "public_runtime_audit_head": "144a57ca07cc371d4506b60af753ede42e76c901",
+  "frozen_source_sha256": {
+    "eval/reliability_bench/terminal_schema_v2.py": "2fe27dbad45726b35b5be73c6150e590421d756be89573f7c58fd83ce849e544",
+    "eval/reliability_bench/public_runtime_v2.py": "ab572138d222fcb99037709cc1864b53209e788166431cacd4b298e4905420a8",
+    "eval/reliability_bench/measurement_spec_v2.py": "038ee4075b5f32d9dd74dfe9e69006cb0054941ea881f6e812bbe8e7bf035f3d",
+    "eval/reliability_bench/task_predicate_evaluator_v2.py": "7be012fa20ef161258c4ccd604e1ba1b6030662a3001c17add83ffb20e4c0c0e",
+    "eval/reliability_bench/trace_evidence_evaluator_v2.py": "6e13316732b7e6d4aed706db1fac59e7ad1c43498a3632f4b9d5c6e38068063e"
+  },
+  "heldout_gold_v2_1": {
+    "case_count": 41,
+    "per_trace_fields": 29,
+    "per_trace_exact_comparisons": 1189,
+    "aggregate_exact_comparisons": 8,
+    "total_exact_comparisons": 1197,
+    "mismatches": 0,
+    "gate_result_sha256": "0ae47450aba511221ec57128654a93e95826a20e282ed6ca667841e7111fd86c"
+  },
+  "change_policy": "Any change to a frozen source, core construct semantics, public terminal schema, or public prompt requires a new evaluator version and a complete new independent Gold audit.",
+  "method_validation_v2_1_unseal_allowed": false
+}

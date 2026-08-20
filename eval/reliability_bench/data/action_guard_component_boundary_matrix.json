@@ -1,0 +1,41 @@
+{
+  "version": "reliabilitybench-q/action-guard-boundary-matrix-1.0",
+  "arms": [
+    {"arm": "ledger_only", "automatic_invalidation": false, "action_guard": false},
+    {"arm": "full_selective", "automatic_invalidation": true, "action_guard": false},
+    {"arm": "ledger_only_guard", "automatic_invalidation": false, "action_guard": true},
+    {"arm": "full_selective_guard", "automatic_invalidation": true, "action_guard": true},
+    {"arm": "global_revalidate_guard", "automatic_invalidation": "global", "action_guard": true},
+    {"arm": "oracle_invalidation_guard", "automatic_invalidation": "oracle-invalidation", "action_guard": true}
+  ],
+  "components": {
+    "temporal_evidence_layer": {
+      "input": ["drift_event", "dependency_graph", "evidence_ledger"],
+      "output": ["visible_evidence_validity_state"],
+      "forbidden": ["task_predicate_evaluator", "acceptable_action_set", "action_recommendation"]
+    },
+    "recovery_planner": {
+      "input": ["required_evidence_slots", "abstract_recovery_candidates", "declared_costs"],
+      "output": ["minimum_cost_abstract_recovery_plan"],
+      "forbidden": ["action_guard_decision", "task_predicate_evaluator", "hidden_ground_truth"]
+    },
+    "action_guard": {
+      "input": ["public_task_contract", "visible_evidence_ledger", "candidate_action", "public_tool_schema", "accepted_tool_trace", "frozen_public_required_slots"],
+      "output": ["ALLOW", "BLOCK(reason_code)", "REPAIR_REQUEST(reason_code)"],
+      "forbidden": ["drift_inference", "oracle_invalidation", "task_predicate_evaluator", "acceptable_action_set", "hidden_ground_truth", "recommended_backend", "recommended_qubits", "recommended_tool_parameters"]
+    },
+    "measurement_v2": {
+      "input": ["completed_real_trace", "terminal_decision", "external_task_contract"],
+      "output": ["frozen_primary_and_secondary_metrics"],
+      "runtime_access": false
+    }
+  },
+  "shared_runtime": {
+    "terminal_schema": "terminal-decision-2.0",
+    "max_total_llm_turns": 12,
+    "max_tool_calls": 10,
+    "guard_max_repair_attempts": 2,
+    "guard_repair_consumes_shared_turn_budget": true,
+    "guard_adds_hidden_tool_budget": false
+  }
+}
