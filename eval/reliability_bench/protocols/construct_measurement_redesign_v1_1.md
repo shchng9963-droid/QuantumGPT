@@ -136,9 +136,9 @@ U_t(d_t)=\mathbf 1[\exists e\in P(d_t):V_t(e)=0].
 \[
 EvidenceState_t(d)=
 \begin{cases}
-safe,& Supported_t(d)=1\\
+safe,& Supported_t(d)=1\land C_P(d)=1\land U_t(d)=0\\
 unsafe,& \exists e\in P(d):V_t(e)=0\\
-unknown,& C_P(d)=0\land U_t(d)=0.
+unknown,& \text{otherwise}.
 \end{cases}
 \]
 
@@ -161,7 +161,7 @@ Covers(e,r)\land V_t(e)=1
 另报告保守风险上界
 
 \[
-UnsafeOrUnknown_t(d_t)=U_t(d_t)\lor\neg C_P(d_t),
+UnsafeOrUnknown_t(d_t)=U_t(d_t)\lor\neg Supported_t(d_t)\lor\neg C_P(d_t),
 \]
 
 但它只能作为复合敏感性指标，不能替代三类主指标或被解释为“确定使用了旧证据”。这样既避免Agent通过省略证据ID人为降低`stale-use rate`，也不会把未知错误解释为已确认过期依赖。
