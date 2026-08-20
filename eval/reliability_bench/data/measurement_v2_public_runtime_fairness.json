@@ -1,0 +1,74 @@
+{
+  "audit_version": "reliabilitybench-q/public-runtime-fairness-2.0",
+  "candidate_commit": "40e1a619b0613453246aa8d9c689d237a942486d",
+  "arm_count": 6,
+  "all_public_prompts_identical": true,
+  "common_public_prompt_sha256": "4f2c7392cbcbe3f3b4933c159f007d7fc4b93637ca61bfd5ebafc5dc3590a2bb",
+  "shared_runtime": {
+    "terminal_schema": "reliabilitybench-q/terminal-decision-2.0",
+    "max_tokens": 4096,
+    "max_turns": 12,
+    "max_tool_calls": 10,
+    "max_cost_units": 10,
+    "request_timeout_seconds": 120.0,
+    "api_max_attempts": 2,
+    "api_fixed_backoff_seconds": 1.0,
+    "format_max_attempts": 2,
+    "trace_save_policy": "append_only_keep_failures"
+  },
+  "component_information_access_matrix": {
+    "ledger_only": {
+      "evidence_ledger": true,
+      "invalidation": "none",
+      "action_guard": "absent",
+      "oracle_private_channel": false
+    },
+    "original_full": {
+      "evidence_ledger": true,
+      "invalidation": "dependency_scoped",
+      "action_guard": "absent",
+      "oracle_private_channel": false
+    },
+    "ledger_only_plus_action_guard": {
+      "evidence_ledger": true,
+      "invalidation": "none",
+      "action_guard": "interface_only_unimplemented",
+      "oracle_private_channel": false
+    },
+    "full_plus_action_guard": {
+      "evidence_ledger": true,
+      "invalidation": "dependency_scoped",
+      "action_guard": "interface_only_unimplemented",
+      "oracle_private_channel": false
+    },
+    "global_revalidate_plus_action_guard": {
+      "evidence_ledger": true,
+      "invalidation": "global",
+      "action_guard": "interface_only_unimplemented",
+      "oracle_private_channel": false
+    },
+    "oracle_invalidation_plus_action_guard": {
+      "evidence_ledger": true,
+      "invalidation": "oracle_invalidation_only",
+      "action_guard": "interface_only_unimplemented",
+      "oracle_private_channel": true
+    }
+  },
+  "common_fields": [
+    "public prompt and schema instructions",
+    "deterministic evidence IDs",
+    "tool catalog and prices",
+    "turn, token, call, and cost budgets",
+    "strict JSON parser and generic format retry",
+    "timeout and API retry policy",
+    "append-only trace retention",
+    "status, decision, and supporting_evidence_ids requirements"
+  ],
+  "semantic_repair_capability": false,
+  "action_guard_core_implemented": false,
+  "prompt_leakage_tokens_absent": [
+    "invalidated_evidence_ids",
+    "recommended_action"
+  ],
+  "allowed_treatment_differences_only": true
+}

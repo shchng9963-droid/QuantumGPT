@@ -1,0 +1,47 @@
+{
+  "audit_version": "reliabilitybench-q/gold-audit-summary-2.0",
+  "candidate_commit": "40e1a619b0613453246aa8d9c689d237a942486d",
+  "development": {
+    "case_count": 39,
+    "first_run_disagreements": 9,
+    "first_run_classification": {
+      "gold_specification_error": 8,
+      "evaluator_implementation_bug": 1,
+      "construct_non_identifiable": 0
+    },
+    "final_passed": 39,
+    "final_failed": 0,
+    "gold_payload_sha256": "ec419deea7c3d55f44de11d44af60698f3fcd3fc804fbc67c0cd98879fb04c172",
+    "audit_file_sha256": "e686b5d5cdc8c87da3476902fcd48a86d8c1b7adface5a03bc6f6116e4ea66c9"
+  },
+  "held_out": {
+    "case_count": 41,
+    "field_count": 22,
+    "exact_field_comparisons": 902,
+    "mismatch_count": 0,
+    "all_unique_truth_gates_passed": true,
+    "prediction_sha256_before_gold_unseal": "c5508df1f64948ff9db3a8409bf304ddfe25816d06c7cc05ac2231275c145b72",
+    "manifest_sha256": "dfc199b5c25444fb25f87d0ea9672eb5f92b06c2ea25829cb3a092a962f54f58",
+    "prediction_freeze_manifest_sha256": "c7b502b57cfc3fc654e3a15a821b211765ce6e33ad4a99ba78bac39f1655720f",
+    "gate_result_sha256": "bca7ec93155f98f700378e1daef2c7540b39b2c1ca154876c39cc11dc99e8d75"
+  },
+  "held_out_coverage": {
+    "task_type": {
+      "backend_selection": 15,
+      "qubit_mapping": 4,
+      "transpilation": 4,
+      "fidelity_claim": 4,
+      "mitigation_decision": 8,
+      "unreachable_target": 6
+    },
+    "drift_relevance": {"related": 32, "unrelated": 9},
+    "terminal_status": {"success": 36, "failure": 3, "abstain": 2},
+    "evidence_state": {"safe": 20, "unsafe": 7, "unknown": 14},
+    "snapshot_lineage": {"valid": 40, "invalid": 1},
+    "evidence_closure": {"complete": 40, "incomplete": 1},
+    "runtime_identifier_binding": {"accepted": 40, "rejected_forged_id": 1}
+  },
+  "formal_method_experiment_run": false,
+  "method_validation_v2_1_unsealed": false,
+  "action_guard_core_modified": false
+}
