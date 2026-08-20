@@ -24,7 +24,7 @@ from .schema import (
 )
 
 
-GENERATOR_VERSION = "reliabilitybench-q/method-validation-generator-2.0"
+GENERATOR_VERSION = "reliabilitybench-q/method-validation-generator-2.1"
 
 BACKENDS = ("FakeBrisbane", "FakeSherbrooke", "FakeKyiv")
 CIRCUITS = (
@@ -50,7 +50,7 @@ SEVERITIES = (
 
 @dataclass(frozen=True)
 class GeneratorV2Config:
-    random_seed: int = 20260824
+    random_seed: int
     pairs_per_task: int = 2
     candidate_qubit_slack: int = 2
     target_fidelity: float = 0.85
@@ -58,7 +58,7 @@ class GeneratorV2Config:
     source: str = "synthetic_method_validation_v2"
 
 
-DEFAULT_CONFIG = GeneratorV2Config()
+DEVELOPMENT_CONFIG = GeneratorV2Config(random_seed=20260824)
 
 
 def canonical_config(config: GeneratorV2Config) -> dict[str, Any]:
@@ -327,7 +327,7 @@ def _build_episode(
 
 
 def generate_method_validation_candidates(
-    config: GeneratorV2Config = DEFAULT_CONFIG,
+    config: GeneratorV2Config,
 ) -> list[Episode]:
     if config.pairs_per_task != 2:
         raise ValueError("the preregistered v2 protocol requires two pairs per task")
@@ -344,7 +344,7 @@ def generate_method_validation_candidates(
 
 
 __all__ = [
-    "DEFAULT_CONFIG",
+    "DEVELOPMENT_CONFIG",
     "GENERATOR_VERSION",
     "GeneratorV2Config",
     "canonical_config",

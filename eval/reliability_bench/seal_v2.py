@@ -16,7 +16,6 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from . import generator_v2, predicates_v2, schema
 from .generator_v2 import (
-    DEFAULT_CONFIG,
     GENERATOR_VERSION,
     GeneratorV2Config,
     canonical_config,
@@ -25,8 +24,8 @@ from .generator_v2 import (
 )
 
 
-SEAL_VERSION = "reliabilitybench-q/method-validation-seal-1.0"
-VALIDATION_SET_VERSION = "reliabilitybench-q/method-validation-v2.0"
+SEAL_VERSION = "reliabilitybench-q/method-validation-seal-1.1"
+VALIDATION_SET_VERSION = "reliabilitybench-q/method-validation-v2.1"
 ARCHIVE_MAGIC = b"RBQ-AES256-GCM-V1\x00"
 ARCHIVE_AAD = VALIDATION_SET_VERSION.encode("utf-8")
 
@@ -99,7 +98,7 @@ def seal_method_validation_set(
     seal_commit: str,
     authorized_custodians: list[str],
     unseal_condition: str,
-    config: GeneratorV2Config = DEFAULT_CONFIG,
+    config: GeneratorV2Config,
     generated_at: str | None = None,
 ) -> dict[str, Any]:
     if not generator_commit.strip():

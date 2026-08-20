@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import replace
 
 from eval.reliability_bench.generator_v2 import (
-    DEFAULT_CONFIG,
+    DEVELOPMENT_CONFIG,
     config_sha256,
     generate_method_validation_candidates,
 )
@@ -23,13 +23,13 @@ from eval.reliability_bench.schema import (
 def _episode(task, relevance):
     return next(
         item
-        for item in generate_method_validation_candidates()
+        for item in generate_method_validation_candidates(DEVELOPMENT_CONFIG)
         if item.task_type is task and item.drift_event.relevance is relevance
     )
 
 
 def test_v2_generates_24_matched_heldout_candidates_without_public_truth_leakage():
-    episodes = generate_method_validation_candidates()
+    episodes = generate_method_validation_candidates(DEVELOPMENT_CONFIG)
     assert len(episodes) == 24
     assert len({item.pair_id for item in episodes}) == 12
     assert {item.schema_version for item in episodes} == {LATEST_SCHEMA_VERSION}
@@ -94,7 +94,7 @@ def test_snapshot_lineage_uses_registered_real_ids_not_symbolic_aliases():
 
 
 def test_initial_snapshot_is_a_registered_evidence_source_with_current_descendant():
-    for episode in generate_method_validation_candidates():
+    for episode in generate_method_validation_candidates(DEVELOPMENT_CONFIG):
         policy = episode.ground_truth.acceptable_payload["evidence_policy"]
         initial = episode.initial_state["snapshot_id"]
         current = policy["current_snapshot_id"]
@@ -133,6 +133,8 @@ def test_v11_schema_rejects_unregistered_initial_snapshot_boundary_case():
 
 
 def test_generator_config_hash_is_deterministic_and_sensitive():
-    assert config_sha256(DEFAULT_CONFIG) == config_sha256(DEFAULT_CONFIG)
-    changed = replace(DEFAULT_CONFIG, random_seed=DEFAULT_CONFIG.random_seed + 1)
-    assert config_sha256(changed) != config_sha256(DEFAULT_CONFIG)
+    assert config_sha256(DEVELOPMENT_CONFIG) == config_sha256(DEVELOPMENT_CONFIG)
+    changed = replace(
+        DEVELOPMENT_CONFIG, random_seed=DEVELOPMENT_CONFIG.random_seed + 1
+    )
+    assert config_sha256(changed) != config_sha256(DEVELOPMENT_CONFIG)

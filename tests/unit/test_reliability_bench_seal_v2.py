@@ -8,6 +8,7 @@ import tarfile
 
 import pytest
 
+from eval.reliability_bench.generator_v2 import DEVELOPMENT_CONFIG
 from eval.reliability_bench.seal_v2 import (
     _decrypt_archive_for_verification,
     _read_secret,
@@ -25,6 +26,7 @@ def test_sealer_writes_only_ciphertext_and_manager_manifest(tmp_path):
         seal_commit="abc1234",
         authorized_custodians=["study_manager"],
         unseal_condition="judge v2 and ActionGuard are independently frozen",
+        config=DEVELOPMENT_CONFIG,
         generated_at="2026-08-20T00:00:00+00:00",
     )
     assert manifest["episode_count"] == 24
@@ -61,6 +63,7 @@ def test_sealer_refuses_overwrite_and_requires_custody_protocol(tmp_path):
         "seal_commit": "abc1234",
         "authorized_custodians": ["study_manager"],
         "unseal_condition": "judge and method are frozen",
+        "config": DEVELOPMENT_CONFIG,
     }
     seal_method_validation_set(**kwargs)
     with pytest.raises(FileExistsError):
@@ -74,4 +77,5 @@ def test_sealer_refuses_overwrite_and_requires_custody_protocol(tmp_path):
             seal_commit="abc1234",
             authorized_custodians=[],
             unseal_condition="judge and method are frozen",
+            config=DEVELOPMENT_CONFIG,
         )
