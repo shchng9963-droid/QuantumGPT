@@ -286,8 +286,10 @@ def _tool_output(
         }
     if tool_name == "get_qubit_properties":
         degraded = [_degraded_qubit(episode)] if task_changed else []
+        candidates = episode.task_constraints.get("candidate_qubits")
+        available = list(candidates) if candidates else list(range(5))
         return {
-            "available_qubits": list(range(5)),
+            "available_qubits": available,
             "degraded_qubits": degraded,
         }
     if tool_name == "get_coupling_map":

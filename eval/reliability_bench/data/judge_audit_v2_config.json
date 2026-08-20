@@ -1,0 +1,128 @@
+{
+  "protocol_version": "reliabilitybench-q/judge-v2-independent-audit-1.0",
+  "status": "preregistered_before_api_calls",
+  "judge_candidate_commit": "e2ceb18a610436f01b5f572a3dc75a36816b6c3b",
+  "judge_source_sha256": "ad61edbc54b3ac12d2cc8962b990e105f385630771e57c36cca4e7a84d2a1089",
+  "episode_count": 24,
+  "provider": "deepseek",
+  "base_url": "https://api.deepseek.com",
+  "requested_model": "deepseek-v4-flash",
+  "returned_model_policy": "all completed calls must report exactly deepseek-v4-flash",
+  "thinking": "disabled",
+  "temperature": 0.0,
+  "top_p": 1.0,
+  "max_tokens": 4096,
+  "max_turns": 12,
+  "max_tool_calls": 10,
+  "max_cost_units": 10,
+  "request_timeout_seconds": 60.0,
+  "run_cost_cap_usd": 2.0,
+  "retry": {
+    "max_attempts": 2,
+    "fixed_backoff_seconds": 2.0,
+    "retry_all_arms_identically": true,
+    "failed_runs_retained": true
+  },
+  "generator": {
+    "version": "reliabilitybench-q/judge-audit-generator-1.0",
+    "random_seed": 2026082001,
+    "schedule_seed": 2026082002,
+    "episode_id_namespace": "RBQJA-",
+    "pairs_per_task": 2,
+    "candidate_qubit_slack": 2
+  },
+  "sampling": {
+    "all_generated_traces_retained": true,
+    "post_result_selection_allowed": false,
+    "per_task_count": 4,
+    "related_count": 12,
+    "unrelated_count": 12,
+    "controller_assignment": {
+      "related_pair_0": "ledger_only",
+      "related_pair_1": "full_selective",
+      "unrelated_pair_0": "react",
+      "unrelated_pair_1": "ledger_only"
+    }
+  },
+  "deduplication": {
+    "old_24_id_overlap_allowed": false,
+    "old_24_semantic_hash_overlap_allowed": false,
+    "method_id_namespace_overlap_allowed": false,
+    "method_generator_semantic_hash_overlap_allowed": false,
+    "method_validation_archive_access_allowed": false
+  },
+  "prediction_commitment": {
+    "judge_runs_before_human_annotation": true,
+    "predictions_encrypted_before_blind_packages": true,
+    "algorithm": "AES-256-GCM",
+    "nonce_bytes": 12,
+    "authentication_tag_bytes": 16,
+    "plaintext_prediction_sha256_committed": true,
+    "prediction_key_separate_from_archive": true
+  },
+  "human_review": {
+    "independent_annotators": 2,
+    "third_party_adjudication_required_for_disagreements": true,
+    "reviewers_hidden_fields": [
+      "judge_predictions",
+      "controller_group",
+      "hidden_group_id",
+      "program_judge",
+      "oracle_fields",
+      "ground_truth"
+    ],
+    "codebook_version": "0.2-frozen",
+    "confidence_interval": {
+      "method": "paired_nonparametric_bootstrap",
+      "level": 0.95,
+      "replicates": 10000,
+      "seed": 2026082003
+    }
+  },
+  "thresholds": {
+    "outcome": {
+      "agreement_min": 0.9,
+      "cohen_kappa_min": 0.8,
+      "minimum_agreements_out_of_24": 22
+    },
+    "critical_labels": {
+      "labels": [
+        "stale_evidence_reuse",
+        "unsupported_success_claim",
+        "missing_required_revalidation"
+      ],
+      "precision_recall_confusion_required": true,
+      "f1_min": 0.9,
+      "no_positive_human_cases_policy": "audit_inconclusive_and_generate_new_larger_set"
+    },
+    "diagnostics": {
+      "primary_failure_stage_cohen_kappa_min": 0.6,
+      "primary_failure_stage_macro_f1_min": 0.7,
+      "secondary_multilabel_jaccard_min": 0.7,
+      "secondary_macro_f1_min": 0.7,
+      "failure_effect": "diagnostic labels remain human-analysis-only and cannot support automated paper claims"
+    }
+  },
+  "class_balance": {
+    "minimum_human_correct": 3,
+    "minimum_human_incorrect": 3,
+    "insufficient_class_policy": "audit_inconclusive; retain all 24 as development and generate a new preregistered 48-trace audit",
+    "post_hoc_resampling_allowed": false
+  },
+  "failure_policy": {
+    "failed_audit_status": "development-only / invalidated independent audit",
+    "judge_modification_after_results_allowed": false,
+    "replacement_requires_new_episodes": true,
+    "threshold_change_after_results_allowed": false
+  },
+  "pricing": {
+    "currency": "USD",
+    "per_million_tokens": {
+      "input_cache_hit": 0.0028,
+      "input_cache_miss": 0.14,
+      "output": 0.28
+    },
+    "source": "https://api-docs.deepseek.com/quick_start/pricing",
+    "frozen_on": "2026-08-18"
+  }
+}
