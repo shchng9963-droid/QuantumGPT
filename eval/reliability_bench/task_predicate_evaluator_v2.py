@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Mapping, Sequence
 
+from .measurement_spec_v2 import PRIMARY_UTILITY_WEIGHTS
 from .schema import Episode, TaskType
 from .terminal_schema_v2 import TerminalDecision, TerminalStatus
 
@@ -136,7 +137,7 @@ def aggregate_selective_metrics(
     evaluations: Sequence[TaskEvaluation],
     *,
     costs: Sequence[float] | None = None,
-    utility_weights: Mapping[str, float],
+    utility_weights: Mapping[str, float] = PRIMARY_UTILITY_WEIGHTS,
 ) -> dict[str, float | int | None]:
     """Aggregate coverage/risk and an explicitly weighted overall utility."""
     if not evaluations:

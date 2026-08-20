@@ -9,11 +9,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping, Sequence
 
+from .measurement_spec_v2 import TASK_REQUIRED_SLOTS as REQUIRED_SLOT_REGISTRY
 from .schema import Episode, TaskType
 from .terminal_schema_v2 import TerminalDecision, TerminalStatus
 
 
-TRACE_EVALUATOR_VERSION = "reliabilitybench-q/trace-evidence-evaluator-1.0-dev"
+TRACE_EVALUATOR_VERSION = "reliabilitybench-q/trace-evidence-evaluator-2.0-candidate"
 
 TOOL_EVIDENCE_REGISTRY: dict[str, tuple[str, ...]] = {
     "get_backend_health": ("backend_health", "backend_capacity"),
@@ -37,12 +38,7 @@ EVIDENCE_TYPE_SLOTS: dict[str, tuple[str, ...]] = {
 }
 
 TASK_REQUIRED_SLOTS: dict[TaskType, tuple[str, ...]] = {
-    TaskType.BACKEND_SELECTION: ("backend_ranking",),
-    TaskType.QUBIT_MAPPING: ("qubit_properties",),
-    TaskType.TRANSPILATION: ("compilation",),
-    TaskType.FIDELITY_CLAIM: ("circuit_result",),
-    TaskType.MITIGATION_DECISION: ("mitigation_estimate",),
-    TaskType.UNREACHABLE_TARGET: ("backend_capacity",),
+    task_type: REQUIRED_SLOT_REGISTRY[task_type.value] for task_type in TaskType
 }
 
 
@@ -54,6 +50,8 @@ class EvidenceNode:
     slots: tuple[str, ...]
     depends_on_resources: tuple[str, ...]
     valid: bool
+    stale: bool = False
+    closure_complete: bool = True
     parent_evidence_ids: tuple[str, ...] = ()
     query_reference_ids: tuple[str, ...] = ()
 
@@ -66,11 +64,13 @@ class NormalizedToolCall:
     request: dict[str, Any]
     response: dict[str, Any]
     output_evidence_id: str
-    current_snapshot_id: str
+    observed_snapshot_id: str
     slots: tuple[str, ...]
     query_reference_ids: tuple[str, ...]
+    parent_evidence_ids: tuple[str, ...]
     successful: bool
     cost_units: int
+    latency_seconds: float
 
 
 @dataclass(frozen=True)
@@ -83,6 +83,9 @@ class TraceEvidenceEvaluation:
     unsafe_or_unknown: bool
     supporting_evidence_ids: tuple[str, ...]
     unresolved_supporting_evidence_ids: tuple[str, ...]
+    provenance_closure_ids: tuple[str, ...]
+    snapshot_lineage_valid: bool
+    evidence_closure_complete: bool
     required_evidence_slots: tuple[str, ...]
     necessary_revalidation_slots: tuple[str, ...]
     valid_revalidation_slots: tuple[str, ...]
@@ -96,7 +99,11 @@ class TraceEvidenceEvaluation:
     intervention_executed: bool
     intervention_verified: bool
     actual_tool_call_count: int
+    failed_tool_call_count: int
+    repeated_tool_call_count: int
+    irrelevant_tool_call_count: int
     actual_cost_units: int
+    actual_latency_seconds: float
 
 
 def _tool_successful(response: Mapping[str, Any]) -> bool:
@@ -105,7 +112,19 @@ def _tool_successful(response: Mapping[str, Any]) -> bool:
     if response.get("success") is False or response.get("executed") is False:
         return False
     status = response.get("status")
-    return status not in {"error", "failed", "rejected"}
+    return status not in {"error", "failed", "rejected", "timeout", "timed_out"}
+
+
+def _string_ids(value: Any, *, field: str) -> tuple[str, ...]:
+    if value is None:
+        return ()
+    if not isinstance(value, (list, tuple)):
+        raise ValueError(f"{field} must be a list")
+    if any(not isinstance(item, str) or not item for item in value):
+        raise ValueError(f"{field} must contain non-empty strings")
+    if len(value) != len(set(value)):
+        raise ValueError(f"{field} must not contain duplicates")
+    return tuple(value)
 
 
 def normalize_accepted_tool_calls(
@@ -138,6 +157,16 @@ def normalize_accepted_tool_calls(
         cost = raw.get("cost_units", 0)
         if not isinstance(cost, int) or isinstance(cost, bool) or cost < 0:
             raise ValueError("tool cost_units must be a non-negative integer")
+        latency = raw.get("latency_seconds", 0.0)
+        if (
+            not isinstance(latency, (int, float))
+            or isinstance(latency, bool)
+            or latency < 0
+        ):
+            raise ValueError("tool latency_seconds must be a non-negative number")
+        observed_snapshot = raw.get("observed_snapshot_id", current_snapshot_id)
+        if not isinstance(observed_snapshot, str) or not observed_snapshot:
+            raise ValueError("observed_snapshot_id must be a non-empty string")
         normalized.append(
             NormalizedToolCall(
                 tool_call_id=f"call:{index}",
@@ -146,11 +175,15 @@ def normalize_accepted_tool_calls(
                 request=dict(request),
                 response=dict(response),
                 output_evidence_id=f"obs:{trace_id}:{index}",
-                current_snapshot_id=current_snapshot_id,
+                observed_snapshot_id=observed_snapshot,
                 slots=TOOL_EVIDENCE_REGISTRY[str(tool_name)],
                 query_reference_ids=references,
+                parent_evidence_ids=_string_ids(
+                    raw.get("parent_evidence_ids"), field="parent_evidence_ids"
+                ),
                 successful=_tool_successful(response),
                 cost_units=cost,
+                latency_seconds=float(latency),
             )
         )
     return tuple(sorted(normalized, key=lambda item: item.call_index))
@@ -171,26 +204,93 @@ def _initial_evidence_nodes(episode: Episode) -> tuple[EvidenceNode, ...]:
                 slots=slots,
                 depends_on_resources=evidence.depends_on_resources,
                 valid=valid,
+                stale=not valid,
             )
         )
     return tuple(nodes)
 
 
+def _snapshot_lineage(episode: Episode) -> tuple[set[str], str, bool]:
+    policy = episode.ground_truth.acceptable_payload["evidence_policy"]
+    lineage = policy.get("snapshot_lineage")
+    initial = str(episode.initial_state["snapshot_id"])
+    current = _current_snapshot_id(episode)
+    if not isinstance(lineage, list):
+        return set(), current, False
+    by_id = {
+        item.get("snapshot_id"): item
+        for item in lineage
+        if isinstance(item, Mapping) and isinstance(item.get("snapshot_id"), str)
+    }
+    initial_node = by_id.get(initial)
+    current_node = by_id.get(current)
+    valid = bool(
+        len(by_id) == len(lineage)
+        and initial_node
+        and initial_node.get("phase") == "pre_drift"
+        and initial_node.get("parent_snapshot_id") is None
+        and current_node
+        and current_node.get("phase") == "current"
+        and current_node.get("parent_snapshot_id") == initial
+    )
+    return set(by_id), current, valid
+
+
 def _tool_evidence_nodes(
     calls: Sequence[NormalizedToolCall],
+    *,
+    initial_nodes: Sequence[EvidenceNode],
+    registered_snapshots: set[str],
+    current_snapshot_id: str,
+    snapshot_lineage_valid: bool,
 ) -> tuple[EvidenceNode, ...]:
-    return tuple(
-        EvidenceNode(
-            evidence_id=call.output_evidence_id,
-            source=f"accepted_tool_call:{call.tool_call_id}:{call.tool_name}",
-            snapshot_id=call.current_snapshot_id,
-            slots=call.slots,
-            depends_on_resources=(),
-            valid=call.successful,
-            query_reference_ids=call.query_reference_ids,
+    known = {node.evidence_id for node in initial_nodes}
+    nodes: list[EvidenceNode] = []
+    for call in calls:
+        closure_complete = set(call.parent_evidence_ids).issubset(known)
+        snapshot_valid = (
+            snapshot_lineage_valid
+            and
+            call.observed_snapshot_id in registered_snapshots
+            and call.observed_snapshot_id == current_snapshot_id
         )
-        for call in calls
-    )
+        nodes.append(
+            EvidenceNode(
+                evidence_id=call.output_evidence_id,
+                source=f"accepted_tool_call:{call.tool_call_id}:{call.tool_name}",
+                snapshot_id=call.observed_snapshot_id,
+                slots=call.slots,
+                depends_on_resources=(),
+                valid=call.successful and snapshot_valid and closure_complete,
+                stale=False,
+                closure_complete=closure_complete,
+                parent_evidence_ids=call.parent_evidence_ids,
+                query_reference_ids=call.query_reference_ids,
+            )
+        )
+        known.add(call.output_evidence_id)
+    return tuple(nodes)
+
+
+def _provenance_closure(
+    cited_ids: Sequence[str], nodes: Mapping[str, EvidenceNode]
+) -> tuple[tuple[str, ...], bool]:
+    pending = list(cited_ids)
+    visited: set[str] = set()
+    complete = True
+    while pending:
+        evidence_id = pending.pop()
+        if evidence_id in visited:
+            continue
+        visited.add(evidence_id)
+        node = nodes.get(evidence_id)
+        if node is None:
+            complete = False
+            continue
+        if not node.closure_complete:
+            complete = False
+        pending.extend(node.parent_evidence_ids)
+    return tuple(sorted(visited)), complete
 
 
 def _current_snapshot_id(episode: Episode) -> str:
@@ -262,8 +362,17 @@ def evaluate_trace_evidence(
         raw_tool_calls=accepted_tool_calls,
         current_snapshot_id=_current_snapshot_id(episode),
     )
+    registered_snapshots, current_snapshot_id, lineage_valid = _snapshot_lineage(
+        episode
+    )
     initial_nodes = _initial_evidence_nodes(episode)
-    tool_nodes = _tool_evidence_nodes(calls)
+    tool_nodes = _tool_evidence_nodes(
+        calls,
+        initial_nodes=initial_nodes,
+        registered_snapshots=registered_snapshots,
+        current_snapshot_id=current_snapshot_id,
+        snapshot_lineage_valid=lineage_valid,
+    )
     nodes = {node.evidence_id: node for node in (*initial_nodes, *tool_nodes)}
     unresolved = tuple(
         evidence_id
@@ -275,7 +384,10 @@ def evaluate_trace_evidence(
         for evidence_id in decision.supporting_evidence_ids
         if evidence_id in nodes
     ]
-    definite_stale = any(not node.valid for node in supporting_nodes)
+    closure_ids, closure_complete = _provenance_closure(
+        decision.supporting_evidence_ids, nodes
+    )
+    definite_stale = any(node.stale for node in supporting_nodes)
     required_slots = TASK_REQUIRED_SLOTS[episode.task_type]
     valid_supported_slots = {
         slot
@@ -284,7 +396,11 @@ def evaluate_trace_evidence(
         for slot in node.slots
     }
     unsupported = not set(required_slots).issubset(valid_supported_slots)
-    provenance_incomplete = bool(unresolved) or not decision.supporting_evidence_ids
+    provenance_incomplete = (
+        bool(unresolved)
+        or not decision.supporting_evidence_ids
+        or not closure_complete
+    )
     if definite_stale:
         evidence_state = "unsafe"
     elif not unsupported and not provenance_incomplete:
@@ -323,6 +439,13 @@ def evaluate_trace_evidence(
         decision, calls, {node.evidence_id for node in initial_nodes}
     )
     requested, attempted, executed, verified = _intervention_stages(decision, calls)
+    call_signatures = [
+        (call.tool_name, repr(sorted(call.request.items()))) for call in calls
+    ]
+    repeated_calls = len(call_signatures) - len(set(call_signatures))
+    irrelevant_calls = sum(
+        not set(call.slots).intersection(required_slots) for call in calls
+    )
     return TraceEvidenceEvaluation(
         evaluator_version=TRACE_EVALUATOR_VERSION,
         evidence_state=evidence_state,
@@ -332,6 +455,9 @@ def evaluate_trace_evidence(
         unsafe_or_unknown=definite_stale or unsupported or provenance_incomplete,
         supporting_evidence_ids=decision.supporting_evidence_ids,
         unresolved_supporting_evidence_ids=unresolved,
+        provenance_closure_ids=closure_ids,
+        snapshot_lineage_valid=lineage_valid,
+        evidence_closure_complete=closure_complete,
         required_evidence_slots=required_slots,
         necessary_revalidation_slots=necessary_slots,
         valid_revalidation_slots=tuple(sorted(valid_tool_slots)),
@@ -347,7 +473,13 @@ def evaluate_trace_evidence(
         intervention_executed=executed,
         intervention_verified=verified,
         actual_tool_call_count=len(calls),
+        failed_tool_call_count=sum(not call.successful for call in calls),
+        repeated_tool_call_count=repeated_calls,
+        irrelevant_tool_call_count=irrelevant_calls,
         actual_cost_units=sum(call.cost_units for call in calls),
+        actual_latency_seconds=round(
+            sum(call.latency_seconds for call in calls), 9
+        ),
     )
 
 
