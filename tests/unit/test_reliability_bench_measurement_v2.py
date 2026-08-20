@@ -264,15 +264,8 @@ def test_schema_rejects_self_reported_execution_fact_and_invalid_abstain_shape()
         },
     )
     raw["decision"]["payload"]["intervention_executed"] = True
-    decision = parse_terminal_decision(raw)
-    assert "intervention_executed" in decision.payload
-    result = evaluate_task_decision(
-        _episode(TaskType.MITIGATION_DECISION, related=True), decision
-    )
-    assert result.predicate_satisfied is False
-    assert result.error_codes == ("payload_schema_mismatch",)
-    # The common parser preserves the shared envelope; the independent task
-    # evaluator rejects forbidden task-specific facts.
+    with pytest.raises(ValueError, match="decision.payload keys differ"):
+        parse_terminal_decision(raw)
     abstain = _raw_terminal(
         task=TaskType.BACKEND_SELECTION,
         action="select_backend",

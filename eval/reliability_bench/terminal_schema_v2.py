@@ -14,6 +14,24 @@ from typing import Any, Mapping
 
 TERMINAL_SCHEMA_VERSION = "reliabilitybench-q/terminal-decision-2.0"
 
+TASK_PAYLOAD_KEYS: dict[str, set[str]] = {
+    "backend_selection": {"backend_id"},
+    "qubit_mapping": {"qubit_ids"},
+    "transpilation": {"compilation_snapshot_id"},
+    "fidelity_claim": {"claimed_success"},
+    "mitigation_decision": {"mitigation_policy", "intervention_requested"},
+    "unreachable_target": {"declared_unreachable"},
+}
+
+TASK_ACTIONS: dict[str, set[str]] = {
+    "backend_selection": {"select_backend"},
+    "qubit_mapping": {"select_qubits"},
+    "transpilation": {"retranspile", "reuse_compilation"},
+    "fidelity_claim": {"rerun_circuit", "reuse_valid_result"},
+    "mitigation_decision": {"reassess_mitigation", "keep_mitigation"},
+    "unreachable_target": {"declare_unreachable", "continue_execution"},
+}
+
 
 class TerminalStatus(str, Enum):
     SUCCESS = "success"
@@ -66,6 +84,51 @@ def _string_tuple(value: Any, *, location: str) -> tuple[str, ...]:
     return tuple(value)
 
 
+def _validate_task_payload(
+    *, task_type: str, task_action: str, payload: Mapping[str, Any]
+) -> None:
+    if task_type not in TASK_PAYLOAD_KEYS:
+        raise ValueError("decision.task_type is not a registered task")
+    if task_action not in TASK_ACTIONS[task_type]:
+        raise ValueError("decision.task_action is invalid for the task type")
+    _require_exact_keys(
+        payload, TASK_PAYLOAD_KEYS[task_type], location="decision.payload"
+    )
+    if task_type == "backend_selection":
+        if not isinstance(payload["backend_id"], str) or not payload["backend_id"]:
+            raise ValueError("backend_id must be a non-empty string")
+    elif task_type == "qubit_mapping":
+        qubits = payload["qubit_ids"]
+        if (
+            not isinstance(qubits, list)
+            or any(
+                not isinstance(item, int) or isinstance(item, bool)
+                for item in qubits
+            )
+            or len(qubits) != len(set(qubits))
+        ):
+            raise ValueError("qubit_ids must be a unique integer list")
+    elif task_type == "transpilation":
+        if (
+            not isinstance(payload["compilation_snapshot_id"], str)
+            or not payload["compilation_snapshot_id"]
+        ):
+            raise ValueError("compilation_snapshot_id must be a non-empty string")
+    elif task_type == "fidelity_claim":
+        if not isinstance(payload["claimed_success"], bool):
+            raise ValueError("claimed_success must be boolean")
+    elif task_type == "mitigation_decision":
+        if (
+            not isinstance(payload["mitigation_policy"], str)
+            or not payload["mitigation_policy"]
+        ):
+            raise ValueError("mitigation_policy must be a non-empty string")
+        if not isinstance(payload["intervention_requested"], bool):
+            raise ValueError("intervention_requested must be boolean")
+    elif not isinstance(payload["declared_unreachable"], bool):
+        raise ValueError("declared_unreachable must be boolean")
+
+
 def parse_terminal_decision(value: Mapping[str, Any]) -> TerminalDecision:
     """Parse one strict terminal object shared by every experimental arm."""
     if not isinstance(value, Mapping):
@@ -106,10 +169,23 @@ def parse_terminal_decision(value: Mapping[str, Any]) -> TerminalDecision:
         raise ValueError("decision.task_action must be a non-empty string")
     if not isinstance(payload, dict):
         raise ValueError("decision.payload must be an object")
+    if task_type not in TASK_PAYLOAD_KEYS:
+        raise ValueError("decision.task_type is not a registered task")
     if status is TerminalStatus.ABSTAIN and task_action != "abstain":
         raise ValueError("abstain status requires task_action=abstain")
     if status is not TerminalStatus.ABSTAIN and task_action == "abstain":
         raise ValueError("task_action=abstain requires abstain status")
+    if status is TerminalStatus.ABSTAIN:
+        _require_exact_keys(payload, {"reason"}, location="decision.payload")
+        if (
+            not isinstance(payload["reason"], str)
+            or not payload["reason"].strip()
+        ):
+            raise ValueError("abstain reason must be a non-empty string")
+    else:
+        _validate_task_payload(
+            task_type=task_type, task_action=task_action, payload=payload
+        )
 
     declarations = value["revalidation_actions"]
     if not isinstance(declarations, list):
@@ -174,6 +250,8 @@ def parse_terminal_decision(value: Mapping[str, Any]) -> TerminalDecision:
 
 
 __all__ = [
+    "TASK_ACTIONS",
+    "TASK_PAYLOAD_KEYS",
     "TERMINAL_SCHEMA_VERSION",
     "RevalidationDeclaration",
     "TerminalDecision",
