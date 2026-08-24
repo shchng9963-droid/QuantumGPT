@@ -31,14 +31,15 @@ from tests.unit.test_reliability_bench_measurement_v3 import (
 )
 
 
-def test_six_arm_public_runtime_is_treatment_neutral_and_guard_is_placeholder():
+def test_six_arm_public_runtime_is_treatment_neutral_and_guard_is_external():
     validate_fairness_contract()
     audit = generate_fairness_audit()
     assert len(StudyArm) == 6
     assert len(COMPONENT_INFORMATION_ACCESS) == 6
     assert audit["all_public_prompts_identical"] is True
     assert len(set(audit["public_prompt_hash_by_arm"].values())) == 1
-    assert audit["action_guard_core_implemented"] is False
+    assert audit["action_guard_core_implemented"] is True
+    assert audit["action_guard_implementation_location"].startswith("external")
     assert audit["semantic_repair_capability"] is False
     assert "invalidated_evidence_ids" not in PUBLIC_SYSTEM_PROMPT
     assert "recommended_action" not in PUBLIC_SYSTEM_PROMPT
