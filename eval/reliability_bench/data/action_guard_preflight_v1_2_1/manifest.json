@@ -1,0 +1,14 @@
+{
+  "preflight_version": "reliabilitybench-q/action-guard-real-llm-preflight-1.2.1",
+  "development_only": true,
+  "formal_claims_allowed": false,
+  "config_sha256": "e7dea941a30988f1199be594b5204245c5bacb9d90e2ea811d6142e067699bec",
+  "shared_system_prompt_sha256": "175c6a57b9b5ce0131c799217b8c817ab3c83210e6a3b5d9b7bd29bf906031ed",
+  "episode_sha256": "be27a2c13667744bf7c753d2ad88c7fa641f643caf708505a1a2a35ef6dfac01",
+  "schedule_sha256": "e384d4c97b20316e7bbe9c442bb763432951c87a11df8667ea8a08d99e89268e",
+  "run_count": 72,
+  "method_validation_v2_1_access": {
+    "status": "not_accessed",
+    "evidence_type": "custodian_declaration_only"
+  }
+}

@@ -1,0 +1,506 @@
+[
+  {
+    "schedule_index": 0,
+    "episode_id": "AG12DEV2-20260824-backend_selection-01-related",
+    "task_type": "backend_selection",
+    "arm": "full_plus_action_guard",
+    "hidden_arm_id": "arm-7bafedaee3c143ac"
+  },
+  {
+    "schedule_index": 1,
+    "episode_id": "AG12DEV2-20260824-backend_selection-01-related",
+    "task_type": "backend_selection",
+    "arm": "ledger_only",
+    "hidden_arm_id": "arm-330db67319ab4985"
+  },
+  {
+    "schedule_index": 2,
+    "episode_id": "AG12DEV2-20260824-backend_selection-01-related",
+    "task_type": "backend_selection",
+    "arm": "global_revalidate_plus_action_guard",
+    "hidden_arm_id": "arm-998376f8bc8fc653"
+  },
+  {
+    "schedule_index": 3,
+    "episode_id": "AG12DEV2-20260824-backend_selection-01-related",
+    "task_type": "backend_selection",
+    "arm": "ledger_only_plus_action_guard",
+    "hidden_arm_id": "arm-5e7d61c9dfe6be2a"
+  },
+  {
+    "schedule_index": 4,
+    "episode_id": "AG12DEV2-20260824-backend_selection-01-related",
+    "task_type": "backend_selection",
+    "arm": "original_full",
+    "hidden_arm_id": "arm-d689264fbdc1e42c"
+  },
+  {
+    "schedule_index": 5,
+    "episode_id": "AG12DEV2-20260824-backend_selection-01-related",
+    "task_type": "backend_selection",
+    "arm": "invalidation_consistency_check",
+    "hidden_arm_id": "arm-3809bf76b09a0e8f"
+  },
+  {
+    "schedule_index": 6,
+    "episode_id": "AG12DEV2-20260824-backend_selection-01-unrelated",
+    "task_type": "backend_selection",
+    "arm": "ledger_only",
+    "hidden_arm_id": "arm-917f9d12734b22dd"
+  },
+  {
+    "schedule_index": 7,
+    "episode_id": "AG12DEV2-20260824-backend_selection-01-unrelated",
+    "task_type": "backend_selection",
+    "arm": "full_plus_action_guard",
+    "hidden_arm_id": "arm-02727e635a741d67"
+  },
+  {
+    "schedule_index": 8,
+    "episode_id": "AG12DEV2-20260824-backend_selection-01-unrelated",
+    "task_type": "backend_selection",
+    "arm": "ledger_only_plus_action_guard",
+    "hidden_arm_id": "arm-236b002710ae29a0"
+  },
+  {
+    "schedule_index": 9,
+    "episode_id": "AG12DEV2-20260824-backend_selection-01-unrelated",
+    "task_type": "backend_selection",
+    "arm": "original_full",
+    "hidden_arm_id": "arm-f22dd542eb9ae02f"
+  },
+  {
+    "schedule_index": 10,
+    "episode_id": "AG12DEV2-20260824-backend_selection-01-unrelated",
+    "task_type": "backend_selection",
+    "arm": "invalidation_consistency_check",
+    "hidden_arm_id": "arm-18caa98bbfb6098a"
+  },
+  {
+    "schedule_index": 11,
+    "episode_id": "AG12DEV2-20260824-backend_selection-01-unrelated",
+    "task_type": "backend_selection",
+    "arm": "global_revalidate_plus_action_guard",
+    "hidden_arm_id": "arm-4f7ba52500b54ff8"
+  },
+  {
+    "schedule_index": 12,
+    "episode_id": "AG12DEV2-20260824-qubit_mapping-01-related",
+    "task_type": "qubit_mapping",
+    "arm": "global_revalidate_plus_action_guard",
+    "hidden_arm_id": "arm-5d50ad02a96fb9af"
+  },
+  {
+    "schedule_index": 13,
+    "episode_id": "AG12DEV2-20260824-qubit_mapping-01-related",
+    "task_type": "qubit_mapping",
+    "arm": "original_full",
+    "hidden_arm_id": "arm-dd3e124bbe9e0fe1"
+  },
+  {
+    "schedule_index": 14,
+    "episode_id": "AG12DEV2-20260824-qubit_mapping-01-related",
+    "task_type": "qubit_mapping",
+    "arm": "ledger_only_plus_action_guard",
+    "hidden_arm_id": "arm-745e9b2d02713fcc"
+  },
+  {
+    "schedule_index": 15,
+    "episode_id": "AG12DEV2-20260824-qubit_mapping-01-related",
+    "task_type": "qubit_mapping",
+    "arm": "ledger_only",
+    "hidden_arm_id": "arm-2be6126046d438f3"
+  },
+  {
+    "schedule_index": 16,
+    "episode_id": "AG12DEV2-20260824-qubit_mapping-01-related",
+    "task_type": "qubit_mapping",
+    "arm": "full_plus_action_guard",
+    "hidden_arm_id": "arm-ae021ec773dda797"
+  },
+  {
+    "schedule_index": 17,
+    "episode_id": "AG12DEV2-20260824-qubit_mapping-01-related",
+    "task_type": "qubit_mapping",
+    "arm": "invalidation_consistency_check",
+    "hidden_arm_id": "arm-0f049366a4d8563a"
+  },
+  {
+    "schedule_index": 18,
+    "episode_id": "AG12DEV2-20260824-qubit_mapping-01-unrelated",
+    "task_type": "qubit_mapping",
+    "arm": "invalidation_consistency_check",
+    "hidden_arm_id": "arm-2eedcc4477fb3425"
+  },
+  {
+    "schedule_index": 19,
+    "episode_id": "AG12DEV2-20260824-qubit_mapping-01-unrelated",
+    "task_type": "qubit_mapping",
+    "arm": "global_revalidate_plus_action_guard",
+    "hidden_arm_id": "arm-1dedb4408f3c379b"
+  },
+  {
+    "schedule_index": 20,
+    "episode_id": "AG12DEV2-20260824-qubit_mapping-01-unrelated",
+    "task_type": "qubit_mapping",
+    "arm": "full_plus_action_guard",
+    "hidden_arm_id": "arm-796e723e898be62d"
+  },
+  {
+    "schedule_index": 21,
+    "episode_id": "AG12DEV2-20260824-qubit_mapping-01-unrelated",
+    "task_type": "qubit_mapping",
+    "arm": "ledger_only_plus_action_guard",
+    "hidden_arm_id": "arm-f65c0562647f39db"
+  },
+  {
+    "schedule_index": 22,
+    "episode_id": "AG12DEV2-20260824-qubit_mapping-01-unrelated",
+    "task_type": "qubit_mapping",
+    "arm": "original_full",
+    "hidden_arm_id": "arm-ea77b0c53bd36855"
+  },
+  {
+    "schedule_index": 23,
+    "episode_id": "AG12DEV2-20260824-qubit_mapping-01-unrelated",
+    "task_type": "qubit_mapping",
+    "arm": "ledger_only",
+    "hidden_arm_id": "arm-d7c1b2b63d0b0498"
+  },
+  {
+    "schedule_index": 24,
+    "episode_id": "AG12DEV2-20260824-transpilation-01-related",
+    "task_type": "transpilation",
+    "arm": "invalidation_consistency_check",
+    "hidden_arm_id": "arm-16a7d5665be592a8"
+  },
+  {
+    "schedule_index": 25,
+    "episode_id": "AG12DEV2-20260824-transpilation-01-related",
+    "task_type": "transpilation",
+    "arm": "original_full",
+    "hidden_arm_id": "arm-51eb147b8865fd6f"
+  },
+  {
+    "schedule_index": 26,
+    "episode_id": "AG12DEV2-20260824-transpilation-01-related",
+    "task_type": "transpilation",
+    "arm": "global_revalidate_plus_action_guard",
+    "hidden_arm_id": "arm-af504053ed5e264b"
+  },
+  {
+    "schedule_index": 27,
+    "episode_id": "AG12DEV2-20260824-transpilation-01-related",
+    "task_type": "transpilation",
+    "arm": "full_plus_action_guard",
+    "hidden_arm_id": "arm-c0dcffa2a82a5908"
+  },
+  {
+    "schedule_index": 28,
+    "episode_id": "AG12DEV2-20260824-transpilation-01-related",
+    "task_type": "transpilation",
+    "arm": "ledger_only_plus_action_guard",
+    "hidden_arm_id": "arm-1c86b5a99fcfa002"
+  },
+  {
+    "schedule_index": 29,
+    "episode_id": "AG12DEV2-20260824-transpilation-01-related",
+    "task_type": "transpilation",
+    "arm": "ledger_only",
+    "hidden_arm_id": "arm-410dff8e524843fd"
+  },
+  {
+    "schedule_index": 30,
+    "episode_id": "AG12DEV2-20260824-transpilation-01-unrelated",
+    "task_type": "transpilation",
+    "arm": "ledger_only_plus_action_guard",
+    "hidden_arm_id": "arm-6620e51160bf5805"
+  },
+  {
+    "schedule_index": 31,
+    "episode_id": "AG12DEV2-20260824-transpilation-01-unrelated",
+    "task_type": "transpilation",
+    "arm": "invalidation_consistency_check",
+    "hidden_arm_id": "arm-10c1633fc33d8f6b"
+  },
+  {
+    "schedule_index": 32,
+    "episode_id": "AG12DEV2-20260824-transpilation-01-unrelated",
+    "task_type": "transpilation",
+    "arm": "full_plus_action_guard",
+    "hidden_arm_id": "arm-4aea13a560a11036"
+  },
+  {
+    "schedule_index": 33,
+    "episode_id": "AG12DEV2-20260824-transpilation-01-unrelated",
+    "task_type": "transpilation",
+    "arm": "ledger_only",
+    "hidden_arm_id": "arm-09e678ef7adc621f"
+  },
+  {
+    "schedule_index": 34,
+    "episode_id": "AG12DEV2-20260824-transpilation-01-unrelated",
+    "task_type": "transpilation",
+    "arm": "global_revalidate_plus_action_guard",
+    "hidden_arm_id": "arm-77361549db87057c"
+  },
+  {
+    "schedule_index": 35,
+    "episode_id": "AG12DEV2-20260824-transpilation-01-unrelated",
+    "task_type": "transpilation",
+    "arm": "original_full",
+    "hidden_arm_id": "arm-4b064adb2614e2b5"
+  },
+  {
+    "schedule_index": 36,
+    "episode_id": "AG12DEV2-20260824-fidelity_claim-01-related",
+    "task_type": "fidelity_claim",
+    "arm": "full_plus_action_guard",
+    "hidden_arm_id": "arm-605b6cbe877e6552"
+  },
+  {
+    "schedule_index": 37,
+    "episode_id": "AG12DEV2-20260824-fidelity_claim-01-related",
+    "task_type": "fidelity_claim",
+    "arm": "ledger_only",
+    "hidden_arm_id": "arm-6c9a4008f5866ddc"
+  },
+  {
+    "schedule_index": 38,
+    "episode_id": "AG12DEV2-20260824-fidelity_claim-01-related",
+    "task_type": "fidelity_claim",
+    "arm": "ledger_only_plus_action_guard",
+    "hidden_arm_id": "arm-3361f92b754a7cee"
+  },
+  {
+    "schedule_index": 39,
+    "episode_id": "AG12DEV2-20260824-fidelity_claim-01-related",
+    "task_type": "fidelity_claim",
+    "arm": "original_full",
+    "hidden_arm_id": "arm-f51c1d89dba8078e"
+  },
+  {
+    "schedule_index": 40,
+    "episode_id": "AG12DEV2-20260824-fidelity_claim-01-related",
+    "task_type": "fidelity_claim",
+    "arm": "invalidation_consistency_check",
+    "hidden_arm_id": "arm-cd739e0954ebb02d"
+  },
+  {
+    "schedule_index": 41,
+    "episode_id": "AG12DEV2-20260824-fidelity_claim-01-related",
+    "task_type": "fidelity_claim",
+    "arm": "global_revalidate_plus_action_guard",
+    "hidden_arm_id": "arm-3c8d6134d048cba2"
+  },
+  {
+    "schedule_index": 42,
+    "episode_id": "AG12DEV2-20260824-fidelity_claim-01-unrelated",
+    "task_type": "fidelity_claim",
+    "arm": "original_full",
+    "hidden_arm_id": "arm-e1251b5cf30cb2ad"
+  },
+  {
+    "schedule_index": 43,
+    "episode_id": "AG12DEV2-20260824-fidelity_claim-01-unrelated",
+    "task_type": "fidelity_claim",
+    "arm": "ledger_only",
+    "hidden_arm_id": "arm-df870efe28accc02"
+  },
+  {
+    "schedule_index": 44,
+    "episode_id": "AG12DEV2-20260824-fidelity_claim-01-unrelated",
+    "task_type": "fidelity_claim",
+    "arm": "global_revalidate_plus_action_guard",
+    "hidden_arm_id": "arm-3ffc5af3d37e27c7"
+  },
+  {
+    "schedule_index": 45,
+    "episode_id": "AG12DEV2-20260824-fidelity_claim-01-unrelated",
+    "task_type": "fidelity_claim",
+    "arm": "full_plus_action_guard",
+    "hidden_arm_id": "arm-035144e2cf4dbd13"
+  },
+  {
+    "schedule_index": 46,
+    "episode_id": "AG12DEV2-20260824-fidelity_claim-01-unrelated",
+    "task_type": "fidelity_claim",
+    "arm": "invalidation_consistency_check",
+    "hidden_arm_id": "arm-d853ffb0b16f57bd"
+  },
+  {
+    "schedule_index": 47,
+    "episode_id": "AG12DEV2-20260824-fidelity_claim-01-unrelated",
+    "task_type": "fidelity_claim",
+    "arm": "ledger_only_plus_action_guard",
+    "hidden_arm_id": "arm-5fe705add015703c"
+  },
+  {
+    "schedule_index": 48,
+    "episode_id": "AG12DEV2-20260824-mitigation_decision-01-related",
+    "task_type": "mitigation_decision",
+    "arm": "global_revalidate_plus_action_guard",
+    "hidden_arm_id": "arm-f20e55d2923521fd"
+  },
+  {
+    "schedule_index": 49,
+    "episode_id": "AG12DEV2-20260824-mitigation_decision-01-related",
+    "task_type": "mitigation_decision",
+    "arm": "invalidation_consistency_check",
+    "hidden_arm_id": "arm-330a912f9ac43bb2"
+  },
+  {
+    "schedule_index": 50,
+    "episode_id": "AG12DEV2-20260824-mitigation_decision-01-related",
+    "task_type": "mitigation_decision",
+    "arm": "ledger_only_plus_action_guard",
+    "hidden_arm_id": "arm-de812e6b31efda72"
+  },
+  {
+    "schedule_index": 51,
+    "episode_id": "AG12DEV2-20260824-mitigation_decision-01-related",
+    "task_type": "mitigation_decision",
+    "arm": "original_full",
+    "hidden_arm_id": "arm-62b9a234c62ba8ad"
+  },
+  {
+    "schedule_index": 52,
+    "episode_id": "AG12DEV2-20260824-mitigation_decision-01-related",
+    "task_type": "mitigation_decision",
+    "arm": "ledger_only",
+    "hidden_arm_id": "arm-4b1659e4d1c7df44"
+  },
+  {
+    "schedule_index": 53,
+    "episode_id": "AG12DEV2-20260824-mitigation_decision-01-related",
+    "task_type": "mitigation_decision",
+    "arm": "full_plus_action_guard",
+    "hidden_arm_id": "arm-ca751a51e61272b1"
+  },
+  {
+    "schedule_index": 54,
+    "episode_id": "AG12DEV2-20260824-mitigation_decision-01-unrelated",
+    "task_type": "mitigation_decision",
+    "arm": "ledger_only_plus_action_guard",
+    "hidden_arm_id": "arm-6edaba1fdbbc80fd"
+  },
+  {
+    "schedule_index": 55,
+    "episode_id": "AG12DEV2-20260824-mitigation_decision-01-unrelated",
+    "task_type": "mitigation_decision",
+    "arm": "ledger_only",
+    "hidden_arm_id": "arm-d94cbbef5fdf85e4"
+  },
+  {
+    "schedule_index": 56,
+    "episode_id": "AG12DEV2-20260824-mitigation_decision-01-unrelated",
+    "task_type": "mitigation_decision",
+    "arm": "full_plus_action_guard",
+    "hidden_arm_id": "arm-ddea51346100b2f6"
+  },
+  {
+    "schedule_index": 57,
+    "episode_id": "AG12DEV2-20260824-mitigation_decision-01-unrelated",
+    "task_type": "mitigation_decision",
+    "arm": "global_revalidate_plus_action_guard",
+    "hidden_arm_id": "arm-d1d383a7e391b22d"
+  },
+  {
+    "schedule_index": 58,
+    "episode_id": "AG12DEV2-20260824-mitigation_decision-01-unrelated",
+    "task_type": "mitigation_decision",
+    "arm": "invalidation_consistency_check",
+    "hidden_arm_id": "arm-10bbd5e9b7ebb011"
+  },
+  {
+    "schedule_index": 59,
+    "episode_id": "AG12DEV2-20260824-mitigation_decision-01-unrelated",
+    "task_type": "mitigation_decision",
+    "arm": "original_full",
+    "hidden_arm_id": "arm-4de4d5c9dbb3d675"
+  },
+  {
+    "schedule_index": 60,
+    "episode_id": "AG12DEV2-20260824-unreachable_target-01-related",
+    "task_type": "unreachable_target",
+    "arm": "ledger_only",
+    "hidden_arm_id": "arm-5e986d002fa622ea"
+  },
+  {
+    "schedule_index": 61,
+    "episode_id": "AG12DEV2-20260824-unreachable_target-01-related",
+    "task_type": "unreachable_target",
+    "arm": "ledger_only_plus_action_guard",
+    "hidden_arm_id": "arm-67a7bdb6a2e073d6"
+  },
+  {
+    "schedule_index": 62,
+    "episode_id": "AG12DEV2-20260824-unreachable_target-01-related",
+    "task_type": "unreachable_target",
+    "arm": "original_full",
+    "hidden_arm_id": "arm-a57fd339f65cabaf"
+  },
+  {
+    "schedule_index": 63,
+    "episode_id": "AG12DEV2-20260824-unreachable_target-01-related",
+    "task_type": "unreachable_target",
+    "arm": "full_plus_action_guard",
+    "hidden_arm_id": "arm-8022818f459a4d84"
+  },
+  {
+    "schedule_index": 64,
+    "episode_id": "AG12DEV2-20260824-unreachable_target-01-related",
+    "task_type": "unreachable_target",
+    "arm": "global_revalidate_plus_action_guard",
+    "hidden_arm_id": "arm-d6f6b857eab57cf9"
+  },
+  {
+    "schedule_index": 65,
+    "episode_id": "AG12DEV2-20260824-unreachable_target-01-related",
+    "task_type": "unreachable_target",
+    "arm": "invalidation_consistency_check",
+    "hidden_arm_id": "arm-15444e2ca3fe7bab"
+  },
+  {
+    "schedule_index": 66,
+    "episode_id": "AG12DEV2-20260824-unreachable_target-01-unrelated",
+    "task_type": "unreachable_target",
+    "arm": "full_plus_action_guard",
+    "hidden_arm_id": "arm-c0a83e91734b556b"
+  },
+  {
+    "schedule_index": 67,
+    "episode_id": "AG12DEV2-20260824-unreachable_target-01-unrelated",
+    "task_type": "unreachable_target",
+    "arm": "invalidation_consistency_check",
+    "hidden_arm_id": "arm-3493f77f8c9b28ee"
+  },
+  {
+    "schedule_index": 68,
+    "episode_id": "AG12DEV2-20260824-unreachable_target-01-unrelated",
+    "task_type": "unreachable_target",
+    "arm": "original_full",
+    "hidden_arm_id": "arm-67602170dd7953bc"
+  },
+  {
+    "schedule_index": 69,
+    "episode_id": "AG12DEV2-20260824-unreachable_target-01-unrelated",
+    "task_type": "unreachable_target",
+    "arm": "ledger_only_plus_action_guard",
+    "hidden_arm_id": "arm-4a727a1b1438d91b"
+  },
+  {
+    "schedule_index": 70,
+    "episode_id": "AG12DEV2-20260824-unreachable_target-01-unrelated",
+    "task_type": "unreachable_target",
+    "arm": "global_revalidate_plus_action_guard",
+    "hidden_arm_id": "arm-e7ef31db83f8365e"
+  },
+  {
+    "schedule_index": 71,
+    "episode_id": "AG12DEV2-20260824-unreachable_target-01-unrelated",
+    "task_type": "unreachable_target",
+    "arm": "ledger_only",
+    "hidden_arm_id": "arm-5c09ab4878008928"
+  }
+]

@@ -1,0 +1,475 @@
+{
+  "audit_version": "reliabilitybench-q/development-gold-audit-3.0",
+  "gold_spec_version": "reliabilitybench-q/gold-trace-spec-3.0",
+  "generated_at": "2026-08-24T13:29:02.519370+00:00",
+  "gold_case_count": 42,
+  "gold_payload_sha256": "cb6749475f7942c2a1ecefe13b97f6694121bc12c418fca6a749f830bb51e324",
+  "passed_count": 42,
+  "failed_count": 0,
+  "all_unique_truth_gates_passed": true,
+  "coverage_tag_counts": {
+    "abstain": 2,
+    "acceptable_action_only": 2,
+    "attempt-failed": 1,
+    "backend_selection": 4,
+    "completion_status_answered": 2,
+    "correct": 1,
+    "correct_rejection": 1,
+    "cost": 1,
+    "delete_one_parent": 1,
+    "evidence_id_only": 2,
+    "executed": 1,
+    "execution_failure": 1,
+    "failed": 1,
+    "feasible": 1,
+    "fidelity_claim": 4,
+    "infeasible": 1,
+    "intervention_stage": 4,
+    "irrelevant": 1,
+    "metamorphic": 8,
+    "mitigation": 4,
+    "mitigation_decision": 4,
+    "not_answered": 1,
+    "predicate_only": 2,
+    "qubit_mapping": 4,
+    "related": 18,
+    "repeat": 1,
+    "requested": 1,
+    "safe_initial": 6,
+    "safe_revalidated": 7,
+    "snapshot_lineage_only": 1,
+    "timeout": 1,
+    "tool_outcome_only": 2,
+    "transpilation": 4,
+    "unknown": 2,
+    "unknown_missing": 6,
+    "unreachable_target": 7,
+    "unrelated": 6,
+    "unsafe": 6,
+    "unsafe_with_current": 1,
+    "verified": 1,
+    "wrong": 2
+  },
+  "rows": [
+    {
+      "case_id": "backend_selection-safe_initial",
+      "tags": [
+        "backend_selection",
+        "unrelated",
+        "safe_initial"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "backend_selection-unsafe",
+      "tags": [
+        "backend_selection",
+        "related",
+        "unsafe"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "backend_selection-unknown_missing",
+      "tags": [
+        "backend_selection",
+        "related",
+        "unknown_missing"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "backend_selection-safe_revalidated",
+      "tags": [
+        "backend_selection",
+        "related",
+        "safe_revalidated"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "qubit_mapping-safe_initial",
+      "tags": [
+        "qubit_mapping",
+        "unrelated",
+        "safe_initial"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "qubit_mapping-unsafe",
+      "tags": [
+        "qubit_mapping",
+        "related",
+        "unsafe"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "qubit_mapping-unknown_missing",
+      "tags": [
+        "qubit_mapping",
+        "related",
+        "unknown_missing"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "qubit_mapping-safe_revalidated",
+      "tags": [
+        "qubit_mapping",
+        "related",
+        "safe_revalidated"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "transpilation-safe_initial",
+      "tags": [
+        "transpilation",
+        "unrelated",
+        "safe_initial"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "transpilation-unsafe",
+      "tags": [
+        "transpilation",
+        "related",
+        "unsafe"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "transpilation-unknown_missing",
+      "tags": [
+        "transpilation",
+        "related",
+        "unknown_missing"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "transpilation-safe_revalidated",
+      "tags": [
+        "transpilation",
+        "related",
+        "safe_revalidated"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "fidelity_claim-safe_initial",
+      "tags": [
+        "fidelity_claim",
+        "unrelated",
+        "safe_initial"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "fidelity_claim-unsafe",
+      "tags": [
+        "fidelity_claim",
+        "related",
+        "unsafe"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "fidelity_claim-unknown_missing",
+      "tags": [
+        "fidelity_claim",
+        "related",
+        "unknown_missing"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "fidelity_claim-safe_revalidated",
+      "tags": [
+        "fidelity_claim",
+        "related",
+        "safe_revalidated"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "mitigation_decision-safe_initial",
+      "tags": [
+        "mitigation_decision",
+        "unrelated",
+        "safe_initial"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "mitigation_decision-unsafe",
+      "tags": [
+        "mitigation_decision",
+        "related",
+        "unsafe"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "mitigation_decision-unknown_missing",
+      "tags": [
+        "mitigation_decision",
+        "related",
+        "unknown_missing"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "mitigation_decision-safe_revalidated",
+      "tags": [
+        "mitigation_decision",
+        "related",
+        "safe_revalidated"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "unreachable_target-safe_initial",
+      "tags": [
+        "unreachable_target",
+        "unrelated",
+        "safe_initial"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "unreachable_target-unsafe",
+      "tags": [
+        "unreachable_target",
+        "related",
+        "unsafe"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "unreachable_target-unknown_missing",
+      "tags": [
+        "unreachable_target",
+        "related",
+        "unknown_missing"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "unreachable_target-safe_revalidated",
+      "tags": [
+        "unreachable_target",
+        "related",
+        "safe_revalidated"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "query-vs-depend-query-only",
+      "tags": [
+        "metamorphic",
+        "evidence_id_only",
+        "safe_revalidated"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "query-vs-depend-cited-stale",
+      "tags": [
+        "metamorphic",
+        "evidence_id_only",
+        "unsafe_with_current"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "tool-outcome-failed",
+      "tags": [
+        "metamorphic",
+        "tool_outcome_only",
+        "failed"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "tool-outcome-timeout",
+      "tags": [
+        "metamorphic",
+        "tool_outcome_only",
+        "timeout"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "snapshot-lineage-broken",
+      "tags": [
+        "metamorphic",
+        "snapshot_lineage_only",
+        "unknown"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "evidence-closure-missing-parent",
+      "tags": [
+        "metamorphic",
+        "delete_one_parent",
+        "unknown"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "task-action-acceptable",
+      "tags": [
+        "metamorphic",
+        "acceptable_action_only",
+        "correct"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "task-action-wrong",
+      "tags": [
+        "metamorphic",
+        "acceptable_action_only",
+        "wrong"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "abstain-feasible",
+      "tags": [
+        "abstain",
+        "feasible"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "abstain-infeasible",
+      "tags": [
+        "abstain",
+        "infeasible"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "unreachable-answered-correct",
+      "tags": [
+        "unreachable_target",
+        "completion_status_answered",
+        "predicate_only",
+        "correct_rejection"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "unreachable-answered-wrong",
+      "tags": [
+        "unreachable_target",
+        "completion_status_answered",
+        "predicate_only",
+        "wrong"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "unreachable-execution-failure",
+      "tags": [
+        "unreachable_target",
+        "execution_failure",
+        "not_answered"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "mit-requested",
+      "tags": [
+        "mitigation",
+        "intervention_stage",
+        "requested"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "mit-attempt-failed",
+      "tags": [
+        "mitigation",
+        "intervention_stage",
+        "attempt-failed"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "mit-executed",
+      "tags": [
+        "mitigation",
+        "intervention_stage",
+        "executed"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "mit-verified",
+      "tags": [
+        "mitigation",
+        "intervention_stage",
+        "verified"
+      ],
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "case_id": "cost-repeat-irrelevant",
+      "tags": [
+        "cost",
+        "repeat",
+        "irrelevant"
+      ],
+      "passed": true,
+      "mismatches": {}
+    }
+  ]
+}

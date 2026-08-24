@@ -1,0 +1,310 @@
+{
+  "all_reason_codes_covered": true,
+  "all_repairs_allowed": true,
+  "case_count": 7,
+  "population": "controlled synthetic candidates; not natural LLM errors",
+  "protocol_version": "reliabilitybench-q/action-guard-repair-stress-1.2",
+  "results": [
+    {
+      "case": "invalid_schema",
+      "events": [
+        {
+          "candidate_sha256": "1372e1d27ef161b91c4a916c1ec17f95b4e8faeaac17ad9bd8c7982ff99f6f70",
+          "check_index": 1,
+          "check_latency_seconds": 3.663799725472927e-05,
+          "feedback": {
+            "guard_outcome": "REPAIR_REQUEST",
+            "reason_code": "invalid_schema",
+            "violated_public_constraint": "tool_name must exist in the public tool catalog"
+          },
+          "llm_turn_count": 1,
+          "outcome": "REPAIR_REQUEST",
+          "reason_code": "invalid_schema",
+          "repair_allowed": true,
+          "repair_attempt_index": 1,
+          "tool_call_count": 0,
+          "violated_public_constraint": "tool_name must exist in the public tool catalog"
+        },
+        {
+          "candidate_sha256": "f872851474262a040683ae806db974b294b93cd85630270c47490fec3611bce4",
+          "check_index": 2,
+          "check_latency_seconds": 2.1570012904703617e-05,
+          "feedback": null,
+          "llm_turn_count": 2,
+          "outcome": "ALLOW",
+          "reason_code": null,
+          "repair_allowed": false,
+          "repair_attempt_index": null,
+          "tool_call_count": 0,
+          "violated_public_constraint": null
+        }
+      ],
+      "first_outcome": "REPAIR_REQUEST",
+      "first_reason_code": "invalid_schema",
+      "repair_feedback": {
+        "guard_outcome": "REPAIR_REQUEST",
+        "reason_code": "invalid_schema",
+        "violated_public_constraint": "tool_name must exist in the public tool catalog"
+      },
+      "repaired_outcome": "ALLOW"
+    },
+    {
+      "case": "unknown_entity",
+      "events": [
+        {
+          "candidate_sha256": "d9688a4f9a4b5c40ca933376007c5115369427f2adc95a170069ff9ed27031a1",
+          "check_index": 1,
+          "check_latency_seconds": 2.039800165221095e-05,
+          "feedback": {
+            "guard_outcome": "REPAIR_REQUEST",
+            "reason_code": "unknown_entity",
+            "violated_public_constraint": "tool arguments must reference public task entities"
+          },
+          "llm_turn_count": 1,
+          "outcome": "REPAIR_REQUEST",
+          "reason_code": "unknown_entity",
+          "repair_allowed": true,
+          "repair_attempt_index": 1,
+          "tool_call_count": 0,
+          "violated_public_constraint": "tool arguments must reference public task entities"
+        },
+        {
+          "candidate_sha256": "f872851474262a040683ae806db974b294b93cd85630270c47490fec3611bce4",
+          "check_index": 2,
+          "check_latency_seconds": 1.5908997738733888e-05,
+          "feedback": null,
+          "llm_turn_count": 2,
+          "outcome": "ALLOW",
+          "reason_code": null,
+          "repair_allowed": false,
+          "repair_attempt_index": null,
+          "tool_call_count": 0,
+          "violated_public_constraint": null
+        }
+      ],
+      "first_outcome": "REPAIR_REQUEST",
+      "first_reason_code": "unknown_entity",
+      "repair_feedback": {
+        "guard_outcome": "REPAIR_REQUEST",
+        "reason_code": "unknown_entity",
+        "violated_public_constraint": "tool arguments must reference public task entities"
+      },
+      "repaired_outcome": "ALLOW"
+    },
+    {
+      "case": "invalid_reference",
+      "events": [
+        {
+          "candidate_sha256": "abe60ed4f9f0850412fe00372c0cae738834b2de5bdf1c77f78d9da97eb1cd0a",
+          "check_index": 1,
+          "check_latency_seconds": 1.9516010070219636e-05,
+          "feedback": {
+            "guard_outcome": "REPAIR_REQUEST",
+            "reason_code": "invalid_reference",
+            "violated_public_constraint": "trigger_evidence_id must exist in the visible ledger"
+          },
+          "llm_turn_count": 1,
+          "outcome": "REPAIR_REQUEST",
+          "reason_code": "invalid_reference",
+          "repair_allowed": true,
+          "repair_attempt_index": 1,
+          "tool_call_count": 0,
+          "violated_public_constraint": "trigger_evidence_id must exist in the visible ledger"
+        },
+        {
+          "candidate_sha256": "f872851474262a040683ae806db974b294b93cd85630270c47490fec3611bce4",
+          "check_index": 2,
+          "check_latency_seconds": 1.5708996215835214e-05,
+          "feedback": null,
+          "llm_turn_count": 2,
+          "outcome": "ALLOW",
+          "reason_code": null,
+          "repair_allowed": false,
+          "repair_attempt_index": null,
+          "tool_call_count": 0,
+          "violated_public_constraint": null
+        }
+      ],
+      "first_outcome": "REPAIR_REQUEST",
+      "first_reason_code": "invalid_reference",
+      "repair_feedback": {
+        "guard_outcome": "REPAIR_REQUEST",
+        "reason_code": "invalid_reference",
+        "violated_public_constraint": "trigger_evidence_id must exist in the visible ledger"
+      },
+      "repaired_outcome": "ALLOW"
+    },
+    {
+      "case": "missing_required_support",
+      "events": [
+        {
+          "candidate_sha256": "93a93af38a6fb7ecf21e224d5b461be9fdea37e2b1f690ab1eeb4a867e27795e",
+          "check_index": 1,
+          "check_latency_seconds": 4.66459896415472e-05,
+          "feedback": {
+            "guard_outcome": "BLOCK",
+            "reason_code": "missing_required_support",
+            "violated_public_constraint": "all public required evidence slots must have cited valid support"
+          },
+          "llm_turn_count": 1,
+          "outcome": "BLOCK",
+          "reason_code": "missing_required_support",
+          "repair_allowed": true,
+          "repair_attempt_index": 1,
+          "tool_call_count": 0,
+          "violated_public_constraint": "all public required evidence slots must have cited valid support"
+        },
+        {
+          "candidate_sha256": "03d9ff9324103461400d4382490ea33371005636fa8160d30932667a9465fa14",
+          "check_index": 2,
+          "check_latency_seconds": 4.7178007662296295e-05,
+          "feedback": null,
+          "llm_turn_count": 2,
+          "outcome": "ALLOW",
+          "reason_code": null,
+          "repair_allowed": false,
+          "repair_attempt_index": null,
+          "tool_call_count": 0,
+          "violated_public_constraint": null
+        }
+      ],
+      "first_outcome": "BLOCK",
+      "first_reason_code": "missing_required_support",
+      "repair_feedback": {
+        "guard_outcome": "BLOCK",
+        "reason_code": "missing_required_support",
+        "violated_public_constraint": "all public required evidence slots must have cited valid support"
+      },
+      "repaired_outcome": "ALLOW"
+    },
+    {
+      "case": "stale_cited_evidence",
+      "events": [
+        {
+          "candidate_sha256": "03d9ff9324103461400d4382490ea33371005636fa8160d30932667a9465fa14",
+          "check_index": 1,
+          "check_latency_seconds": 4.308999632485211e-05,
+          "feedback": {
+            "guard_outcome": "BLOCK",
+            "reason_code": "stale_cited_evidence",
+            "violated_public_constraint": "final decisions must not cite ledger evidence marked invalid"
+          },
+          "llm_turn_count": 1,
+          "outcome": "BLOCK",
+          "reason_code": "stale_cited_evidence",
+          "repair_allowed": true,
+          "repair_attempt_index": 1,
+          "tool_call_count": 0,
+          "violated_public_constraint": "final decisions must not cite ledger evidence marked invalid"
+        },
+        {
+          "candidate_sha256": "83b8fef52c4cd5e9d901b7d2cba829a59916ca6990ecc362097ca4b780eab3da",
+          "check_index": 2,
+          "check_latency_seconds": 5.2638002671301365e-05,
+          "feedback": null,
+          "llm_turn_count": 2,
+          "outcome": "ALLOW",
+          "reason_code": null,
+          "repair_allowed": false,
+          "repair_attempt_index": null,
+          "tool_call_count": 1,
+          "violated_public_constraint": null
+        }
+      ],
+      "first_outcome": "BLOCK",
+      "first_reason_code": "stale_cited_evidence",
+      "repair_feedback": {
+        "guard_outcome": "BLOCK",
+        "reason_code": "stale_cited_evidence",
+        "violated_public_constraint": "final decisions must not cite ledger evidence marked invalid"
+      },
+      "repaired_outcome": "ALLOW"
+    },
+    {
+      "case": "unverified_revalidation",
+      "events": [
+        {
+          "candidate_sha256": "83b8fef52c4cd5e9d901b7d2cba829a59916ca6990ecc362097ca4b780eab3da",
+          "check_index": 1,
+          "check_latency_seconds": 4.308999632485211e-05,
+          "feedback": {
+            "guard_outcome": "BLOCK",
+            "reason_code": "unverified_revalidation",
+            "violated_public_constraint": "revalidation requires a successful accepted tool response"
+          },
+          "llm_turn_count": 1,
+          "outcome": "BLOCK",
+          "reason_code": "unverified_revalidation",
+          "repair_allowed": true,
+          "repair_attempt_index": 1,
+          "tool_call_count": 1,
+          "violated_public_constraint": "revalidation requires a successful accepted tool response"
+        },
+        {
+          "candidate_sha256": "83b8fef52c4cd5e9d901b7d2cba829a59916ca6990ecc362097ca4b780eab3da",
+          "check_index": 2,
+          "check_latency_seconds": 4.8039015382528305e-05,
+          "feedback": null,
+          "llm_turn_count": 2,
+          "outcome": "ALLOW",
+          "reason_code": null,
+          "repair_allowed": false,
+          "repair_attempt_index": null,
+          "tool_call_count": 1,
+          "violated_public_constraint": null
+        }
+      ],
+      "first_outcome": "BLOCK",
+      "first_reason_code": "unverified_revalidation",
+      "repair_feedback": {
+        "guard_outcome": "BLOCK",
+        "reason_code": "unverified_revalidation",
+        "violated_public_constraint": "revalidation requires a successful accepted tool response"
+      },
+      "repaired_outcome": "ALLOW"
+    },
+    {
+      "case": "premature_finalization",
+      "events": [
+        {
+          "candidate_sha256": "a928de32ff08218a991aa3c75a8068dd09ebc79ee3c6a57c51879e07f3213f65",
+          "check_index": 1,
+          "check_latency_seconds": 3.650700091384351e-05,
+          "feedback": {
+            "guard_outcome": "BLOCK",
+            "reason_code": "premature_finalization",
+            "violated_public_constraint": "answered terminal decisions require explicit supporting evidence"
+          },
+          "llm_turn_count": 1,
+          "outcome": "BLOCK",
+          "reason_code": "premature_finalization",
+          "repair_allowed": true,
+          "repair_attempt_index": 1,
+          "tool_call_count": 0,
+          "violated_public_constraint": "answered terminal decisions require explicit supporting evidence"
+        },
+        {
+          "candidate_sha256": "03d9ff9324103461400d4382490ea33371005636fa8160d30932667a9465fa14",
+          "check_index": 2,
+          "check_latency_seconds": 3.4693977795541286e-05,
+          "feedback": null,
+          "llm_turn_count": 2,
+          "outcome": "ALLOW",
+          "reason_code": null,
+          "repair_allowed": false,
+          "repair_attempt_index": null,
+          "tool_call_count": 0,
+          "violated_public_constraint": null
+        }
+      ],
+      "first_outcome": "BLOCK",
+      "first_reason_code": "premature_finalization",
+      "repair_feedback": {
+        "guard_outcome": "BLOCK",
+        "reason_code": "premature_finalization",
+        "violated_public_constraint": "answered terminal decisions require explicit supporting evidence"
+      },
+      "repaired_outcome": "ALLOW"
+    }
+  ]
+}

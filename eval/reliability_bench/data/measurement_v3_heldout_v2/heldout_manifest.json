@@ -1,0 +1,31 @@
+{
+  "status": "generated_gold_encrypted_predictions_not_run",
+  "generated_at": "2026-08-24T13:30:14.063127+00:00",
+  "candidate_commit": "773e325370e2cd4168637ace5c7e5404af1eb142",
+  "frozen_source_sha256": {
+    "eval/reliability_bench/terminal_schema_v3.py": "a7768dae16b03091021e9a5c0127b2dad380466a65d961750fd38dead732c0df",
+    "eval/reliability_bench/public_runtime_v3.py": "204b26ae782e3f6d062ce130a060789a3290212d6799b300185b659cc354fdba",
+    "eval/reliability_bench/measurement_spec_v3.py": "a58aa232425e0945bb4fb7f545c658d97f82c408d1e5d939fac8105b026ba8f4",
+    "eval/reliability_bench/task_predicate_evaluator_v3.py": "4c60a0c6f4e1105856855f588e5a532f19ebf1e07a72c105b943f167812241d8",
+    "eval/reliability_bench/trace_evidence_evaluator_v3.py": "32edab50ff0a2ffc36d298032610b4e10b4f6d1d80a4cc92b3f62041ae1e27b9",
+    "eval/reliability_bench/gold_trace_spec_v3.py": "fb16ef0c8593bd31bd2057303b084a8755a4ac9df75e08cf85715b87bb5775eb"
+  },
+  "fresh_namespace_sha256": "12f14b33f2f9d98444b21633c9ec991f01bd03252dcda336ef7c7a25c74d6fa5",
+  "case_count": 44,
+  "public_trace_sha256": "65bd0be5cf36c0839219ee2ebaa9642dd61a7c26cbf70b21049b278be4145ef5",
+  "encrypted_gold_sha256": "e7de9ca8ffa3808b204b4deb0c2dca1de0b3c39ea2239485648c713b71560936",
+  "gold_plaintext_sha256": "2c27dd22180c52424ef6ee57d3ff4ce8a743e6f217a1ff884174532df0007c68",
+  "aes_gcm": {
+    "key_bits": 256,
+    "nonce_bytes": 12,
+    "tag_bytes": 16
+  },
+  "separation": {
+    "development_gold": "fresh cryptographic ID/resource/snapshot namespace",
+    "measurement_v2_gold": "superseded sources and cases are not imported",
+    "judge_v2_audit": "independent declarative traces; no imported audit data",
+    "method_validation_v2_1": "sealed archive never opened; collision avoided by fresh namespace",
+    "future_action_guard_data": "no ActionGuard behavior or data imported"
+  },
+  "unseal_condition": "predictions file and prediction manifest must exist and be hashed first"
+}

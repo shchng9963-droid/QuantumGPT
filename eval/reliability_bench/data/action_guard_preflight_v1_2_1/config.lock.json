@@ -1,0 +1,39 @@
+{
+  "protocol_version": "reliabilitybench-q/action-guard-real-llm-preflight-1.2.1",
+  "development_only": true,
+  "formal_method_claims_allowed": false,
+  "provider": "deepseek",
+  "base_url": "https://api.deepseek.com",
+  "requested_model": "deepseek-v4-flash",
+  "thinking": "disabled",
+  "temperature": 0.0,
+  "top_p": 1.0,
+  "max_tokens": 4096,
+  "max_turns": 12,
+  "max_tool_calls": 10,
+  "max_cost_units": 10,
+  "request_timeout_seconds": 120.0,
+  "retry": {
+    "max_attempts": 2,
+    "fixed_backoff_seconds": 1.0
+  },
+  "format_max_attempts": 2,
+  "guard_max_repair_attempts": 2,
+  "development_episode_seed": 20263001,
+  "schedule_seed": 20263002,
+  "run_cost_cap_usd": 5.0,
+  "pricing": {
+    "currency": "USD",
+    "per_million_tokens": {
+      "input_cache_hit": 0.0028,
+      "input_cache_miss": 0.14,
+      "output": 0.28
+    },
+    "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "basis": "official DeepSeek V4-Flash USD schedule; usage-derived estimate, with provider invoice authoritative",
+    "frozen_on": "2026-08-24"
+  },
+  "configuration_status": "development-preflight-v1.2-candidate",
+  "approval_basis": "research protocol instruction dated 2026-08-24",
+  "config_sha256": "e7dea941a30988f1199be594b5204245c5bacb9d90e2ea811d6142e067699bec"
+}
