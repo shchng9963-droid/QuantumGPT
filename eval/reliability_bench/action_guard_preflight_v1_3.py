@@ -23,7 +23,10 @@ from .action_guard_contract_v1_2 import (
     PUBLIC_TOOL_SCHEMAS,
     PublicTaskContract,
 )
-from .action_guard_runtime_v1_3 import GuardRuntimeSessionV1_3
+from .action_guard_runtime_v1_3 import (
+    GuardRuntimeSessionV1_3,
+    close_runtime_failure_state,
+)
 from .generator_v2 import GeneratorV2Config, generate_method_validation_candidates
 from .public_runtime_v3_1 import (
     SHARED_RUNTIME_CONFIG,
@@ -32,7 +35,6 @@ from .public_runtime_v3_1 import (
     parse_agent_terminal_runtime_output,
     terminal_schema_public_description,
 )
-from .runtime_terminal_v1 import build_runtime_execution_failure
 from .schema import Episode, TaskType, episode_from_dict
 from .temporal_evidence_v1_2 import (
     EvidenceBeliefDependency,
@@ -793,7 +795,7 @@ def run_preflight_trace(
     runtime_failure_reason = fatal_error
     runtime_generated_terminal = terminal_raw is None
     if terminal_raw is None:
-        terminal_raw = build_runtime_execution_failure(
+        terminal_raw = close_runtime_failure_state(
             failure_reason=str(fatal_error),
             last_candidate_hash=last_candidate_hash,
             last_guard_outcome=last_guard_outcome,

@@ -1,0 +1,11 @@
+{
+  "record_version": "reliabilitybench-q/action-guard-runtime-supersession-1.0",
+  "recorded_on": "2026-08-24",
+  "superseded_package": "ActionGuard v1.2 development preflight package",
+  "status": "development-only / failed preflight because repair exhaustion lacked a scoreable runtime terminal state",
+  "guard_core_disposition": "ActionGuard v1.2 safety core preserved byte-for-byte and reused",
+  "replacement_package": "ActionGuard package v1.3 with public runtime terminal closure",
+  "old_run_disposition": "permanently retained; not rescored as passing and not selectively rerun",
+  "method_validation_v2_1": "sealed; not accessed; custodian declaration only",
+  "paper_performance_claims_allowed": false
+}

@@ -9,13 +9,15 @@ from eval.reliability_bench.action_guard_preflight_v1_3 import (
     generate_development_preflight_episodes,
     run_preflight_trace,
 )
+from eval.reliability_bench.action_guard_runtime_v1_3 import (
+    close_runtime_failure_state,
+)
 from eval.reliability_bench.gold_trace_spec_v3 import build_development_cases
 from eval.reliability_bench.public_runtime_v3_1 import (
     StudyArm,
     parse_agent_terminal_runtime_output,
 )
 from eval.reliability_bench.runtime_terminal_v1 import (
-    build_runtime_execution_failure,
     parse_runtime_execution_failure,
 )
 from eval.reliability_bench.schema import episode_from_dict
@@ -79,7 +81,7 @@ def _config():
 
 
 def _runtime_failure(reason_code: str):
-    return build_runtime_execution_failure(
+    return close_runtime_failure_state(
         failure_reason="guard_repair_budget_exhausted",
         last_candidate_hash="b" * 64,
         last_guard_outcome="BLOCK",
@@ -205,6 +207,30 @@ def test_preflight_repair_exhaustion_closes_as_scoreable_runtime_failure():
     assert trace["unscorable_reason"] is None
     assert len(trace["guard_events"]) == 3
     assert sum(event["repair_allowed"] for event in trace["guard_events"]) == 2
+
+
+def test_non_guard_exhaustion_uses_the_same_runtime_failure_envelope():
+    episode = generate_development_preflight_episodes(20264011)[0]
+    trace = run_preflight_trace(
+        episode=episode,
+        arm=StudyArm.LEDGER_ONLY,
+        schedule_item={
+            "schedule_index": 1,
+            "episode_id": episode.episode_id,
+            "task_type": episode.task_type.value,
+            "arm": StudyArm.LEDGER_ONLY.value,
+            "hidden_arm_id": "arm-test-nonguard",
+        },
+        client=_AlwaysInvalidToolClient(),
+        config=_config(),
+    )
+    assert trace["trace_complete"] is True
+    assert trace["terminal_source"] == "runtime"
+    assert trace["terminal"]["runtime_generated"] is True
+    assert trace["terminal"]["decision"] is None
+    assert trace["terminal"]["last_guard_outcome"] is None
+    assert trace["terminal"]["last_reason_code"] is None
+    assert trace["unscorable_reason"] is None
 
 
 def test_frozen_action_guard_core_hash_is_unchanged():

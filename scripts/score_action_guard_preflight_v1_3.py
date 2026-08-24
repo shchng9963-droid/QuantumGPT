@@ -145,8 +145,18 @@ def main() -> int:
             "provenance_incomplete": sum(item["evidence"]["provenance_incomplete"] is True for item in scored),
             "realized_revalidation_cost_units": sum(costs),
             "api_error_attempts": sum(len(item["llm"]["api_errors"]) for item in selected),
-            "budget_exhausted_runs": sum(
-                "budget_exhausted" in str(item.get("runtime_failure_reason"))
+            "resource_budget_exhausted_runs": sum(
+                item.get("runtime_failure_reason")
+                in {
+                    "completion_token_budget_exhausted",
+                    "tool_call_budget_exhausted",
+                    "tool_cost_budget_exhausted",
+                }
+                for item in selected
+            ),
+            "guard_repair_exhausted_runs": sum(
+                item.get("runtime_failure_reason")
+                == "guard_repair_budget_exhausted"
                 for item in selected
             ),
             "parse_failure_runs": sum(bool(item["llm"]["parser_errors"]) for item in selected),
@@ -298,7 +308,7 @@ def main() -> int:
     no_all_abstain = all(item["answered"] > 0 for item in group_report.values())
     no_systemic_failures = all(
         item["api_error_attempts"] <= 1
-        and item["budget_exhausted_runs"] == 0
+        and item["resource_budget_exhausted_runs"] == 0
         and item["parse_failure_runs"] <= 1
         for item in group_report.values()
     )
@@ -310,7 +320,7 @@ def main() -> int:
         "runtime_missing_terminal_unscorable_zero": all_scoreable,
         "ledger_guard_not_structural_zero_allow": ledger_guard.get("complete", 0) > 0,
         "no_group_all_abstains": no_all_abstain,
-        "no_systemic_api_budget_or_parse_failure": no_systemic_failures,
+        "no_systemic_api_resource_budget_or_parse_failure": no_systemic_failures,
         "public_prompt_equal_within_episode": all(len(items) == 1 for items in prompt_hashes.values()),
         "runtime_config_identical_all_arms": len(frozen_configs) == 1,
         "guard_repair_loop_triggered": any(
