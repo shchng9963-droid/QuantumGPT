@@ -1,0 +1,12 @@
+{
+  "record_version": "reliabilitybench-q/action-guard-v1-supersession-1.0",
+  "recorded_on": "2026-08-24",
+  "superseded_version": "reliabilitybench-q/action-guard-1.0-frozen",
+  "superseded_candidate_commit": "7b4264f5c6c904208dc3427f6ed0161fbef1d910",
+  "original_freeze_record": "eval/reliability_bench/data/action_guard_freeze_manifest_v1.json",
+  "status": "retained-for-provenance / not-used-for-sealed-method-validation",
+  "reason": "The original core 2x2 encoded Ledger post-drift evidence as unknown. Guard therefore blocked structurally under uncertainty, conflating the Guard treatment with evidence-state updating.",
+  "replacement": "ActionGuard v1.1 separates controller belief B_t(e) from evaluator-computed objective validity V*_t(e). Ledger preserves last-known-valid belief after drift; Full alone updates belief through the Temporal Evidence Layer.",
+  "method_validation_v2_1_runs_under_v1": 0,
+  "paper_claims_from_v1_allowed": false
+}
