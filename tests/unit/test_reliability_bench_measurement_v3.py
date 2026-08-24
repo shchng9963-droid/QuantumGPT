@@ -193,6 +193,47 @@ def _decision(**kwargs):
     return parse_terminal_decision(_raw_terminal(**kwargs))
 
 
+def test_correct_unreachable_is_answered_and_correct_rejection():
+    episode = _episode(TaskType.UNREACHABLE_TARGET, related=True)
+    decision = _decision(
+        task=TaskType.UNREACHABLE_TARGET,
+        action="declare_unreachable",
+        payload={"declared_unreachable": True},
+    )
+    result = evaluate_task_decision(episode, decision)
+    assert result.answered is True
+    assert result.terminal_correct is True
+    assert result.correct_rejection is True
+    assert result.wrong_decision is False
+
+
+def test_wrong_unreachable_declaration_is_wrong_decision():
+    episode = _episode(TaskType.UNREACHABLE_TARGET, related=True)
+    decision = _decision(
+        task=TaskType.UNREACHABLE_TARGET,
+        action="declare_unreachable",
+        payload={"declared_unreachable": False},
+    )
+    result = evaluate_task_decision(episode, decision)
+    assert result.terminal_correct is False
+    assert result.correct_rejection is False
+    assert result.wrong_decision is True
+
+
+def test_execution_failure_is_not_an_answer_or_wrong_decision():
+    episode = _episode(TaskType.BACKEND_SELECTION, related=True)
+    decision = _decision(
+        task=TaskType.BACKEND_SELECTION,
+        action="execution_failure",
+        payload={"reason": "timeout"},
+        completion_status="execution_failure",
+    )
+    result = evaluate_task_decision(episode, decision)
+    assert result.answered is False
+    assert result.execution_failure is True
+    assert result.wrong_decision is None
+
+
 @pytest.mark.parametrize(
     ("task", "related", "action", "payload", "completion_status"),
     [

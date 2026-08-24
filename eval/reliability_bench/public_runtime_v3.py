@@ -65,8 +65,8 @@ SHARED_TOOL_CATALOG = (
 )
 SHARED_RUNTIME_CONFIG = SharedRuntimeConfig()
 
-# This matrix is the only permitted treatment difference.  "interface_only"
-# explicitly means the present stage implements no ActionGuard behavior.
+# This matrix is the only permitted treatment difference. Guard behavior lives
+# in the separately versioned treatment component, never in this common adapter.
 COMPONENT_INFORMATION_ACCESS: dict[StudyArm, dict[str, Any]] = {
     StudyArm.LEDGER_ONLY: {
         "evidence_ledger": True,
@@ -83,25 +83,25 @@ COMPONENT_INFORMATION_ACCESS: dict[StudyArm, dict[str, Any]] = {
     StudyArm.LEDGER_GUARD: {
         "evidence_ledger": True,
         "invalidation": "none",
-        "action_guard": "interface_only_unimplemented",
+        "action_guard": "external_action_guard_v1_2",
         "objective_consistency_private_channel": False,
     },
     StudyArm.FULL_GUARD: {
         "evidence_ledger": True,
         "invalidation": "dependency_scoped",
-        "action_guard": "interface_only_unimplemented",
+        "action_guard": "external_action_guard_v1_2",
         "objective_consistency_private_channel": False,
     },
     StudyArm.GLOBAL_GUARD: {
         "evidence_ledger": True,
         "invalidation": "global",
-        "action_guard": "interface_only_unimplemented",
+        "action_guard": "external_action_guard_v1_2",
         "objective_consistency_private_channel": False,
     },
     StudyArm.INVALIDATION_CONSISTENCY_CHECK: {
         "evidence_ledger": True,
         "invalidation": "objective_invalidation_consistency_check_only",
-        "action_guard": "interface_only_unimplemented",
+        "action_guard": "external_action_guard_v1_2",
         "objective_consistency_private_channel": True,
     },
 }
@@ -289,7 +289,8 @@ def generate_fairness_audit() -> dict[str, Any]:
             arm.value: COMPONENT_INFORMATION_ACCESS[arm] for arm in StudyArm
         },
         "only_registered_component_differences": True,
-        "action_guard_core_implemented": False,
+        "action_guard_core_implemented": True,
+        "action_guard_implementation_location": "external treatment component ActionGuard v1.2",
         "semantic_repair_capability": False,
         "forbidden_adapter_capabilities": [
             "rewrite_action",
@@ -308,7 +309,7 @@ def validate_fairness_contract() -> None:
     if not audit["all_public_prompts_identical"]:
         raise AssertionError("public prompt differs across arms")
     if any(
-        item["action_guard"] not in {"absent", "interface_only_unimplemented"}
+        item["action_guard"] not in {"absent", "external_action_guard_v1_2"}
         for item in COMPONENT_INFORMATION_ACCESS.values()
     ):
         raise AssertionError("ActionGuard behavior is forbidden in this stage")

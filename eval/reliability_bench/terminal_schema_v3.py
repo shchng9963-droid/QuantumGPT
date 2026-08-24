@@ -152,7 +152,7 @@ def parse_terminal_decision(value: Mapping[str, Any]) -> TerminalDecision:
     try:
         completion_status = CompletionStatus(value["completion_status"])
     except (TypeError, ValueError) as exc:
-        raise ValueError("invalid terminal status") from exc
+        raise ValueError("invalid completion_status") from exc
 
     decision = value["decision"]
     if not isinstance(decision, Mapping):
@@ -193,7 +193,7 @@ def parse_terminal_decision(value: Mapping[str, Any]) -> TerminalDecision:
             not isinstance(payload["reason"], str)
             or not payload["reason"].strip()
         ):
-            raise ValueError("abstain reason must be a non-empty string")
+            raise ValueError("terminal reason must be a non-empty string")
     else:
         _validate_task_payload(
             task_type=task_type, task_action=task_action, payload=payload

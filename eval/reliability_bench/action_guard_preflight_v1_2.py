@@ -325,7 +325,12 @@ def controller_belief_state(episode: Episode, arm: StudyArm) -> ControllerBelief
 
 
 def _current_snapshot_id(episode: Episode) -> str:
-    return str(episode.ground_truth.acceptable_payload["evidence_policy"]["current_snapshot_id"])
+    # Development episodes expose a stable public pre/current naming contract.
+    # Do not extract any value from the hidden ground_truth payload for prompts.
+    pre_snapshot_id = str(episode.initial_state["snapshot_id"])
+    if not pre_snapshot_id.endswith("-pre"):
+        raise ValueError("development preflight snapshot ID must end in -pre")
+    return f"{pre_snapshot_id[:-4]}-current"
 
 
 def public_task_contract(episode: Episode) -> PublicTaskContract:

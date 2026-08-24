@@ -313,8 +313,11 @@ def test_v12_runtime_has_no_evaluator_or_objective_truth_imports():
         root / "eval/reliability_bench/temporal_evidence_v1_2.py",
     )
     forbidden = {
+        "measurement_spec_v2",
         "measurement_spec_v3",
+        "task_predicate_evaluator_v2",
         "task_predicate_evaluator_v3",
+        "trace_evidence_evaluator_v2",
         "trace_evidence_evaluator_v3",
         "predicates_v2",
         "generator_v2",
