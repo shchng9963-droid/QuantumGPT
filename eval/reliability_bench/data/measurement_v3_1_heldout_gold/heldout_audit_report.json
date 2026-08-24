@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "case_count": 48,
+  "field_comparisons": 1440,
+  "aggregate_comparisons": 9,
+  "total_comparisons": 1449,
+  "exact_agreement": 1449,
+  "mismatches": [],
+  "aggregate_mismatches": [],
+  "prediction_sha256_before_gold_unseal": "bd64b2f36728f6347b1fe576e3e758658fe1bacd135eb90150125c39aa3ee2b6",
+  "gold_plaintext_sha256": "4eef71298065c87187fba3dccda1c7a3290edc8de9badfbb046cb13383a7cc53"
+}

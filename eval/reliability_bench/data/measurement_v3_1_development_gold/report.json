@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "development_only": true,
+  "gold_sha256_before_prediction": "122afa4b72d47a12e3b9462994dfdb9eb31066fd2fff3dafa92cd4ff169b8897",
+  "prediction_sha256": "fa197d0953f7e6dc2f664f62a07f1f2c67652883d509e068547ab7e7827a1b36",
+  "case_count": 48,
+  "field_count_per_case": 30,
+  "comparison_count": 1440,
+  "exact_agreement": 1440,
+  "mismatch_count": 0,
+  "mismatches": [],
+  "aggregate_metrics": {
+    "episode_count": 48,
+    "answered_count": 39,
+    "coverage": 0.8125,
+    "execution_failure_rate": 0.14583333333333334,
+    "selective_risk": 0.05128205128205128,
+    "feasible_completion_rate": 0.8048780487804879,
+    "correct_rejection_rate": 0.5714285714285714,
+    "unnecessary_abstain_rate": 0.024390243902439025,
+    "overall_utility": 0.5635416666666667
+  }
+}
