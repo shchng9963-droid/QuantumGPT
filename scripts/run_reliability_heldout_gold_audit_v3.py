@@ -28,14 +28,14 @@ from eval.reliability_bench.task_predicate_evaluator_v3 import (
 from eval.reliability_bench.trace_evidence_evaluator_v3 import evaluate_trace_evidence
 
 
-CANDIDATE_COMMIT = "2347a267ae6d53cb36674ef28138b857075fbf76"
+CANDIDATE_COMMIT = "773e325370e2cd4168637ace5c7e5404af1eb142"
 FROZEN_SOURCE_SHA256 = {
     "eval/reliability_bench/terminal_schema_v3.py": "a7768dae16b03091021e9a5c0127b2dad380466a65d961750fd38dead732c0df",
     "eval/reliability_bench/public_runtime_v3.py": "204b26ae782e3f6d062ce130a060789a3290212d6799b300185b659cc354fdba",
     "eval/reliability_bench/measurement_spec_v3.py": "a58aa232425e0945bb4fb7f545c658d97f82c408d1e5d939fac8105b026ba8f4",
     "eval/reliability_bench/task_predicate_evaluator_v3.py": "4c60a0c6f4e1105856855f588e5a532f19ebf1e07a72c105b943f167812241d8",
     "eval/reliability_bench/trace_evidence_evaluator_v3.py": "32edab50ff0a2ffc36d298032610b4e10b4f6d1d80a4cc92b3f62041ae1e27b9",
-    "eval/reliability_bench/gold_trace_spec_v3.py": "32a4f91e12adedc66affc81b637101d25391285686ed8b4b4a30939813e40de8",
+    "eval/reliability_bench/gold_trace_spec_v3.py": "fb16ef0c8593bd31bd2057303b084a8755a4ac9df75e08cf85715b87bb5775eb",
 }
 AUDIT_AAD = b"ReliabilityBench-Q held-out Gold v3"
 UTILITY_WEIGHTS = {
