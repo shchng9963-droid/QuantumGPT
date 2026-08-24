@@ -1,0 +1,14 @@
+{
+  "audit_version": "reliabilitybench-q/method-validation-key-backup-audit-1.0",
+  "verified_on": "2026-08-24",
+  "backup_mode": "byte-for-byte copy to independent local disk location",
+  "source_location": "/home/wangshuchang/quantumgpt-runs/reliability_b11/custodian_keys/method-validation-v2.1-5e348a5.key",
+  "backup_location": "D:/QuantumGPT_MethodValidation_Key_Backup_20260824/method-validation-v2.1-5e348a5.key",
+  "size_bytes": 45,
+  "source_sha256": "d1550442b368d9230eb0336e50fd2a3454067212756718eb756e4fdd868f82b8f",
+  "backup_sha256": "d1550442b368d9230eb0336e50fd2a3454067212756718eb756e4fdd868f82b8f",
+  "hashes_match": true,
+  "key_contents_displayed_or_parsed": false,
+  "sealed_archive_opened": false,
+  "custody_note": "This satisfies independent-location backup. A second human custodian remains preferable for the final expanded study."
+}

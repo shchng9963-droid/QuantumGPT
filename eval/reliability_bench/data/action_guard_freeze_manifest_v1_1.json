@@ -1,0 +1,47 @@
+{
+  "freeze_version": "reliabilitybench-q/action-guard-freeze-1.1",
+  "frozen_on": "2026-08-24",
+  "status": "engineering-gate-passed / awaiting-research-owner-unseal-approval",
+  "action_guard_candidate_commit": "d0d779268858dff2db1b5b0fcfea43a716be2189",
+  "preflight_protocol_commit": "ede83ecde2e129d41221e541bb089a89b73a9a02",
+  "measurement_v2": {
+    "evaluator_candidate_commit": "40e1a619b0613453246aa8d9c689d237a942486d",
+    "public_runtime_audit_head": "144a57ca07cc371d4506b60af753ede42e76c901",
+    "heldout_gold_exact_agreement": "1197/1197",
+    "frozen_source_hash_mismatches": 0
+  },
+  "frozen_source_sha256": {
+    "eval/reliability_bench/action_guard_contract_v1_1.py": "2cdf9e861b3534e20305b554fe9011b0401114224c7ec9ae1fd16757262d4ab8",
+    "eval/reliability_bench/action_guard_v1_1.py": "38964e3831361b82aa95a30ec872a2c51c2e9f8cb9c7c683eced4ff24ce92db6",
+    "eval/reliability_bench/action_guard_runtime_v1_1.py": "e02be1add401d1df4f3da9f693d1ccf5f5e24e1d5e53299e0fe88c057e9e2c2a",
+    "eval/reliability_bench/temporal_evidence_v1_1.py": "4dadf720033c0e27761a67eed666dc54c7bd6ce1004433daacdae806ae4f5394",
+    "eval/reliability_bench/action_guard_preflight_v1_1.py": "7a583e8d262f299572feae5e8bb8abf3a4e4aee32a62bbf59183dce895bf8a87",
+    "eval/reliability_bench/data/action_guard_preflight_config_v1_1.json": "ef1fb8687c08bda97efe365e9aa210817d52cc77e8f9fd46b945093c96d84fd0",
+    "scripts/run_action_guard_preflight_v1_1.py": "9a20a4fecffe8c26c7e31b0dfb90bbe4e386b8318422052bbcc8ba5ba5964078",
+    "scripts/score_action_guard_preflight_v1_1.py": "5bfb08286e94819a245df8ce628424ed8845607488b9689b0876b0113c700b23",
+    "tests/unit/test_reliability_bench_action_guard_v1_1.py": "2571b837ae2c8efea209cb8154d06baa4d6b2dcdcf416780ab7872bfb8da87b9",
+    "tests/unit/test_reliability_bench_action_guard_preflight_v1_1.py": "4f9c925ff1e8efed1e6b745f20c123c51bc8d022878d68fbc49ea5af83b7b4a1",
+    "eval/reliability_bench/protocols/action_guard_formal_spec_v1_1.md": "759ab9b2784fc627f353c36314ff224ecdea49b5ab454fad1841b83da15114c0",
+    "eval/reliability_bench/protocols/action_guard_statistics_preregistration_v1_1.md": "64e09deb9ba09e1ca82d105258a751e44bae75fa69e1cd1b5a19b6377c605326",
+    "eval/reliability_bench/protocols/action_guard_freeze_report_v1_1.md": "b7ecfa2d904319a6629c2d3c2ab074dc394d32f173e17178737564c8b03075b9",
+    "eval/reliability_bench/data/action_guard_component_boundary_matrix_v1_1.json": "a10fc7ca62b37b1d2a79d9749652e92f7d8d674e4b41d45fcc41b8cccabedd15",
+    "eval/reliability_bench/data/action_guard_runtime_config_signoff_v1_1.json": "1e17eef5f9bf80daa06976bd2c73903f1772aa1fc8dd6dffc870799c4d961cc7",
+    "eval/reliability_bench/data/method_validation_v2_1_key_backup_audit.json": "063d0fc732569039fe7268cb89fcad7f295567844f9293bbb36b301e1422f055",
+    "eval/reliability_bench/data/action_guard_preflight_v1_1_summary.json": "969d1b4778f7844e35f80804fb563d7d1744f8b52b7f89679454f703368e8ddd"
+  },
+  "gates": {
+    "core_belief_truth_counterfactual_tests": "6/6",
+    "preflight_structure_tests": "3/3",
+    "reliability_bench_regression_tests": "148/148",
+    "real_llm_preflight_complete": "36/36",
+    "real_llm_preflight_scoreable": "36/36",
+    "api_error_attempts": 0,
+    "budget_or_guard_repair_exhaustions": 0,
+    "prompt_or_feedback_leaks": 0,
+    "key_independent_location_backup_verified": true
+  },
+  "change_policy": "Any semantic or source change to ActionGuard v1.1, B_t production, the shared interaction protocol, repair policy, or preregistered analysis requires a new version and renewed engineering preflight before method-validation use.",
+  "method_validation_v2_1_unseal_allowed": false,
+  "formal_144_run_allowed": false,
+  "required_next_authority": "explicit research-owner approval"
+}

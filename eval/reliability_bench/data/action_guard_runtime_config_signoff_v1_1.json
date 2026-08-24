@@ -1,0 +1,33 @@
+{
+  "signoff_version": "reliabilitybench-q/action-guard-runtime-config-signoff-1.1",
+  "signed_on": "2026-08-24",
+  "signature_type": "content-addressed protocol freeze",
+  "authorization_basis": "research protocol instruction dated 2026-08-24",
+  "preflight_harness_commit": "ede83ecde2e129d41221e541bb089a89b73a9a02",
+  "config_path": "eval/reliability_bench/data/action_guard_preflight_config_v1_1.json",
+  "config_sha256": "ef1fb8687c08bda97efe365e9aa210817d52cc77e8f9fd46b945093c96d84fd0",
+  "shared_prompt_sha256": "4be280b16c9d20d23b20c145108d8c60e1d3ada58a4c369758814a3a48927a03",
+  "provider": "deepseek",
+  "base_url": "https://api.deepseek.com",
+  "requested_model": "deepseek-v4-flash",
+  "actual_returned_model_in_36_run": "deepseek-v4-flash",
+  "thinking": "disabled",
+  "temperature": 0.0,
+  "top_p": 1.0,
+  "max_tokens": 4096,
+  "max_turns": 12,
+  "max_tool_calls": 10,
+  "max_cost_units": 10,
+  "request_timeout_seconds": 120.0,
+  "retry": {"max_attempts": 2, "fixed_backoff_seconds": 1.0},
+  "format_max_attempts": 2,
+  "guard_max_repair_attempts": 2,
+  "pricing_usd_per_million_tokens": {
+    "input_cache_hit": 0.0028,
+    "input_cache_miss": 0.14,
+    "output": 0.28
+  },
+  "pricing_source": "https://api-docs.deepseek.com/quick_start/pricing/",
+  "provider_invoice_is_authoritative": true,
+  "formal_run_authorized": false
+}

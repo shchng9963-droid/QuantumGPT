@@ -1,0 +1,34 @@
+{
+  "version": "reliabilitybench-q/action-guard-boundary-matrix-1.1",
+  "constructs": {
+    "controller_belief_validity": "B_t(e): controller-visible believed_valid / believed_invalid / unknown",
+    "objective_actual_validity": "V*_t(e): evaluator-only objective validity derived after execution"
+  },
+  "core_2x2": [
+    {"arm": "ledger_only", "belief_update_after_drift": "none_preserve_last_known", "guard": false},
+    {"arm": "original_full", "belief_update_after_drift": "dependency_scoped", "guard": false},
+    {"arm": "ledger_only_plus_action_guard", "belief_update_after_drift": "none_preserve_last_known", "guard": true},
+    {"arm": "full_plus_action_guard", "belief_update_after_drift": "dependency_scoped", "guard": true}
+  ],
+  "supplementary_arms": [
+    {"arm": "global_revalidate_plus_action_guard", "belief_update_after_drift": "global_invalidation", "guard": true},
+    {"arm": "oracle_invalidation_plus_action_guard", "belief_update_after_drift": "oracle_invalidation_only", "guard": true}
+  ],
+  "information_access": {
+    "temporal_evidence_layer": {
+      "reads": ["public_changed_features", "method_dependency_graph", "prior_B_t"],
+      "writes": ["updated_B_t"],
+      "forbidden": ["V*_t", "task_predicate", "acceptable_action_set"]
+    },
+    "action_guard": {
+      "reads": ["public_task_contract", "B_t", "candidate_action", "public_tool_schema", "accepted_tool_trace"],
+      "writes": ["ALLOW_or_BLOCK_or_REPAIR_REQUEST", "audit_event"],
+      "forbidden": ["V*_t", "drift_inference", "oracle_invalidation", "task_predicate", "acceptable_action_set", "recommended_action"]
+    },
+    "measurement_v2": {
+      "reads_after_run": ["episode", "terminal", "accepted_tool_trace", "snapshot_lineage", "evidence_dependencies"],
+      "writes": ["V*_t", "task_and_evidence_metrics"],
+      "runtime_access": false
+    }
+  }
+}
