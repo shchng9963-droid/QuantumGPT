@@ -1,0 +1,44 @@
+{
+  "erratum_version": "reliabilitybench-q/hash-integrity-erratum-1.0",
+  "issued_on": "2026-08-24",
+  "policy": "append-only; historical files are preserved byte-for-byte; this record is authoritative for future integrity checks",
+  "cause": "six manually transcribed SHA-256 fields contained 65 hexadecimal characters",
+  "corrections": [
+    {
+      "file": "eval/reliability_bench/data/judge_v2_failed_audit_disposition.json",
+      "field": "artifacts.aggregate_report_sha256",
+      "correct_sha256": "c2e329007a90818fe3e6a0bc13360d4bdc2d60b2ff52fc5b0f9a47681d75b50c"
+    },
+    {
+      "file": "eval/reliability_bench/data/judge_v2_failed_audit_disposition.json",
+      "field": "method_validation_v2_1.encrypted_archive_sha256",
+      "correct_sha256": "4bcdfe4a810d580d24268ec44ece47cc7f3b0d41b87d6282f526a208f968e132"
+    },
+    {
+      "file": "eval/reliability_bench/data/method_validation_v2_1_key_backup_audit.json",
+      "field": "source_sha256",
+      "correct_sha256": "d1550442b368d9230eb0336e50fd2a3454067212756718eb756e4fd868f82b8f"
+    },
+    {
+      "file": "eval/reliability_bench/data/method_validation_v2_1_key_backup_audit.json",
+      "field": "backup_sha256",
+      "correct_sha256": "d1550442b368d9230eb0336e50fd2a3454067212756718eb756e4fd868f82b8f"
+    },
+    {
+      "file": "eval/reliability_bench/data/measurement_v2_gold_audit_summary.json",
+      "field": "development_gold.gold_payload_sha256",
+      "correct_sha256": "ec419deea7c3d55f44de11d44af60698f3fcd3fc804fbc67c0cd9879fb04c172"
+    },
+    {
+      "file": "eval/reliability_bench/data/measurement_v2_gold_audit_summary.json",
+      "field": "heldout_gate.prediction_sha256_before_gold_unseal",
+      "correct_sha256": "41a070a1098d0f54237df9b89617167dc1f7cbad73f781d79338232be4152d94"
+    }
+  ],
+  "verification": {
+    "algorithm": "SHA-256 over raw file bytes",
+    "historical_files_modified": false,
+    "method_validation_v2_1_decrypted_or_read": false,
+    "note": "The encrypted archive and key files were hashed as opaque byte strings; no plaintext was accessed."
+  }
+}

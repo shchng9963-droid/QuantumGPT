@@ -1,0 +1,13 @@
+{
+  "record_version": "reliabilitybench-q/action-guard-supersession-1.1-to-1.2",
+  "issued_on": "2026-08-24",
+  "superseded_version": "ActionGuard/Temporal Layer v1.1",
+  "replacement_version": "ActionGuard/Temporal Layer v1.2",
+  "historical_record_retained": true,
+  "method_validation_use": false,
+  "reason": "The core 2x2 requires an explicit controller-visible B_t separated from evaluator-only V*_t. Version 1.2 makes that information boundary a typed interface and adds the B_t=valid, V*_t=invalid counterfactual.",
+  "method_validation_v2_1_access": {
+    "status": "not_accessed",
+    "evidence_type": "custodian_declaration_only"
+  }
+}

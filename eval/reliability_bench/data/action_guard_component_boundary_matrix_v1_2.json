@@ -1,0 +1,22 @@
+{
+  "version": "reliabilitybench-q/action-guard-boundary-matrix-1.2",
+  "constructs": {
+    "controller_belief_validity": "B_t(e), visible to the controller and Guard",
+    "objective_actual_validity": "V*_t(e), independently reconstructed only by Measurement after execution"
+  },
+  "core_2x2": [
+    {"arm": "ledger_only", "B_t_update": "none; preserve last-known-valid", "guard": false},
+    {"arm": "original_full", "B_t_update": "dependency-scoped from public changed features", "guard": false},
+    {"arm": "ledger_only_plus_action_guard", "B_t_update": "none; preserve last-known-valid", "guard": true},
+    {"arm": "full_plus_action_guard", "B_t_update": "dependency-scoped from public changed features", "guard": true}
+  ],
+  "supplementary_arms": [
+    {"arm": "global_revalidate_plus_action_guard", "B_t_update": "global invalidation", "role": "cost baseline"},
+    {"arm": "invalidation_consistency_check", "B_t_update": "objective invalidation through private consistency channel", "role": "consistency check only; not an identification upper bound"}
+  ],
+  "access": {
+    "temporal_layer": {"reads": ["public changed features", "method dependency graph", "prior B_t"], "writes": ["B_t"], "forbidden": ["V*_t", "task predicate", "acceptable action set"]},
+    "action_guard": {"reads": ["public task contract", "B_t", "candidate", "tool schema", "accepted trace"], "writes": ["ALLOW/BLOCK/REPAIR_REQUEST", "audit event"], "forbidden": ["V*_t", "Oracle labels", "task predicate", "acceptable action set", "recommended answer"]},
+    "measurement_v3": {"reads_after_run": ["episode", "terminal", "real trace", "snapshot lineage", "objective dependencies"], "writes": ["V*_t", "metrics"], "runtime_access": false}
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "record_version": "reliabilitybench-q/measurement-supersession-2-to-3",
+  "issued_on": "2026-08-24",
+  "superseded_version": "Measurement v2 / terminal-decision-2.0",
+  "replacement_candidate": "Measurement v3 / terminal-decision-3.0",
+  "historical_gold_and_results_modified": false,
+  "historical_status": "superseded; retained for provenance; not used for new method claims",
+  "substantive_reason": "v2 coupled physical infeasibility to status=failure, although the public prompt did not define that convention. v3 separates completion from correctness and lets the task predicate score declare_unreachable.",
+  "new_gate_required": "fresh development Gold and fresh independently sealed held-out Gold, with 100% exact agreement for every uniquely identifiable field"
+}
