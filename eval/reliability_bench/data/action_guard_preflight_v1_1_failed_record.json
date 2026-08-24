@@ -1,0 +1,23 @@
+{
+  "record_version": "reliabilitybench-q/action-guard-preflight-failure-record-1.0",
+  "recorded_on": "2026-08-24",
+  "candidate_commit": "d0d779268858dff2db1b5b0fcfea43a716be2189",
+  "status": "development-only / failed structural preflight / never selectively rerun",
+  "run_directory": "/home/wangshuchang/quantumgpt-runs/action_guard_v1_1/real-llm-preflight-d0d7792-20260824",
+  "run_count": 36,
+  "complete_count": 34,
+  "scoreable_count": 34,
+  "failed_trace_count": 2,
+  "failed_scope": "mitigation_decision in full_plus_action_guard and oracle_invalidation_plus_action_guard",
+  "root_cause": "The public apply_mitigation schema constrained mitigation_policy to a public entity domain, but the shared episode input omitted the domain values. The LLM therefore proposed three plausible but unregistered policy names and exhausted the fixed Guard repair budget.",
+  "classification": "shared public-contract observability defect, not a Guard belief-validity defect and not a performance result",
+  "corrective_action": "Upgrade the preflight protocol to 1.1.1, expose all public entity domains equally to all arms, and use a wholly new development namespace, episode seed, and schedule seed.",
+  "sha256": {
+    "traces.jsonl": "58cfa0715c15e9c6a3cb98212a0c29b6ae82bd6f7530b9caf5d2b27f8941602e",
+    "report.json": "43dba9e5df87135b5ef82405a3f86cff8ab8e2bb9ffa8b0e1400173cc1a301f1",
+    "config.lock.json": "9e22b52a6b28d62adccd320e377a1d128e04f20b1cd62dc1f6b66e070576f717",
+    "episodes.jsonl": "d90da1c57b820ae0f3757b60ff90f71443d96285ef773fdee4d3aebaaedff5ad"
+  },
+  "paper_claims_allowed": false,
+  "method_validation_v2_1_accessed": false
+}

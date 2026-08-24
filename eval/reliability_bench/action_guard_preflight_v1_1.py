@@ -41,8 +41,8 @@ from .temporal_evidence_v1_1 import (
 )
 
 
-PREFLIGHT_VERSION = "reliabilitybench-q/action-guard-real-llm-preflight-1.1"
-DEVELOPMENT_NAMESPACE = "AG11DEV-20260824"
+PREFLIGHT_VERSION = "reliabilitybench-q/action-guard-real-llm-preflight-1.1.1"
+DEVELOPMENT_NAMESPACE = "AG11DEV2-20260824"
 GUARD_ARMS = {
     StudyArm.LEDGER_GUARD,
     StudyArm.FULL_GUARD,
@@ -133,6 +133,9 @@ SHARED_AGENT_SYSTEM_PROMPT = canonical_json(
             "payload_fields_by_task": terminal_schema_public_description()["task_payload_fields"],
         },
         "tool_argument_schemas": _tool_schema_description(),
+        "tool_output_evidence_slots": {
+            tool: list(slots) for tool, slots in PUBLIC_TOOL_EVIDENCE_SLOTS.items()
+        },
         "facts": [
             "Tool output evidence IDs are supplied only after accepted real calls.",
             "A revalidation declaration never creates a tool call.",
@@ -213,7 +216,7 @@ def generate_development_preflight_episodes(seed: int) -> list[Episode]:
     candidates = generate_method_validation_candidates(
         GeneratorV2Config(
             random_seed=seed,
-            source="action_guard_v1_1_real_llm_preflight_source",
+            source="action_guard_v1_1_real_llm_preflight_source_v2",
         )
     )
     selected = []
@@ -227,7 +230,7 @@ def generate_development_preflight_episodes(seed: int) -> list[Episode]:
         )
         payload = _recursive_namespace(original.to_dict())
         payload["template_id"] = f"{DEVELOPMENT_NAMESPACE}-{task.value}-template"
-        payload["source"] = "action_guard_v1_1_real_llm_preflight_source"
+        payload["source"] = "action_guard_v1_1_real_llm_preflight_source_v2"
         selected.append(episode_from_dict(payload))
     if len({item.episode_id for item in selected}) != 6:
         raise AssertionError("development preflight must contain six unique episode IDs")
@@ -323,6 +326,7 @@ def public_task_contract(episode: Episode) -> PublicTaskContract:
 
 
 def public_episode_prompt(episode: Episode) -> str:
+    task = public_task_contract(episode)
     return canonical_json(
         {
             "instruction": "Complete the task for the current device state.",
@@ -339,6 +343,13 @@ def public_episode_prompt(episode: Episode) -> str:
             },
             "initial_device_state": episode.initial_state,
             "device_change": episode.drift_event.neutral_payload(),
+            "public_entity_domains": {
+                "backend_ids": list(task.backend_ids),
+                "qubit_ids": list(task.qubit_ids),
+                "circuit_ids": list(task.circuit_ids),
+                "snapshot_ids": list(task.snapshot_ids),
+                "mitigation_policy_ids": list(task.mitigation_policy_ids),
+            },
             "initial_evidence": [
                 {"evidence_id": item.evidence_id, "evidence_type": item.evidence_type}
                 for item in episode.evidence

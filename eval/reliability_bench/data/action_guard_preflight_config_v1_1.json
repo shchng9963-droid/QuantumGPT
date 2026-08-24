@@ -1,5 +1,5 @@
 {
-  "protocol_version": "reliabilitybench-q/action-guard-real-llm-preflight-1.1",
+  "protocol_version": "reliabilitybench-q/action-guard-real-llm-preflight-1.1.1",
   "development_only": true,
   "formal_method_claims_allowed": false,
   "provider": "deepseek",
@@ -16,8 +16,8 @@
   "retry": {"max_attempts": 2, "fixed_backoff_seconds": 1.0},
   "format_max_attempts": 2,
   "guard_max_repair_attempts": 2,
-  "development_episode_seed": 20260921,
-  "schedule_seed": 20260922,
+  "development_episode_seed": 20261001,
+  "schedule_seed": 20261002,
   "run_cost_cap_usd": 5.0,
   "pricing": {
     "currency": "USD",
