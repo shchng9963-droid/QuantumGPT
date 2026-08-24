@@ -1,0 +1,24 @@
+{
+  "record_version": "reliabilitybench-q/measurement-v3-heldout-failure-1",
+  "recorded_on": "2026-08-24",
+  "status": "development-only / failed independent Gold audit",
+  "candidate_commit": "2347a267ae6d53cb36674ef28138b857075fbf76",
+  "case_count": 44,
+  "mismatch_count": 25,
+  "prediction_sha256_before_unseal": "97463e20855b66a8134a0e3e7951f82fbf0337a414d3d72e428c3d06db519516",
+  "encrypted_gold_sha256": "bd14f5234d20f9d0e65a932fec4bf24351a2a1b3b86afd0f93a797ef450e3279",
+  "classification": {
+    "gold_label_errors": [
+      "six unrelated-safe seed cases omitted the required initial evidence citation while expecting safe",
+      "the unrelated qubit wrong-action seed selected an objectively acceptable qubit set"
+    ],
+    "evaluator_implementation_bugs": [],
+    "construct_identifiability_failures": []
+  },
+  "disposition": "permanently converted to development; never eligible for a Measurement v3 freeze claim; replacement requires a fresh cryptographic namespace and a new package",
+  "threshold_changed": false,
+  "method_validation_v2_1_access": {
+    "status": "not_accessed",
+    "evidence_type": "custodian_declaration_only"
+  }
+}

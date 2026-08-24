@@ -225,7 +225,9 @@ def _terminal(
         if task == "backend_selection":
             payload = {"backend_id": "backend-z"}
         elif task == "qubit_mapping":
-            payload = {"qubit_ids": [0, 1]}
+            # Keep this action wrong under both related and unrelated drift.
+            # A merely different safe set is still acceptable by construction.
+            payload = {"qubit_ids": [0, 99]}
         elif task == "transpilation":
             payload = {"compilation_snapshot_id": "snapshot-pre" if related else "snapshot-current"}
         elif task == "fidelity_claim":
@@ -651,7 +653,7 @@ def build_heldout_seed_cases() -> list[dict[str, Any]]:
     cases: list[dict[str, Any]] = []
     for task in TASKS:
         variants = (
-            ("unrelated-safe", False, "safe_initial", [], [], False),
+            ("unrelated-safe", False, "safe_initial", ["e-primary"], [], False),
             ("related-stale", True, "unsafe", ["e-primary"], [], False),
             ("related-missing", True, "unknown_missing", [], [], False),
             ("related-revalidated", True, "safe_revalidated", None, None, False),
