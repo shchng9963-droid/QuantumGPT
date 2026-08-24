@@ -1,0 +1,35 @@
+{
+  "freeze_version": "reliabilitybench-q/measurement-freeze-3.0",
+  "frozen_on": "2026-08-24",
+  "status": "frozen after replacement independent Gold gate",
+  "candidate_commit": "773e325370e2cd4168637ace5c7e5404af1eb142",
+  "terminal_schema": "reliabilitybench-q/terminal-decision-3.0",
+  "frozen_source_sha256": {
+    "eval/reliability_bench/terminal_schema_v3.py": "a7768dae16b03091021e9a5c0127b2dad380466a65d961750fd38dead732c0df",
+    "eval/reliability_bench/public_runtime_v3.py": "204b26ae782e3f6d062ce130a060789a3290212d6799b300185b659cc354fdba",
+    "eval/reliability_bench/measurement_spec_v3.py": "a58aa232425e0945bb4fb7f545c658d97f82c408d1e5d939fac8105b026ba8f4",
+    "eval/reliability_bench/task_predicate_evaluator_v3.py": "4c60a0c6f4e1105856855f588e5a532f19ebf1e07a72c105b943f167812241d8",
+    "eval/reliability_bench/trace_evidence_evaluator_v3.py": "32edab50ff0a2ffc36d298032610b4e10b4f6d1d80a4cc92b3f62041ae1e27b9",
+    "eval/reliability_bench/gold_trace_spec_v3.py": "fb16ef0c8593bd31bd2057303b084a8755a4ac9df75e08cf85715b87bb5775eb"
+  },
+  "development_gold": {
+    "case_count": 42,
+    "passed": "42/42",
+    "gold_payload_sha256": "cb6749475f7942c2a1ecefe13b97f6694121bc12c418fca6a749f830bb51e324"
+  },
+  "independent_heldout_gold": {
+    "replacement_version": "v2",
+    "case_count": 44,
+    "field_count_per_trace": 30,
+    "aggregate_field_count": 9,
+    "exact_agreement": "1329/1329 field comparisons across 44 independent traces",
+    "mismatch_count": 0,
+    "public_trace_sha256": "65bd0be5cf36c0839219ee2ebaa9642dd61a7c26cbf70b21049b278be4145ef5",
+    "encrypted_gold_sha256": "e7de9ca8ffa3808b204b4deb0c2dca1de0b3c39ea2239485648c713b71560936",
+    "gold_plaintext_sha256": "2c27dd22180c52424ef6ee57d3ff4ce8a743e6f217a1ff884174532df0007c68",
+    "prediction_sha256_before_unseal": "78d02ed93d4a591f40382bf584b8b88f306575b61aa2e8769cda58edeaf59d0c"
+  },
+  "failed_heldout_history": "v1 retained as development-only; 25 disagreements traced to two declarative Gold errors; threshold unchanged",
+  "interpretation_guardrail": "1329 is a count of field comparisons, not independent samples; the independent audit unit count is 44 traces",
+  "change_policy": "Any semantic or source modification to the six frozen Measurement files requires a new version and a complete fresh independent Gold audit."
+}

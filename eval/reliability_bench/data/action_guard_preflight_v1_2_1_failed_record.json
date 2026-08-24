@@ -1,0 +1,34 @@
+{
+  "record_version": "reliabilitybench-q/action-guard-preflight-failure-1.2.1",
+  "recorded_on": "2026-08-24",
+  "status": "development-only / failed preflight gate",
+  "run_count": 72,
+  "trace_complete": 71,
+  "scoreable": 71,
+  "trace_sha256": "3837038f57017d1c98a3c650e7e1c6cc0e22df39567c6d3d73831242fe57006e",
+  "passed_findings": {
+    "real_guard_repair_loop_triggered": true,
+    "guard_interventions": 3,
+    "guard_repair_attempts": 2,
+    "api_error_attempts": 0,
+    "all_groups_same_prompt_model_tools_and_budget": true,
+    "belief_component_boundary": true,
+    "related_unrelated_counterfactuals_present": true,
+    "all_abstain_avoidance_absent": true,
+    "ground_truth_or_answer_payload_leaks": 0,
+    "correct_rejection_restored": true
+  },
+  "failed_gates": [
+    "trace_completion_72_of_72",
+    "scoreable_72_of_72",
+    "guard_repair_budget_exhaustion_absent"
+  ],
+  "failure_analysis": "One Global-Revalidate+Guard mitigation trace repeatedly cited evidence that did not cover mitigation_estimate. Guard correctly returned missing_required_support; the model failed to recover within the frozen two-repair budget.",
+  "classification": "model recovery failure under fixed budget; not an ActionGuard implementation bug, prompt leakage, API failure, or Measurement ambiguity",
+  "disposition": "retained without selective rerun; no third natural preflight is authorized automatically because repeated fresh runs would become outcome fishing",
+  "paper_performance_claims_allowed": false,
+  "method_validation_v2_1_access": {
+    "status": "not_accessed",
+    "evidence_type": "custodian_declaration_only"
+  }
+}

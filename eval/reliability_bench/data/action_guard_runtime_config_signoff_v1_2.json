@@ -1,0 +1,22 @@
+{
+  "signoff_version": "reliabilitybench-q/action-guard-runtime-signoff-1.2",
+  "signed_on": "2026-08-24",
+  "status": "configuration signed; method freeze still blocked",
+  "provider": "deepseek",
+  "requested_model": "deepseek-v4-flash",
+  "returned_model_ids": ["deepseek-v4-flash"],
+  "thinking": "disabled",
+  "temperature": 0.0,
+  "top_p": 1.0,
+  "max_tokens": 4096,
+  "max_turns": 12,
+  "max_tool_calls": 10,
+  "max_cost_units": 10,
+  "timeout_seconds": 120.0,
+  "api_retry": {"max_attempts": 2, "fixed_backoff_seconds": 1.0},
+  "format_max_attempts": 2,
+  "guard_max_repair_attempts": 2,
+  "pricing_basis": "official DeepSeek V4-Flash USD schedule stored in action_guard_preflight_config_v1_2.json; provider invoice authoritative",
+  "fairness": "identical for all six groups",
+  "selective_rerun_forbidden": true
+}

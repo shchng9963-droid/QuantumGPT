@@ -1,0 +1,31 @@
+{
+  "review_version": "reliabilitybench-q/method-validation-v2.1-compatibility-3.0",
+  "reviewed_on": "2026-08-24",
+  "compatibility": "conditionally compatible; continue sealed",
+  "internal_episode_semantics_changed": false,
+  "unchanged_internal_contracts": [
+    "episode evidence IDs",
+    "resource dependencies",
+    "snapshot lineage",
+    "task predicates",
+    "tool response semantics",
+    "generator_v2.py and schema.py"
+  ],
+  "external_changes": [
+    "terminal-decision-3.0",
+    "common public prompt and adapter",
+    "Measurement v3",
+    "ActionGuard/Temporal Layer v1.2",
+    "Oracle arm renamed to Invalidation-Consistency Check"
+  ],
+  "opaque_archive_sha256_verified": "4bcdfe4a810d580d24268ec44ece47cc7f3b0d41b87d6282f526a208f968e132",
+  "custodian_key_sha256_verified_without_display_or_parse": "d1550442b368d9230eb0336e50fd2a3454067212756718eb756e4fd868f82b8f",
+  "hash_authority": "eval/reliability_bench/data/hash_integrity_erratum_20260824.json",
+  "method_validation_v2_1_access": {
+    "status": "not_accessed",
+    "evidence_type": "custodian_declaration_only"
+  },
+  "invalidation_trigger": "Any future need to change an internal contract requires invalidating and regenerating the entire sealed set; partial replacement is forbidden.",
+  "unseal_allowed": false,
+  "blocking_reason": "ActionGuard v1.2 natural LLM preflight gate remains failed at 71/72"
+}

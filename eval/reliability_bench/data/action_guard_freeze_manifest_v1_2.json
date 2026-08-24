@@ -1,0 +1,25 @@
+{
+  "freeze_version": "reliabilitybench-q/action-guard-freeze-1.2-candidate",
+  "recorded_on": "2026-08-24",
+  "status": "FREEZE BLOCKED / formal method validation forbidden",
+  "candidate_commit": "9d7b10ff6484a652e365599b06997b6a688c722a",
+  "frozen_source_sha256": {
+    "eval/reliability_bench/action_guard_contract_v1_2.py": "91791de7c4b1493572ae8add005f7d77286bfc3ffc678bd73efdc1e2ed25b31a",
+    "eval/reliability_bench/action_guard_v1_2.py": "3cf75ca5045e5e01504597c121a155cbe1ee0086931fa826ff4d8c9b03dec1a2",
+    "eval/reliability_bench/action_guard_runtime_v1_2.py": "6a3d7c5e5899238d949bd0ef169739f3505a0bea638467c0166fd0de182cae7a",
+    "eval/reliability_bench/temporal_evidence_v1_2.py": "8d3ea320780f1771c5be1def9786379375f16b96c3ad58a2fde39ae797665438",
+    "eval/reliability_bench/action_guard_preflight_v1_2.py": "f0e1b99bd42be856f9bfbc722940fcc2d0c9115439afe0436863d87b23937768",
+    "eval/reliability_bench/data/action_guard_preflight_config_v1_2.json": "e7dea941a30988f1199be594b5204245c5bacb9d90e2ea811d6142e067699bec"
+  },
+  "passed_engineering_gates": {
+    "reliability_bench_regression_tests": "189/189",
+    "belief_truth_counterfactuals": "passed",
+    "dependency_isolation": "passed",
+    "controlled_repair_stress": "7/7 reason codes intercepted and repaired",
+    "measurement_v3_independent_gold": "1329/1329 field comparisons across 44 traces"
+  },
+  "blocking_gate": "the second fresh 72-run natural preflight completed and scored 71/72; one genuine model recovery failure exhausted the fixed repair budget",
+  "method_validation_v2_1_unseal_allowed": false,
+  "formal_144_run_allowed": false,
+  "required_next_authority": "research owner must decide whether the preflight gate remains strict 72/72, becomes an explicitly statistical completion-rate gate, or requires a separately preregistered new recovery mechanism; no option may retroactively recode the failed trace"
+}
