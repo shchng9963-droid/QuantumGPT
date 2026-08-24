@@ -44,7 +44,7 @@ from .temporal_evidence_v1_2 import (
 
 PREFLIGHT_VERSION = "reliabilitybench-q/action-guard-real-llm-preflight-1.3.0"
 DEVELOPMENT_NAMESPACE = "AG13DEV1-20260824"
-DEVELOPMENT_PAIR_INDEX = 2
+DEVELOPMENT_PAIR_INDEX = 0
 GUARD_ARMS = {
     StudyArm.LEDGER_GUARD,
     StudyArm.FULL_GUARD,
