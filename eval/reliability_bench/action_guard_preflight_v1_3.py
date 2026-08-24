@@ -245,7 +245,7 @@ def generate_development_preflight_episodes(seed: int) -> list[Episode]:
             payload["template_id"] = (
                 f"{DEVELOPMENT_NAMESPACE}-{task.value}-counterfactual-template"
             )
-        payload["source"] = "action_guard_v1_3_real_llm_preflight_source_v3_1"
+            payload["source"] = "action_guard_v1_3_real_llm_preflight_source_v3_1"
             selected.append(episode_from_dict(payload))
     if len({item.episode_id for item in selected}) != 12:
         raise AssertionError("development preflight must contain twelve unique episodes")
