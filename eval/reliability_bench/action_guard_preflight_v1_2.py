@@ -41,8 +41,9 @@ from .temporal_evidence_v1_2 import (
 )
 
 
-PREFLIGHT_VERSION = "reliabilitybench-q/action-guard-real-llm-preflight-1.2.0"
-DEVELOPMENT_NAMESPACE = "AG12DEV-20260824"
+PREFLIGHT_VERSION = "reliabilitybench-q/action-guard-real-llm-preflight-1.2.1"
+DEVELOPMENT_NAMESPACE = "AG12DEV2-20260824"
+DEVELOPMENT_PAIR_INDEX = 1
 GUARD_ARMS = {
     StudyArm.LEDGER_GUARD,
     StudyArm.FULL_GUARD,
@@ -239,7 +240,7 @@ def generate_development_preflight_episodes(seed: int) -> list[Episode]:
                 for item in candidates
                 if item.task_type is task
                 and item.drift_event.relevance.value == relevance
-                and item.pair_id.endswith("-00")
+                and item.pair_id.endswith(f"-{DEVELOPMENT_PAIR_INDEX:02d}")
             )
             payload = _recursive_namespace(original.to_dict())
             payload["template_id"] = (
@@ -707,6 +708,14 @@ def run_preflight_trace(
                                         "task_action",
                                         "payload",
                                     ],
+                                    "failure_required_shape": {
+                                        "code": None,
+                                        "reason": None,
+                                    },
+                                    "failure_rule": (
+                                        "failure must always be an object; for completion_status=answered "
+                                        "both failure fields must be null"
+                                    ),
                                     "instruction": (
                                         "Repair syntax only. Do not add an answer, entity, evidence ID, "
                                         "or tool call that was not already chosen or observed."

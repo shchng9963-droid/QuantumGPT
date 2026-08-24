@@ -1,0 +1,24 @@
+{
+  "record_version": "reliabilitybench-q/action-guard-preflight-failure-1.2.0",
+  "recorded_on": "2026-08-24",
+  "status": "development-only / failed preflight gate",
+  "run_count": 72,
+  "trace_complete": 71,
+  "scoreable": 71,
+  "trace_sha256": "ecae319a59f588de9c823e1047ad32f39fdaf971cce1c4b0847dc2a9a5c42d59",
+  "failed_gates": [
+    "trace_completion_72_of_72",
+    "scoreable_72_of_72",
+    "guard_repair_loop_triggered"
+  ],
+  "diagnosis": {
+    "format_failure": "one final response used failure=null twice; common generic retry did not restate the required failure object shape",
+    "guard_repair": "no natural candidate violated a Guard invariant; the separately reported controlled stress did trigger every reason code"
+  },
+  "disposition": "retained without selective rerun; protocol upgraded to 1.2.1 and a fresh pair index, seed, namespace, schedule, and output directory are required",
+  "paper_performance_claims_allowed": false,
+  "method_validation_v2_1_access": {
+    "status": "not_accessed",
+    "evidence_type": "custodian_declaration_only"
+  }
+}
